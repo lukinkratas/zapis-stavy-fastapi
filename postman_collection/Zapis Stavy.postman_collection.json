@@ -1,0 +1,42 @@
+{
+	"info": {
+		"_postman_id": "cc3230d1-f87e-4fa0-995f-78295b85cede",
+		"name": "Zapis Stavy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47894645",
+		"_collection_link": "https://lukin-kratas-s-team.postman.co/workspace/Team-Workspace~e65703fb-893e-45f5-8259-68ab8b0697f4/collection/47894645-cc3230d1-f87e-4fa0-995f-78295b85cede?action=share&source=collection_link&creator=47894645"
+	},
+	"item": [
+		{
+			"name": "post reading",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"value\": 99\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/reading",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reading"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

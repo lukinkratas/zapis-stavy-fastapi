@@ -6,4 +6,4 @@ help:
 	@echo "  help      - Show this help message"
 
 serve-dev:
-	uv run uvicorn zapis_stavy_api.main:app --reload
+	uv run uvicorn zapisstavyapi.main:app --reload
