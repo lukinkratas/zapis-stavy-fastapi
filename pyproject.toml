@@ -8,3 +8,42 @@ dependencies = [
     "fastapi>=0.124.0",
     "uvicorn[standard]>=0.38.0",
 ]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+# extend-exclude = ["tests/unit/conftest.py"]
+
+[tool.ruff.lint]
+extend-select = [
+    "E501", # line too long
+    "N",    # PEP8 naming
+    "R",    # RSE - flake8 raise, RET - flake8 return, RUF - ruff specific
+    "I",    # isort
+    "C901", # mccabe - complexity
+    "PD",   # pandas
+    "NPY",  # numpy
+    "D"     # pydocstyle
+]
+ignore = [
+    "D100", # missing docstring in public module
+    "D104", # missing docstring in public package
+    "D107", # missing docstring in __init__
+    "D205"  # one blank line required between summary line and description
+]
+
+per-file-ignores = { "yafin/types.py" = ["D101"]} # missing docstring in public class
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+
+[tool.mypy]
+strict = true
+explicit_package_bases = true
+ignore_missing_imports = true
+disable_error_code = ["no-any-return", "union-attr", "misc"]
+exclude = ["scripts"]

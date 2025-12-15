@@ -1,0 +1,74 @@
+PRAGMA foreign_keys = ON;
+
+-- ==========================
+-- 1. USERS
+-- ==========================
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users(email);
+
+
+-- ==========================
+-- 2. UTILITY TYPES (user-defined)
+-- ==========================
+CREATE TABLE utility_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    unit TEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+    CONSTRAINT unique_user_type_name UNIQUE (user_id, name)
+);
+
+CREATE INDEX idx_utility_types_user ON utility_types(user_id);
+
+
+-- ==========================
+-- 3. METERS (optional multiple sources)
+-- ==========================
+CREATE TABLE meters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    utility_type_id INTEGER NOT NULL,
+
+    name TEXT NOT NULL,
+    description TEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (utility_type_id) REFERENCES utility_types(id) ON DELETE CASCADE,
+
+    CONSTRAINT unique_meter_name_per_type UNIQUE (user_id, utility_type_id, name)
+);
+
+CREATE INDEX idx_meters_user ON meters(user_id);
+CREATE INDEX idx_meters_type ON meters(utility_type_id);
+
+
+-- ==========================
+-- 4. READINGS (time-series)
+-- ==========================
+CREATE TABLE readings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    meter_id INTEGER NOT NULL,
+
+    reading_at DATETIME NOT NULL,
+    value REAL NOT NULL,
+
+    extra TEXT DEFAULT '{}',     -- JSON stored as TEXT
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (meter_id) REFERENCES meters(id) ON DELETE CASCADE,
+
+    CONSTRAINT unique_meter_timestamp UNIQUE (meter_id, reading_at)
+);
+
+CREATE INDEX idx_readings_meter_time ON readings(meter_id, reading_at);
