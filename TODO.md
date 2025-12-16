@@ -1,1 +1,4 @@
 - [x] add linter, formatter, typechecker
+- [ ] add tests
+- [ ] add user auth
+- [ ] add db
