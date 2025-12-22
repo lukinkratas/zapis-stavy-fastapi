@@ -2,3 +2,5 @@
 - [ ] add tests
 - [ ] add user auth
 - [ ] add db
+- [ ] add logging
+- [ ] add prometheus ?
