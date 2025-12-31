@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:14
+    restart: on-failure
+    container_name: zapis-stavy-postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - ./sql/:/docker-entrypoint-initdb.d/sql/
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

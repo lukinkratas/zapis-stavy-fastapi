@@ -6,3 +6,5 @@ __pycache__/
 # Virtual environments
 .venv
 .coverage
+.env
+*.log
