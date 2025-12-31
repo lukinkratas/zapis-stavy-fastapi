@@ -1,15 +1,15 @@
-from typing import Any
-
-import pytest
-from httpx import AsyncClient
-
-from typing import AsyncGenerator, Generator
+from typing import Any, AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 from zapisstavyapi.main import app
+from zapisstavyapi.models import (
+    MeterResp,
+    MeterWithReadingsResp,
+    ReadingResp,
+)
 
 
 @pytest.fixture
@@ -25,26 +25,23 @@ async def async_client(client: TestClient) -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
 
-# @pytest.fixture(autouse=True)
-# async def db() -> AsyncGenerator[None, None]:
-#     await database.connect()
-#     yield
-#     await database.disconnect()
+@pytest.fixture
+async def created_meter(async_client: AsyncClient) -> dict[str, str]:
+    name = "test"
+    response = await async_client.post("/meter", json={"name": name})
+    return response.json()
+
 
 @pytest.fixture
-async def created_meter() -> dict[str, str]:
-    return {
-        "name": "test",
-        "id": "d94a9acf-3775-4dfd-a98f-a4dfea7a241f"
-    }
-
-@pytest.fixture
-async def created_reading(created_meter: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "value": 99.0,
-        "meter_id": created_meter["id"]
-        "id": "1d217e48-cd24-44ba-ae8d-5c57dac723b1",
-    }
+async def created_reading(
+    async_client: AsyncClient, created_meter: dict[str, Any]
+) -> dict[str, Any]:
+    value = 99.0
+    meter_id = created_meter["meter_id"]
+    response = await async_client.post(
+        "/reading", json={"value": value, "meter_id": meter_id}
+    )
+    return response.json()
 
 
 @pytest.mark.anyio
@@ -55,7 +52,7 @@ async def test_create_meter(async_client: AsyncClient) -> None:
     assert response.status_code == 201
 
     response_json = response.json()
-    assert Meter.model_validate(response_json)
+    assert MeterResp.model_validate(response_json)
     assert response_json["name"] == name
 
 
@@ -88,7 +85,7 @@ async def test_create_reading(
     assert response.status_code == 201
 
     response_json = response.json()
-    assert Reading.model_validate(response_json)
+    assert ReadingResp.model_validate(response_json)
     assert response_json["value"] == value
     assert response_json["meter_id"] == created_meter["mid"]
 
@@ -129,7 +126,7 @@ async def test_get_meter_with_readings(
     assert response.status_code == 200
 
     response_json = response.json()
-    assert MeterWithReadings.model_validate(response_json)
+    assert MeterWithReadingsResp.model_validate(response_json)
     assert response_json["meter"] == created_meter
     assert response_json["readings"] == [created_reading]
 

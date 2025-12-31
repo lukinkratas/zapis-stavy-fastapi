@@ -8,6 +8,7 @@ from psycopg.conninfo import make_conninfo
 
 
 def get_conn_info() -> str:
+    """Return connection info as string for psycopg database connection."""
     load_dotenv(override=True)
 
     conn_info_dict = dict(
@@ -21,5 +22,6 @@ def get_conn_info() -> str:
 
 
 async def db_connect(request: Request) -> AsyncGenerator[Connection, None]:
+    """Create connection in connection pool."""
     async with request.app.state.pool.connection() as conn:
         yield conn

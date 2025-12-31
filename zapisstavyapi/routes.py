@@ -13,78 +13,78 @@ router = APIRouter()
 
 @router.post("/meter", status_code=201, response_model=MeterResp)
 async def create_meter(
-    meter_request: MeterReq, db_connection: Connection = Depends(db_connect)
+    meter: MeterReq, conn: Connection = Depends(db_connect)
 ) -> MeterResp:
     """Add new meter into the database.
 
     Args:
-        meter: meter dict input from client
+        meter: meter request payload from client
+        conn: database connection
 
-    Returns: meter dict
+    Returns: meter response dict
     """
-    return await MetersTable.create(db_connection, meter_request)
+    return await MetersTable.create(conn, meter)
 
 
 @router.get("/meter", response_model=list[MeterResp])
 async def get_all_meters(
-    db_connection: Connection = Depends(db_connect),
+    conn: Connection = Depends(db_connect),
 ) -> list[MeterResp]:
     """List all meter dicts in the database.
 
-    Returns: list of meter dicts
+    Args:
+        conn: database connection
+
+    Returns: list of meter response dicts
     """
-    return await MetersTable.retrieve_all(db_connection)
+    return await MetersTable.retrieve_all(conn)
 
 
 @router.post("/reading", status_code=201, response_model=ReadingResp)
 async def create_reading(
-    reading_request: ReadingReq, db_connection: Connection = Depends(db_connect)
+    reading: ReadingReq, conn: Connection = Depends(db_connect)
 ) -> ReadingResp:
     """Add new reading into the database.
 
     Args:
-        reading: reading dict input from client
+        reading: reading request payload from client
+        conn: database connection
 
-    Returns: reading dict
-
-    Raises:
-        HTTPException:
-            If meter with given meter_id (in reading_in) is not found in the database.
+    Returns: reading response dict
     """
-    return await ReadingsTable.create(db_connection, reading_request)
+    return await ReadingsTable.create(conn, reading)
 
 
 @router.get("/meter/{meter_id}/reading", response_model=list[ReadingResp])
 async def get_readings_on_meter(
-    meter_id: uuid.UUID, db_connection: Connection = Depends(db_connect)
+    meter_id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> list[ReadingResp]:
     """List all readings on a given meter.
 
     Args:
         meter_id: uuid of meter
+        conn: database connection
 
-    Returns:
-        list of reading dicts
+    Returns: list of readings response dict
     """
-    return await ReadingsTable.retrieve_by_meter_id(db_connection, meter_id)
+    return await ReadingsTable.retrieve_by_meter_id(conn, meter_id)
 
 
 @router.get("/meter/{meter_id}", response_model=MeterWithReadingsResp)
 async def get_meter_with_readings(
-    meter_id: uuid.UUID, db_connection: Connection = Depends(db_connect)
+    meter_id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> dict[str, Any]:
     """List a given meter and all corresponding readings.
 
     Args:
         meter_id: uuid of meter
+        conn: database connection
 
     Returns:
-        dict with meter dict and list of corresponding reading dicts together
-
-    Raises:
-        HTTPException: If meter with given meter_id is not found in the database.
+        dict with meter resonse dict and list of its' corresponding
+        reading response dicts all together
     """
     return {
-        "meter": await MetersTable.retrieve_by_id(db_connection, meter_id),
-        "readings": await ReadingsTable.retrieve_by_meter_id(db_connection, meter_id),
+        "meter": await MetersTable.retrieve_by_id(conn, meter_id),
+        "readings": await ReadingsTable.retrieve_by_meter_id(conn, meter_id),
     }

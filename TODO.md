@@ -1,11 +1,13 @@
+- Connection on db_models level? routes.py - get_meter_with_readings - use same connection for both queries?
+
 - [x] add linter, formatter, typechecker
 - [x] add db
 
-- [ ] solve pcr
+- [ ] solve mypy
+- [ ] add integration tests (docker test db) + fast api override
 - [ ] add unit tests (mocked)
 - [ ] add logging
 
-- [ ] add integration tests (docker test db) + fast api override
 ```
 from testcontainers.postgres import PostgresContainer
 import psycopg

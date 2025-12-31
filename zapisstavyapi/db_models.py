@@ -9,6 +9,8 @@ from .models import MeterReq, MeterResp, ReadingReq, ReadingResp
 
 
 class MetersTable:
+    """Meters database model."""
+
     @classmethod
     async def retrieve_all(
         cls, conn: Connection, offset: int = 0, limit: int = 100
@@ -53,6 +55,8 @@ class MetersTable:
 
 
 class ReadingsTable:
+    """Readings database model."""
+
     @classmethod
     async def retrieve_by_meter_id(
         cls, conn: Connection, meter_id: uuid.UUID
