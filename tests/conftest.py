@@ -1,18 +1,22 @@
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator, Generator
+
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 from zapisstavyapi.main import app
 
+
 @pytest.fixture(scope="session")
-def anyio_backend():
+def anyio_backend() -> str:
     return "asyncio"
+
 
 @pytest.fixture(scope="session")
 def test_client() -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
+
 
 @pytest.fixture(scope="session")
 async def async_client(test_client: TestClient) -> AsyncGenerator[AsyncClient, None]:

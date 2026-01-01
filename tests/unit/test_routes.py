@@ -1,15 +1,14 @@
-import uuid
-from typing import Any, AsyncGenerator, Generator
+from typing import Any
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import AsyncClient
 
-from zapisstavyapi.main import app
 from zapisstavyapi.models import (
     MeterResp,
     MeterWithReadingsResp,
     ReadingResp,
 )
+
 
 @pytest.fixture
 async def created_meter(async_client: AsyncClient) -> dict[str, str]:
@@ -47,8 +46,6 @@ async def test_create_meter_missing_data(async_client: AsyncClient) -> None:
     reponse = await async_client.post("/meter", json={})
 
     assert reponse.status_code == 422
-
-
 
 
 @pytest.mark.anyio
