@@ -42,7 +42,6 @@ ignore = [
     "D100", # missing docstring in public module
     "D104", # missing docstring in public package
     "D107", # missing docstring in __init__
-    "D205"  # one blank line required between summary line and description
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -60,3 +59,8 @@ strict = true
 explicit_package_bases = true
 ignore_missing_imports = true
 disable_error_code = ["no-any-return", "union-attr", "misc"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests, that use postgres database.",
+]

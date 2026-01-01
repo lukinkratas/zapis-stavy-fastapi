@@ -1,11 +1,19 @@
-- Connection on db_models level? routes.py - get_meter_with_readings - use same connection for both queries?
+2. Use conn.execute? https://www.psycopg.org/psycopg3/docs/advanced/pool.html
+```
+async with AsyncConnectionPool(...) as pool:
+    async with pool.connection() as conn:
+        await conn.execute("SELECT something FROM somewhere ...")
+
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT something else...")
+```
 
 - [x] add linter, formatter, typechecker
 - [x] add db
-
+- [x] solve pcr
 - [ ] solve mypy
-- [ ] add integration tests (docker test db) + fast api override
-- [ ] add unit tests (mocked)
+- [ ] add integration tests (separete test db)
+- [ ] add unit tests (mocked and patched)
 - [ ] add logging
 
 ```
@@ -95,3 +103,7 @@ https://www.youtube.com/watch?v=cmnPiUVlIsM
     + sql query sanitation
     - pg only
     - async only
+
+
+### Depends(db_connect) directly db_models methods args?
+  E.g.: routes.py - get_meter_with_readings() - uses the same connection for both queries (Meters and Readings queries) -> One connection per one request is correct.

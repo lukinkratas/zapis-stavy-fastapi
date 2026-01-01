@@ -1,4 +1,4 @@
-.PHONY: install install-all install-dev format lint lint-fix typecheck test clean-up serve-dev
+.PHONY: install install-all install-dev format lint lint-fix typecheck test test-int clean-up serve-dev
 
 help:
 	@echo "Available targets:"
@@ -11,6 +11,7 @@ help:
 	@echo "  typecheck        - Type check the code using mypy"
 	@echo "  clean-up         - Clean up"
 	@echo "  test             - Run tests"
+	@echo "  test             - Run ingtegration tests"
 	@echo "  serve-dev        - Serve the application with reloading"
 	@echo "  help             - Show this help message"
 
@@ -36,7 +37,10 @@ typecheck:
 	uv run --dev mypy .
 
 test:
-	uv run --dev pytest tests/ -p no:warnings --cov=zapisstavyapi --cov-report=term-missing --cov-branch
+	uv run --dev pytest tests/unit -vv -p no:warnings --cov=zapisstavyapi --cov-report=term-missing --cov-branch
+
+test-int:
+	uv run --dev pytest tests/integration -vv -p no:warnings --cov=zapisstavyapi --cov-report=term-missing --cov-branch
 
 clean-up:
 	rm -rvf .coverage
