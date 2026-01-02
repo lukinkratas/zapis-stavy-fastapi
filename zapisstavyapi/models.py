@@ -33,10 +33,12 @@ class ReadingCreateRequestBody(BaseModel):
     meter_id: uuid.UUID
     value: float | None = None
 
+
 class ReadingUpdateRequestBody(BaseModel):
     """Reading request body model for validation."""
 
     value: float
+
 
 class ReadingResponseJson(BaseModel):
     """Reading response json model for validation."""

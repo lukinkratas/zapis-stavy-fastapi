@@ -12,8 +12,8 @@ from .models import (
     MeterUpdateRequestBody,
     MeterWithReadingsResponseJson,
     ReadingCreateRequestBody,
-    ReadingUpdateRequestBody,
     ReadingResponseJson,
+    ReadingUpdateRequestBody,
 )
 
 router = APIRouter()
@@ -112,9 +112,12 @@ async def delete_reading(
     await ReadingsTable.delete(conn, id)
     return {"message": f"Reading {id} deleted successfully"}
 
+
 @router.put("/reading/{id}", response_model=ReadingResponseJson)
 async def update_reading(
-    id: uuid.UUID, reading: ReadingUpdateRequestBody, conn: Connection = Depends(db_connect)
+    id: uuid.UUID,
+    reading: ReadingUpdateRequestBody,
+    conn: Connection = Depends(db_connect),
 ) -> ReadingResponseJson:
     """Update a reading in the database.
 
@@ -126,6 +129,7 @@ async def update_reading(
     Returns: reading response dict
     """
     return await ReadingsTable.update(conn, id, reading)
+
 
 @router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
 async def get_readings_on_meter(

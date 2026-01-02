@@ -9,8 +9,8 @@ from .models import (
     MeterResponseJson,
     MeterUpdateRequestBody,
     ReadingCreateRequestBody,
-    ReadingUpdateRequestBody,
     ReadingResponseJson,
+    ReadingUpdateRequestBody,
 )
 
 
@@ -185,7 +185,7 @@ class ReadingsTable:
             except Exception:
                 await conn.rollback()
                 raise
-    
+
     @classmethod
     async def update(
         cls, conn: Connection, id: uuid.UUID, reading: ReadingUpdateRequestBody
