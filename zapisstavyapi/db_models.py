@@ -9,6 +9,7 @@ from .models import (
     MeterResponseJson,
     MeterUpdateRequestBody,
     ReadingCreateRequestBody,
+    ReadingUpdateRequestBody,
     ReadingResponseJson,
 )
 
@@ -168,3 +169,57 @@ class ReadingsTable:
             if new_reading is None:
                 raise HTTPException(status_code=500, detail="Reading cannot be created")
             return new_reading
+
+    @classmethod
+    async def delete(cls, conn: Connection, id: uuid.UUID) -> None:
+        """Delete reading record from db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            query = sql.SQL("""
+                DELETE FROM readings
+                WHERE id = %(id)s;
+            """)
+            await cur.execute(query, {"id": id})
+
+            try:
+                await conn.commit()
+            except Exception:
+                await conn.rollback()
+                raise
+    
+    @classmethod
+    async def update(
+        cls, conn: Connection, id: uuid.UUID, reading: ReadingUpdateRequestBody
+    ) -> ReadingResponseJson:
+        """Update reading record in db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            data = reading.model_dump()
+            data.pop("meter_id", None)
+
+            # build SET clause: col = %(col)s
+            set_clause = sql.SQL(", ").join(
+                sql.SQL("{columns} = {value_placeholder}").format(
+                    columns=sql.Identifier(col),
+                    value_placeholder=sql.Placeholder(col),
+                )
+                for col in data.keys()
+            )
+            query = sql.SQL("""
+                UPDATE readings
+                SET {set_clause}
+                WHERE id = %(id)s RETURNING *;
+            """).format(
+                set_clause=set_clause,
+            )
+            await cur.execute(query, data | {"id": id})
+
+            updated_reading = await cur.fetchone()
+            if updated_reading is None:
+                raise HTTPException(status_code=500, detail="Meter cannot be updated")
+
+            try:
+                await conn.commit()
+            except Exception:
+                await conn.rollback()
+                raise
+
+            return updated_reading

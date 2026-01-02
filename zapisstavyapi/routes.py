@@ -12,24 +12,11 @@ from .models import (
     MeterUpdateRequestBody,
     MeterWithReadingsResponseJson,
     ReadingCreateRequestBody,
+    ReadingUpdateRequestBody,
     ReadingResponseJson,
 )
 
 router = APIRouter()
-
-
-@router.get("/meter", response_model=list[MeterResponseJson])
-async def get_all_meters(
-    conn: Connection = Depends(db_connect),
-) -> list[MeterResponseJson]:
-    """List all meter dicts in the database.
-
-    Args:
-        conn: database connection
-
-    Returns: list of meter response dicts
-    """
-    return await MetersTable.select_all(conn)
 
 
 @router.post("/meter", status_code=201, response_model=MeterResponseJson)
@@ -80,6 +67,20 @@ async def update_meter(
     return await MetersTable.update(conn, id, meter)
 
 
+@router.get("/meter", response_model=list[MeterResponseJson])
+async def get_all_meters(
+    conn: Connection = Depends(db_connect),
+) -> list[MeterResponseJson]:
+    """List all meter dicts in the database.
+
+    Args:
+        conn: database connection
+
+    Returns: list of meter response dicts
+    """
+    return await MetersTable.select_all(conn)
+
+
 @router.post("/reading", status_code=201, response_model=ReadingResponseJson)
 async def create_reading(
     reading: ReadingCreateRequestBody, conn: Connection = Depends(db_connect)
@@ -94,6 +95,37 @@ async def create_reading(
     """
     return await ReadingsTable.insert(conn, reading)
 
+
+@router.delete("/reading/{id}")
+async def delete_reading(
+    id: uuid.UUID, conn: Connection = Depends(db_connect)
+) -> dict[str, Any]:
+    """Delete a reading from the database.
+
+    Args:
+        id: uuid of reading
+        conn: database connection
+
+    Returns:
+        dict with detail
+    """
+    await ReadingsTable.delete(conn, id)
+    return {"message": f"Reading {id} deleted successfully"}
+
+@router.put("/reading/{id}", response_model=ReadingResponseJson)
+async def update_reading(
+    id: uuid.UUID, reading: ReadingUpdateRequestBody, conn: Connection = Depends(db_connect)
+) -> ReadingResponseJson:
+    """Update a reading in the database.
+
+    Args:
+        id: uuid of reading
+        reading: reading update request payload from client
+        conn: database connection
+
+    Returns: reading response dict
+    """
+    return await ReadingsTable.update(conn, id, reading)
 
 @router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
 async def get_readings_on_meter(

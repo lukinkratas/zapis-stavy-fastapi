@@ -1,3 +1,5 @@
+meters unit tests with mocking
+
 2. Use conn.execute? https://www.psycopg.org/psycopg3/docs/advanced/pool.html
 ```
 async with AsyncConnectionPool(...) as pool:

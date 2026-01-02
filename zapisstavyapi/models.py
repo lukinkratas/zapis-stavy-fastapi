@@ -31,14 +31,20 @@ class ReadingCreateRequestBody(BaseModel):
     """Reading request body model for validation."""
 
     meter_id: uuid.UUID
+    value: float | None = None
+
+class ReadingUpdateRequestBody(BaseModel):
+    """Reading request body model for validation."""
+
     value: float
 
-
-class ReadingResponseJson(ReadingCreateRequestBody):
+class ReadingResponseJson(BaseModel):
     """Reading response json model for validation."""
 
     id: uuid.UUID
     created_at: datetime.datetime
+    meter_id: uuid.UUID
+    value: float
 
 
 class MeterWithReadingsResponseJson(BaseModel):
