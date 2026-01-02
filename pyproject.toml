@@ -25,7 +25,6 @@ dev = [
 [tool.ruff]
 line-length = 88
 indent-width = 4
-# extend-exclude = ["tests/unit/conftest.py"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -62,5 +61,5 @@ disable_error_code = ["no-any-return", "union-attr", "misc"]
 
 [tool.pytest.ini_options]
 markers = [
-    "integration: marks tests, that use postgres database.",
+    "integration: marks online tests, that use connection to postgres test db.",
 ]

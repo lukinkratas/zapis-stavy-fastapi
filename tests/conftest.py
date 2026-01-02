@@ -1,7 +1,6 @@
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 
 import pytest
-from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 from zapisstavyapi.main import app
@@ -13,14 +12,9 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture(scope="session")
-def test_client() -> Generator[TestClient, None, None]:
-    with TestClient(app) as test_client:
-        yield test_client
-
-
-@pytest.fixture(scope="session")
-async def async_client(test_client: TestClient) -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url=test_client.base_url
-    ) as ac:
-        yield ac
+async def async_client() -> AsyncGenerator[AsyncClient, None]:
+    async with app.router.lifespan_context(app):
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as async_client:
+            yield async_client

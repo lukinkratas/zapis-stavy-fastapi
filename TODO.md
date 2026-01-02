@@ -10,9 +10,7 @@ async with AsyncConnectionPool(...) as pool:
 
 - [x] add linter, formatter, typechecker
 - [x] add db
-- [x] solve pcr
-- [ ] solve mypy
-- [ ] add integration tests (separete test db)
+- [x] add integration tests (separete test db)
 - [ ] add unit tests (mocked and patched)
 - [ ] add logging
 

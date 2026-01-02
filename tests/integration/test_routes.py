@@ -1,32 +1,97 @@
-import uuid
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import pytest
 from httpx import AsyncClient
 
-from zapisstavyapi.models import (
-    MeterResp,
-)
+from zapisstavyapi.models import MeterResponseJson
 
 
 @pytest.fixture
-def default_meter(default_meter_id: uuid.UUID) -> dict[str, Any]:
+def default_meter() -> dict[str, Any]:
     return {
         "name": "default",
-        "id": default_meter_id,
-        "created_at": "2026-01-01T13:00:52.176660Z",
+        "id": "5ad4f210-cdfb-4196-82f7-af6afda013ea",
+        "created_at": "2026-01-02T11:07:19.693516Z",
+        "description": None,
     }
+
+
+@pytest.fixture
+async def created_meter(
+    async_client: AsyncClient,
+) -> AsyncGenerator[dict[str, Any], None]:
+    name = "test"
+    response = await async_client.post("/meter", json={"name": name})
+    created_meter = response.json()
+
+    yield created_meter
+
+    id = created_meter["id"]
+    await async_client.delete(f"/meter/{id}")
 
 
 @pytest.mark.integration
 @pytest.mark.anyio
 async def test_get_all_meters(
-    async_client: AsyncClient, default_meter: MeterResp
+    async_client: AsyncClient, default_meter: MeterResponseJson
 ) -> None:
     response = await async_client.get("/meter")
 
     assert response.status_code == 200
-    assert response.json() == [default_meter]
+    meters = response.json()
+    assert meters == [default_meter]
+
+
+@pytest.mark.integration
+@pytest.mark.anyio
+async def test_create_and_delete_meter(
+    async_client: AsyncClient, default_meter: MeterResponseJson
+) -> None:
+    # assert meters
+    response = await async_client.get("/meter")
+    meters = response.json()
+    assert meters == [default_meter]
+
+    # create meter
+    name = "test"
+    response = await async_client.post("/meter", json={"name": name})
+    assert response.status_code == 201
+
+    # assert meter
+    new_meter = response.json()
+    assert MeterResponseJson.model_validate(new_meter)
+    assert new_meter["name"] == name
+
+    # assert meters
+    response = await async_client.get("/meter")
+    meters = response.json()
+    assert meters == [default_meter, new_meter]
+
+    # delete created meter
+    id = new_meter["id"]
+    response = await async_client.delete(f"/meter/{id}")
+    assert response.status_code == 200
+
+    # assert meters
+    response = await async_client.get("/meter")
+    meters = response.json()
+    assert meters == [default_meter]
+
+
+@pytest.mark.integration
+@pytest.mark.anyio
+async def test_update_meter(
+    async_client: AsyncClient, created_meter: MeterResponseJson
+) -> None:
+    name = "test_updated"
+    id = created_meter["id"]
+    response = await async_client.put(f"/meter/{id}", json={"name": name})
+    assert response.status_code == 200
+
+    # assert meter
+    updated_meter = response.json()
+    assert MeterResponseJson.model_validate(updated_meter)
+    assert updated_meter["name"] == name
 
 
 # @pytest.fixture
@@ -56,7 +121,7 @@ async def test_get_all_meters(
 #     assert response.status_code == 201
 #
 #     response_json = response.json()
-#     assert MeterResp.model_validate(response_json)
+#     assert MeterResponseJson.model_validate(response_json)
 #     assert response_json["name"] == name
 #
 #

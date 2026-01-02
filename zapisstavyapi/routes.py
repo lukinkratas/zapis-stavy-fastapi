@@ -6,30 +6,22 @@ from psycopg import Connection
 
 from .db import db_connect
 from .db_models import MetersTable, ReadingsTable
-from .models import MeterReq, MeterResp, MeterWithReadingsResp, ReadingReq, ReadingResp
+from .models import (
+    MeterCreateRequestBody,
+    MeterResponseJson,
+    MeterUpdateRequestBody,
+    MeterWithReadingsResponseJson,
+    ReadingCreateRequestBody,
+    ReadingResponseJson,
+)
 
 router = APIRouter()
 
 
-@router.post("/meter", status_code=201, response_model=MeterResp)
-async def create_meter(
-    meter: MeterReq, conn: Connection = Depends(db_connect)
-) -> MeterResp:
-    """Add new meter into the database.
-
-    Args:
-        meter: meter request payload from client
-        conn: database connection
-
-    Returns: meter response dict
-    """
-    return await MetersTable.create(conn, meter)
-
-
-@router.get("/meter", response_model=list[MeterResp])
+@router.get("/meter", response_model=list[MeterResponseJson])
 async def get_all_meters(
     conn: Connection = Depends(db_connect),
-) -> list[MeterResp]:
+) -> list[MeterResponseJson]:
     """List all meter dicts in the database.
 
     Args:
@@ -37,47 +29,95 @@ async def get_all_meters(
 
     Returns: list of meter response dicts
     """
-    return await MetersTable.retrieve_all(conn)
+    return await MetersTable.select_all(conn)
 
 
-@router.post("/reading", status_code=201, response_model=ReadingResp)
+@router.post("/meter", status_code=201, response_model=MeterResponseJson)
+async def create_meter(
+    meter: MeterCreateRequestBody, conn: Connection = Depends(db_connect)
+) -> MeterResponseJson:
+    """Add new meter into the database.
+
+    Args:
+        meter: meter create request payload from client
+        conn: database connection
+
+    Returns: meter response dict
+    """
+    return await MetersTable.insert(conn, meter)
+
+
+@router.delete("/meter/{id}")
+async def delete_meter(
+    id: uuid.UUID, conn: Connection = Depends(db_connect)
+) -> dict[str, Any]:
+    """Delete a meter from the database.
+
+    Args:
+        id: uuid of meter
+        conn: database connection
+
+    Returns:
+        dict with detail
+    """
+    await MetersTable.delete(conn, id)
+    return {"message": f"Meter {id} deleted successfully"}
+
+
+@router.put("/meter/{id}", response_model=MeterResponseJson)
+async def update_meter(
+    id: uuid.UUID, meter: MeterUpdateRequestBody, conn: Connection = Depends(db_connect)
+) -> MeterResponseJson:
+    """Update a meter in the database.
+
+    Args:
+        id: uuid of meter
+        meter: meter update request payload from client
+        conn: database connection
+
+    Returns: meter response dict
+    """
+    return await MetersTable.update(conn, id, meter)
+
+
+@router.post("/reading", status_code=201, response_model=ReadingResponseJson)
 async def create_reading(
-    reading: ReadingReq, conn: Connection = Depends(db_connect)
-) -> ReadingResp:
+    reading: ReadingCreateRequestBody, conn: Connection = Depends(db_connect)
+) -> ReadingResponseJson:
     """Add new reading into the database.
 
     Args:
-        reading: reading request payload from client
+        reading: reading create request payload from client
         conn: database connection
 
     Returns: reading response dict
     """
-    return await ReadingsTable.create(conn, reading)
+    return await ReadingsTable.insert(conn, reading)
 
 
-@router.get("/meter/{meter_id}/reading", response_model=list[ReadingResp])
+@router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
 async def get_readings_on_meter(
-    meter_id: uuid.UUID, conn: Connection = Depends(db_connect)
-) -> list[ReadingResp]:
+    id: uuid.UUID, conn: Connection = Depends(db_connect)
+) -> list[ReadingResponseJson]:
     """List all readings on a given meter.
 
     Args:
-        meter_id: uuid of meter
+        id: uuid of meter
         conn: database connection
 
     Returns: list of readings response dict
     """
-    return await ReadingsTable.retrieve_by_meter_id(conn, meter_id)
+    return await ReadingsTable.select_by_meter_id(conn, id)
 
 
-@router.get("/meter/{meter_id}", response_model=MeterWithReadingsResp)
+@router.get("/meter/{id}", response_model=MeterWithReadingsResponseJson)
 async def get_meter_with_readings(
-    meter_id: uuid.UUID, conn: Connection = Depends(db_connect)
+    id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> dict[str, Any]:
     """List a given meter and all corresponding readings.
 
     Args:
-        meter_id: uuid of meter
+        id: uuid of meter
         conn: database connection
 
     Returns:
@@ -85,6 +125,6 @@ async def get_meter_with_readings(
         reading response dicts all together
     """
     return {
-        "meter": await MetersTable.retrieve_by_id(conn, meter_id),
-        "readings": await ReadingsTable.retrieve_by_meter_id(conn, meter_id),
+        "meter": await MetersTable.select_by_id(conn, id),
+        "readings": await ReadingsTable.select_by_meter_id(conn, id),
     }
