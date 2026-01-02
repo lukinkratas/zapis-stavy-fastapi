@@ -1,6 +1,6 @@
 # Zapis Stavy Backend [WIP]
 
-- FastAPI
-- [AWS lambda/app runner/fargate] BE: FastAPI + Mangum
+- FastAPI + Postgres via Psycopg
+- [AWS lambda/app runner/fargate]
   - + [AWS API Gateway]?
   - + [AWS cognito] for auth?
