@@ -192,9 +192,10 @@ async def test_update_reading(
     assert ReadingResponseJson.model_validate(updated_reading)
     assert updated_reading["value"] == value
 
+
 @pytest.mark.integration
 @pytest.mark.anyio
-async def test_create_and_delete_reading(
+async def test_get_meter_with_readings(
     async_client: AsyncClient,
     default_meter: MeterResponseJson,
     default_reading: ReadingResponseJson,
@@ -203,4 +204,7 @@ async def test_create_and_delete_reading(
     response = await async_client.get(f"/meter/{meter_id}")
     assert response.status_code == 200
     meter_with_readings = response.json()
-    assert meter_with_readings == {"meter": default_meter, "readings": [default_reading]}
+    assert meter_with_readings == {
+        "meter": default_meter,
+        "readings": [default_reading],
+    }

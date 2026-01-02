@@ -136,15 +136,19 @@ class ReadingsTable:
 
     @classmethod
     async def select_by_meter_id(
-        cls, conn: Connection, meter_id: uuid.UUID
+        cls, conn: Connection, meter_id: uuid.UUID, offset: int = 0, limit: int = 100
     ) -> list[ReadingResponseJson]:
         """Select all readings records on a given meter from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
             query = sql.SQL("""
                 SELECT * FROM readings
-                WHERE meter_id = %(meter_id)s;
+                WHERE meter_id = %(meter_id)s
+                OFFSET %(offset)s
+                LIMIT %(limit)s;
             """)
-            await cur.execute(query, {"meter_id": meter_id})
+            await cur.execute(
+                query, {"meter_id": meter_id, "offset": offset, "limit": limit}
+            )
 
             return await cur.fetchall()
 
