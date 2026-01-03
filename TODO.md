@@ -1,14 +1,5 @@
-meters unit tests with mocking
-
-2. Use conn.execute? https://www.psycopg.org/psycopg3/docs/advanced/pool.html
-```
-async with AsyncConnectionPool(...) as pool:
-    async with pool.connection() as conn:
-        await conn.execute("SELECT something FROM somewhere ...")
-
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT something else...")
-```
+meters unit tests with mocking for readings
+?? split models, db_models, test_routes
 
 - [x] add linter, formatter, typechecker
 - [x] add db
@@ -16,18 +7,6 @@ async with AsyncConnectionPool(...) as pool:
 - [ ] add unit tests (mocked and patched)
 - [ ] add logging
 
-```
-from testcontainers.postgres import PostgresContainer
-import psycopg
-import pytest
-
-@pytest.fixture
-def db():
-    with PostgresContainer("postgres:16") as postgres:
-        conn = psycopg.connect(postgres.get_connection_url())
-        yield conn
-        conn.close()
-```
 - [ ] add user auth
 - [ ] add api version into url
 - [ ] add health check
