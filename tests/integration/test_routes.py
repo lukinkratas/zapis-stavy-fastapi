@@ -1,9 +1,40 @@
+import uuid
 from typing import Any, AsyncGenerator
 
 import pytest
 from httpx import AsyncClient
 
 from zapisstavyapi.models import MeterResponseJson, ReadingResponseJson
+
+
+def assert_meter(meter: MeterResponseJson, **kwargs: Any) -> None:
+    assert MeterResponseJson.model_validate(meter)
+    for key, val in kwargs.items():
+        assert meter[key] == val
+
+
+def assert_reading(reading: ReadingResponseJson, **kwargs: Any) -> None:
+    assert ReadingResponseJson.model_validate(reading)
+    for key, val in kwargs.items():
+        assert reading[key] == val
+
+
+async def assert_meters(
+    async_client: AsyncClient, expected_list_of_meters: list[MeterResponseJson]
+) -> None:
+    response = await async_client.get("/meter")
+    meters = response.json()
+    assert meters == expected_list_of_meters
+
+
+async def assert_readings_on_meter(
+    async_client: AsyncClient,
+    meter_id: uuid.UUID,
+    expected_list_of_readings: list[ReadingResponseJson],
+) -> None:
+    response = await async_client.get(f"/meter/{meter_id}/reading")
+    readings = response.json()
+    assert readings == expected_list_of_readings
 
 
 @pytest.fixture
@@ -74,10 +105,7 @@ async def test_get_all_meters(
 async def test_create_and_delete_meter(
     async_client: AsyncClient, default_meter: MeterResponseJson
 ) -> None:
-    # assert meters
-    response = await async_client.get("/meter")
-    meters = response.json()
-    assert meters == [default_meter]
+    await assert_meters(async_client, [default_meter])
 
     # create meter
     name = "test"
@@ -86,23 +114,16 @@ async def test_create_and_delete_meter(
 
     # assert meter
     new_meter = response.json()
-    assert MeterResponseJson.model_validate(new_meter)
-    assert new_meter["name"] == name
+    assert_meter(new_meter, name=name)
 
-    # assert meters
-    response = await async_client.get("/meter")
-    meters = response.json()
-    assert meters == [default_meter, new_meter]
+    await assert_meters(async_client, [default_meter, new_meter])
 
     # delete created meter
     mid = new_meter["id"]
     response = await async_client.delete(f"/meter/{mid}")
     assert response.status_code == 200
 
-    # assert meters
-    response = await async_client.get("/meter")
-    meters = response.json()
-    assert meters == [default_meter]
+    await assert_meters(async_client, [default_meter])
 
 
 @pytest.mark.integration
@@ -115,10 +136,8 @@ async def test_update_meter(
     response = await async_client.put(f"/meter/{mid}", json={"name": name})
     assert response.status_code == 200
 
-    # assert meter
     updated_meter = response.json()
-    assert MeterResponseJson.model_validate(updated_meter)
-    assert updated_meter["name"] == name
+    assert_meter(updated_meter, name=name)
 
 
 @pytest.mark.integration
@@ -143,11 +162,7 @@ async def test_create_and_delete_reading(
     default_reading: ReadingResponseJson,
 ) -> None:
     meter_id = default_meter["id"]
-
-    # assert readings
-    response = await async_client.get(f"/meter/{meter_id}/reading")
-    readings = response.json()
-    assert readings == [default_reading]
+    await assert_readings_on_meter(async_client, meter_id, [default_reading])
 
     # create reading
     value = 99.0
@@ -156,25 +171,19 @@ async def test_create_and_delete_reading(
     )
     assert response.status_code == 201
 
-    # assert reading
     new_reading = response.json()
-    assert ReadingResponseJson.model_validate(new_reading)
-    assert new_reading["value"] == value
+    assert_reading(new_reading, value=value)
 
-    # assert readings
-    response = await async_client.get(f"/meter/{meter_id}/reading")
-    readings = response.json()
-    assert readings == [default_reading, new_reading]
+    await assert_readings_on_meter(
+        async_client, meter_id, [default_reading, new_reading]
+    )
 
     # delete created reading
     rid = new_reading["id"]
     response = await async_client.delete(f"/reading/{rid}")
     assert response.status_code == 200
 
-    # assert readings
-    response = await async_client.get(f"/meter/{meter_id}/reading")
-    readings = response.json()
-    assert readings == [default_reading]
+    await assert_readings_on_meter(async_client, meter_id, [default_reading])
 
 
 @pytest.mark.integration
@@ -187,10 +196,8 @@ async def test_update_reading(
     response = await async_client.put(f"/reading/{rid}", json={"value": value})
     assert response.status_code == 200
 
-    # assert meter
     updated_reading = response.json()
-    assert ReadingResponseJson.model_validate(updated_reading)
-    assert updated_reading["value"] == value
+    assert_reading(updated_reading, value=value)
 
 
 @pytest.mark.integration
