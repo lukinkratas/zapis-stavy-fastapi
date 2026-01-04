@@ -23,7 +23,7 @@ def configure_logging() -> None:
                 "formatter": "simple",
                 "level": "DEBUG",
             },
-            "file": {
+            "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "filename": "zapisstavyapi.log",
                 "formatter": "detailed",
@@ -35,7 +35,7 @@ def configure_logging() -> None:
         },
         "loggers": {
             "zapisstavyapi": {
-                "handlers": ["console", "file"],
+                "handlers": ["console", "rotating_file"],
                 "level": "DEBUG",
                 "propagate": False,
             },
