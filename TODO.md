@@ -1,22 +1,18 @@
-meters unit tests with mocking for readings
-?? split models, db_models, test_routes
+yield async_client, mock_conn, mock_cursor
 
 - [x] add linter, formatter, typechecker
 - [x] add db
 - [x] add integration tests (separete test db)
-- [ ] add unit tests (mocked and patched)
-- [ ] add logging
+- [x] add unit tests (mocked and patched)
+- [x] add logging
 
 - [ ] add user auth
 - [ ] add api version into url
 - [ ] add health check
 - [ ] rate limiting
 - [ ] error handling
+- [ ] test coverage 95%+
 - [ ] add prometheus ?
-- [ ] fix err:
-/Users/lukaskratochvila/projects/zapis-stavy-backend/.venv/lib/python3.12/site-packages/psycopg_pool/pool_async.py:163: RuntimeWarning: opening the async pool AsyncConnectionPool in the constructor is deprecated and will not be supported anymore in a future release. Please use `await pool.open()`, or use the pool as context manager using: `async with AsyncConnectionPool(...) as pool: `...
-
-https://youtu.be/GMBiCMsEsq8?si=b9dgLTg5oUNSKUYB
 - [ ] pydantic-settings? e.g.: loggin level?
 
 - [ ] pydantic-settings for .env - DB_URL/ROLLBACK settings for database https://fastapi.tiangolo.com/advanced/settings/

@@ -45,7 +45,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "zapisstavyapi/models/*" = ["D101"] # missing docstring in public class
-"tests/*" = ["D103"]                # missing docstring in public function
+"tests/*" = [
+    "D102", # missing docstring in public method
+    "D103", # missing docstring in public function
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

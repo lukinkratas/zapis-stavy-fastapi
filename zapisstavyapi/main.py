@@ -13,11 +13,9 @@ from .routes import router as meter_router
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Setup and teardown of the app."""
     configure_logging()
-    print("Setup")
     async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
         app.state.pool = pool
         yield
-    print("Teardown")
 
 
 app = FastAPI(lifespan=lifespan)

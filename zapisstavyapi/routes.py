@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Any
 
@@ -15,11 +16,14 @@ from .models import (
     ReadingResponseJson,
     ReadingUpdateRequestBody,
 )
+from .utils import log_async_func
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 @router.post("/meter", status_code=201, response_model=MeterResponseJson)
+@log_async_func(logger.info)
 async def create_meter(
     meter: MeterCreateRequestBody, conn: Connection = Depends(db_connect)
 ) -> MeterResponseJson:
@@ -35,6 +39,7 @@ async def create_meter(
 
 
 @router.delete("/meter/{id}")
+@log_async_func(logger.info)
 async def delete_meter(
     id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> dict[str, Any]:
@@ -52,6 +57,7 @@ async def delete_meter(
 
 
 @router.put("/meter/{id}", response_model=MeterResponseJson)
+@log_async_func(logger.info)
 async def update_meter(
     id: uuid.UUID, meter: MeterUpdateRequestBody, conn: Connection = Depends(db_connect)
 ) -> MeterResponseJson:
@@ -68,6 +74,7 @@ async def update_meter(
 
 
 @router.get("/meter", response_model=list[MeterResponseJson])
+@log_async_func(logger.info)
 async def get_all_meters(
     conn: Connection = Depends(db_connect),
 ) -> list[MeterResponseJson]:
@@ -82,6 +89,7 @@ async def get_all_meters(
 
 
 @router.post("/reading", status_code=201, response_model=ReadingResponseJson)
+@log_async_func(logger.info)
 async def create_reading(
     reading: ReadingCreateRequestBody, conn: Connection = Depends(db_connect)
 ) -> ReadingResponseJson:
@@ -97,6 +105,7 @@ async def create_reading(
 
 
 @router.delete("/reading/{id}")
+@log_async_func(logger.info)
 async def delete_reading(
     id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> dict[str, Any]:
@@ -114,6 +123,7 @@ async def delete_reading(
 
 
 @router.put("/reading/{id}", response_model=ReadingResponseJson)
+@log_async_func(logger.info)
 async def update_reading(
     id: uuid.UUID,
     reading: ReadingUpdateRequestBody,
@@ -132,6 +142,7 @@ async def update_reading(
 
 
 @router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
+@log_async_func(logger.info)
 async def get_readings_on_meter(
     id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> list[ReadingResponseJson]:
@@ -147,6 +158,7 @@ async def get_readings_on_meter(
 
 
 @router.get("/meter/{id}", response_model=MeterWithReadingsResponseJson)
+@log_async_func(logger.info)
 async def get_meter_with_readings(
     id: uuid.UUID, conn: Connection = Depends(db_connect)
 ) -> dict[str, Any]:

@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from fastapi import HTTPException
@@ -12,12 +13,23 @@ from .models import (
     ReadingResponseJson,
     ReadingUpdateRequestBody,
 )
+from .utils import error, log_async_func
+
+logger = logging.getLogger(__name__)
+
+
+def format_sql_query(sql_query: sql.SQL) -> str:
+    """Format SQL for logs."""
+    sql_query_str = sql.as_string(sql_query)
+    sql_query_lines = sql_query_str.split("\n")
+    return " ".join([query_line.strip() for query_line in sql_query_lines])
 
 
 class MetersTable:
     """Meters database model."""
 
     @classmethod
+    @log_async_func(logger.debug)
     async def select_all(
         cls, conn: Connection, offset: int = 0, limit: int = 100
     ) -> list[MeterResponseJson]:
@@ -28,10 +40,12 @@ class MetersTable:
                 OFFSET %(offset)s
                 LIMIT %(limit)s;
             """)
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"offset": offset, "limit": limit})
             return await cur.fetchall()
 
     @classmethod
+    @log_async_func(logger.debug)
     async def select_by_id(cls, conn: Connection, id: uuid.UUID) -> MeterResponseJson:
         """Select meter record by ID from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
@@ -39,14 +53,16 @@ class MetersTable:
                 SELECT * FROM meters
                 WHERE id = %(id)s;
             """)
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"id": id})
 
             meter = await cur.fetchone()
             if meter is None:
-                raise HTTPException(detail="Meter not found")
+                error("Meter not found", HTTPException, logger.error)
             return meter
 
     @classmethod
+    @log_async_func(logger.debug)
     async def insert(
         cls, conn: Connection, meter: MeterCreateRequestBody
     ) -> MeterResponseJson:
@@ -63,11 +79,12 @@ class MetersTable:
                     map(sql.Placeholder, data.keys())
                 ),
             )
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data)
 
             new_meter = await cur.fetchone()
             if new_meter is None:
-                raise HTTPException(status_code=500, detail="Meter cannot be created")
+                error("Meter cannot be created", HTTPException, logger.error)
 
             try:
                 await conn.commit()
@@ -78,6 +95,7 @@ class MetersTable:
             return new_meter
 
     @classmethod
+    @log_async_func(logger.debug)
     async def delete(cls, conn: Connection, id: uuid.UUID) -> None:
         """Delete meter record from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
@@ -85,6 +103,7 @@ class MetersTable:
                 DELETE FROM meters
                 WHERE id = %(id)s;
             """)
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"id": id})
 
             try:
@@ -94,6 +113,7 @@ class MetersTable:
                 raise
 
     @classmethod
+    @log_async_func(logger.debug)
     async def update(
         cls, conn: Connection, id: uuid.UUID, meter: MeterUpdateRequestBody
     ) -> MeterResponseJson:
@@ -116,11 +136,12 @@ class MetersTable:
             """).format(
                 set_clause=set_clause,
             )
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data | {"id": id})
 
             updated_meter = await cur.fetchone()
             if updated_meter is None:
-                raise HTTPException(status_code=500, detail="Meter cannot be updated")
+                error("Meter cannot be updated", HTTPException, logger.error)
 
             try:
                 await conn.commit()
@@ -135,6 +156,7 @@ class ReadingsTable:
     """Readings database model."""
 
     @classmethod
+    @log_async_func(logger.debug)
     async def select_by_meter_id(
         cls, conn: Connection, meter_id: uuid.UUID, offset: int = 0, limit: int = 100
     ) -> list[ReadingResponseJson]:
@@ -146,6 +168,7 @@ class ReadingsTable:
                 OFFSET %(offset)s
                 LIMIT %(limit)s;
             """)
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(
                 query, {"meter_id": meter_id, "offset": offset, "limit": limit}
             )
@@ -153,6 +176,7 @@ class ReadingsTable:
             return await cur.fetchall()
 
     @classmethod
+    @log_async_func(logger.debug)
     async def insert(
         cls, conn: Connection, reading: ReadingCreateRequestBody
     ) -> ReadingResponseJson:
@@ -167,14 +191,16 @@ class ReadingsTable:
                 columns=sql.SQL(", ").join(map(sql.Identifier, data.keys())),
                 values=sql.SQL(", ").join(map(sql.Placeholder, data.keys())),
             )
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data)
 
             new_reading = await cur.fetchone()
             if new_reading is None:
-                raise HTTPException(status_code=500, detail="Reading cannot be created")
+                error("Reading cannot be created", HTTPException, logger.error)
             return new_reading
 
     @classmethod
+    @log_async_func(logger.debug)
     async def delete(cls, conn: Connection, id: uuid.UUID) -> None:
         """Delete reading record from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
@@ -182,6 +208,7 @@ class ReadingsTable:
                 DELETE FROM readings
                 WHERE id = %(id)s;
             """)
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"id": id})
 
             try:
@@ -191,6 +218,7 @@ class ReadingsTable:
                 raise
 
     @classmethod
+    @log_async_func(logger.debug)
     async def update(
         cls, conn: Connection, id: uuid.UUID, reading: ReadingUpdateRequestBody
     ) -> ReadingResponseJson:
@@ -214,11 +242,12 @@ class ReadingsTable:
             """).format(
                 set_clause=set_clause,
             )
+            logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data | {"id": id})
 
             updated_reading = await cur.fetchone()
             if updated_reading is None:
-                raise HTTPException(status_code=500, detail="Meter cannot be updated")
+                error("Reading cannot be updated", HTTPException, logger.error)
 
             try:
                 await conn.commit()

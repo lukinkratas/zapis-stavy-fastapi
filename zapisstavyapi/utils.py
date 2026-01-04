@@ -1,9 +1,25 @@
 from collections.abc import Callable
 from functools import wraps
-from typing import Any
+from typing import Any, NoReturn, Type
 
 
-def get_func_name(func: Callable[..., Any], args: tuple[Any, ...]) -> str:
+def error(
+    msg: str, err_cls: Type[Exception] = Exception, log_func: Callable[..., Any] = print
+) -> NoReturn:
+    """Log error message and raise exception.
+
+    Args:
+        msg: error message (hint), that will be logged and raised.
+        err_cls: class of the raised error.
+        log_func: function used for logging the msg, e.g.: logger.error.
+    """
+    log_func(msg)
+    raise err_cls(msg)
+
+
+def get_func_name_and_args(
+    func: Callable[..., Any], args: tuple[Any, ...]
+) -> tuple[str, tuple[Any, ...]]:
     """Helper function for function name logging.
 
     Args:
@@ -14,31 +30,28 @@ def get_func_name(func: Callable[..., Any], args: tuple[Any, ...]) -> str:
     """
     # check if first argument is class instance (self)
     if args and hasattr(args[0], func.__name__):
-        return f"{args[0].__class__.__name__}.{func.__name__}"
+        func_name = f"{args[0].__class__.__name__}.{func.__name__}"
+        return func_name, args[1:]
 
-    return func.__name__
+    return func.__name__, args
 
 
-def log_func(
-    func: Callable[..., Any], log_func: Callable[..., Any] = print
-) -> Callable[..., Any]:
-    """Decorator for logging functions.
+def log_async_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
+    """Decorator factory that accepts a logging function."""
 
-    Args:
-        func: func to be decorated
-        log_func: function used for logging, e.g.: logger.debug, print, etc.
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        """Decorator, that wraps the function."""
 
-    Returns: decorator
-    """
+        @wraps(func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            func_name, args_copy = get_func_name_and_args(func, args)
 
-    @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        func_name = get_func_name(func, args)
+            log_func(f"{func_name} was called with args={args_copy}, {kwargs=}.")
+            result = await func(*args, **kwargs)
+            log_func(f"{func_name} finished successfully with {result=}.")
 
-        log_func(f"{func_name} was called.")
-        result = func(*args, **kwargs)
-        log_func(f"{func_name} finished.")
+            return result
 
-        return result
+        return async_wrapper
 
-    return wrapper
+    return decorator

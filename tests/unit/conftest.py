@@ -16,8 +16,6 @@ def anyio_backend() -> str:
 
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    # app.state.pool = AsyncMock()
-
     # Create a mock cursor
     mock_cursor = AsyncMock(spec=AsyncCursor)
     mock_cursor.execute = AsyncMock()
@@ -26,9 +24,9 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
     # Create a mock connection
     mock_conn = AsyncMock(spec=Connection)
+    mock_conn.cursor.return_value = mock_cursor
     mock_conn.commit = AsyncMock()
     mock_conn.rollback = AsyncMock()
-    mock_conn.cursor.return_value = mock_cursor
 
     # Mock the db_connect dependency to return your mock connection
     async def override_db_connect() -> AsyncGenerator[AsyncMock, None]:
