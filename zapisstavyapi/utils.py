@@ -1,20 +1,6 @@
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, NoReturn, Type
-
-
-def error(
-    msg: str, err_cls: Type[Exception] = Exception, log_func: Callable[..., Any] = print
-) -> NoReturn:
-    """Log error message and raise exception.
-
-    Args:
-        msg: error message (hint), that will be logged and raised.
-        err_cls: class of the raised error.
-        log_func: function used for logging the msg, e.g.: logger.error.
-    """
-    log_func(msg)
-    raise err_cls(msg)
+from typing import Any
 
 
 def get_func_name_and_args(

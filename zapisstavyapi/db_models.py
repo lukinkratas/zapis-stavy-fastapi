@@ -13,7 +13,7 @@ from .models import (
     ReadingResponseJson,
     ReadingUpdateRequestBody,
 )
-from .utils import error, log_async_func
+from .utils import log_async_func
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class MetersTable:
 
             meter = await cur.fetchone()
             if meter is None:
-                error("Meter not found", HTTPException, logger.error)
+                raise HTTPException(status_code=404, detail=f"Meter {id} not found")
             return meter
 
     @classmethod
@@ -84,7 +84,7 @@ class MetersTable:
 
             new_meter = await cur.fetchone()
             if new_meter is None:
-                error("Meter cannot be created", HTTPException, logger.error)
+                raise HTTPException(status_code=404, detail="Meter cannot be created")
 
             try:
                 await conn.commit()
@@ -141,7 +141,9 @@ class MetersTable:
 
             updated_meter = await cur.fetchone()
             if updated_meter is None:
-                error("Meter cannot be updated", HTTPException, logger.error)
+                raise HTTPException(
+                    status_code=404, detail=f"Meter {id} cannot be updated"
+                )
 
             try:
                 await conn.commit()
@@ -196,7 +198,7 @@ class ReadingsTable:
 
             new_reading = await cur.fetchone()
             if new_reading is None:
-                error("Reading cannot be created", HTTPException, logger.error)
+                raise HTTPException(status_code=404, detail="Reading cannot be created")
             return new_reading
 
     @classmethod
@@ -247,7 +249,9 @@ class ReadingsTable:
 
             updated_reading = await cur.fetchone()
             if updated_reading is None:
-                error("Reading cannot be updated", HTTPException, logger.error)
+                raise HTTPException(
+                    status_code=404, detail=f"Reading {id} cannot be updated"
+                )
 
             try:
                 await conn.commit()
