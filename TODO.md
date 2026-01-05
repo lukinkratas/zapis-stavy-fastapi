@@ -1,10 +1,15 @@
 yield async_client, mock_conn, mock_cursor
+solve mypy
+use loguru instead of logging?
 
 - [x] add linter, formatter, typechecker
 - [x] add db
 - [x] add integration tests (separete test db)
 - [x] add unit tests (mocked and patched)
 - [x] add logging
+- [x] logging level DEBUG only for DEV, INFO for TEST/PROD
+- [x] uuid_length = 8 for DEV
+- [x] pydantic-settings
 
 - [ ] add user auth
 - [ ] add api version into url
@@ -13,9 +18,6 @@ yield async_client, mock_conn, mock_cursor
 - [ ] error handling
 - [ ] test coverage 95%+
 - [ ] add prometheus ?
-- [ ] pydantic-settings? e.g.: loggin level?
-- [ ] uuid_length = 8 for DEV
-- [ ] logging level DEBUG only for DEV, INFO for TEST/PROD
 
 - [ ] pydantic-settings for .env - DB_URL/ROLLBACK settings for database https://fastapi.tiangolo.com/advanced/settings/
 - [x] lifespan docs https://fastapi.tiangolo.com/advanced/events/
@@ -23,6 +25,8 @@ yield async_client, mock_conn, mock_cursor
 - [ ] sql dbs https://fastapi.tiangolo.com/tutorial/sql-databases/
 - [ ] sql dbs https://sqlmodel.tiangolo.com/tutorial/fastapi/response-model/
 - [ ] testing db https://sqlmodel.tiangolo.com/tutorial/fastapi/tests/#testing-database
+
+better stack / logtail cloud logging: https://betterstack.com/community/guides/logging/logging-with-fastapi/
 
 async SQLAlchemy x psycopg x asyncpg
 

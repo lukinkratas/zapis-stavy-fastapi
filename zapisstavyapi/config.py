@@ -15,5 +15,7 @@ class Settings(BaseSettings):
     # used by fast api
     POSTGRES_HOST: str = "localhost"
     ENV_STATE: Literal["dev", "test", "prod"] = "dev"
+    LOGTAIL_TOKEN: str
+    LOGTAIL_HOST: str
 
     model_config = SettingsConfigDict(env_file=".env")
