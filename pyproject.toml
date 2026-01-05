@@ -8,6 +8,7 @@ dependencies = [
     "asgi-correlation-id>=4.3.4",
     "fastapi>=0.128.0",
     "psycopg[binary,pool]>=3.3.2",
+    "pydantic-settings>=2.12.0",
     "python-dotenv>=1.2.1",
     "uvicorn[standard]>=0.38.0",
 ]

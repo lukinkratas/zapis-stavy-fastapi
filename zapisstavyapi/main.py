@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from functools import lru_cache
 from typing import AsyncGenerator
 
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -8,6 +9,7 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import Response
 from psycopg_pool import AsyncConnectionPool
 
+from .config import Settings
 from .db import get_conn_info
 from .logging_config import configure_logging
 from .routes import router as meter_router
@@ -15,13 +17,24 @@ from .routes import router as meter_router
 logger = logging.getLogger(__name__)
 
 
+@lru_cache
+def get_settings() -> Settings:
+    """Load Postgres ans FastAPI config."""
+    return Settings()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Setup and teardown of the app."""
-    configure_logging()
-    async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
+    settings = get_settings()
+    configure_logging(settings)
+    logger.info("Setup")
+
+    async with AsyncConnectionPool(conninfo=get_conn_info(settings)) as pool:
         app.state.pool = pool
         yield
+
+    logger.info("Teardown")
 
 
 app = FastAPI(lifespan=lifespan)

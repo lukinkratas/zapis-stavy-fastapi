@@ -1,11 +1,11 @@
 import logging
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from psycopg import Connection
 
-from .db import db_connect
+from .db import connect_to_db
 from .db_models import MetersTable, ReadingsTable
 from .models import (
     MeterCreateRequestBody,
@@ -25,7 +25,7 @@ router = APIRouter()
 @router.post("/meter", status_code=201, response_model=MeterResponseJson)
 @log_async_func(logger.info)
 async def create_meter(
-    meter: MeterCreateRequestBody, conn: Connection = Depends(db_connect)
+    meter: MeterCreateRequestBody, conn: Annotated[Connection, Depends(connect_to_db)]
 ) -> MeterResponseJson:
     """Add new meter into the database.
 
@@ -41,7 +41,7 @@ async def create_meter(
 @router.delete("/meter/{id}")
 @log_async_func(logger.info)
 async def delete_meter(
-    id: uuid.UUID, conn: Connection = Depends(db_connect)
+    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
 ) -> dict[str, Any]:
     """Delete a meter from the database.
 
@@ -59,7 +59,9 @@ async def delete_meter(
 @router.put("/meter/{id}", response_model=MeterResponseJson)
 @log_async_func(logger.info)
 async def update_meter(
-    id: uuid.UUID, meter: MeterUpdateRequestBody, conn: Connection = Depends(db_connect)
+    id: uuid.UUID,
+    meter: MeterUpdateRequestBody,
+    conn: Annotated[Connection, Depends(connect_to_db)],
 ) -> MeterResponseJson:
     """Update a meter in the database.
 
@@ -76,7 +78,7 @@ async def update_meter(
 @router.get("/meter", response_model=list[MeterResponseJson])
 @log_async_func(logger.info)
 async def get_all_meters(
-    conn: Connection = Depends(db_connect),
+    conn: Annotated[Connection, Depends(connect_to_db)],
 ) -> list[MeterResponseJson]:
     """List all meter dicts in the database.
 
@@ -91,7 +93,8 @@ async def get_all_meters(
 @router.post("/reading", status_code=201, response_model=ReadingResponseJson)
 @log_async_func(logger.info)
 async def create_reading(
-    reading: ReadingCreateRequestBody, conn: Connection = Depends(db_connect)
+    reading: ReadingCreateRequestBody,
+    conn: Annotated[Connection, Depends(connect_to_db)],
 ) -> ReadingResponseJson:
     """Add new reading into the database.
 
@@ -107,7 +110,7 @@ async def create_reading(
 @router.delete("/reading/{id}")
 @log_async_func(logger.info)
 async def delete_reading(
-    id: uuid.UUID, conn: Connection = Depends(db_connect)
+    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
 ) -> dict[str, Any]:
     """Delete a reading from the database.
 
@@ -127,7 +130,7 @@ async def delete_reading(
 async def update_reading(
     id: uuid.UUID,
     reading: ReadingUpdateRequestBody,
-    conn: Connection = Depends(db_connect),
+    conn: Annotated[Connection, Depends(connect_to_db)],
 ) -> ReadingResponseJson:
     """Update a reading in the database.
 
@@ -144,7 +147,7 @@ async def update_reading(
 @router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
 @log_async_func(logger.info)
 async def get_readings_on_meter(
-    id: uuid.UUID, conn: Connection = Depends(db_connect)
+    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
 ) -> list[ReadingResponseJson]:
     """List all readings on a given meter.
 
@@ -160,7 +163,7 @@ async def get_readings_on_meter(
 @router.get("/meter/{id}", response_model=MeterWithReadingsResponseJson)
 @log_async_func(logger.info)
 async def get_meter_with_readings(
-    id: uuid.UUID, conn: Connection = Depends(db_connect)
+    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
 ) -> dict[str, Any]:
     """List a given meter and all corresponding readings.
 

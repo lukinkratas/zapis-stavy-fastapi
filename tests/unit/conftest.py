@@ -5,7 +5,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncCursor, Connection
 
-from zapisstavyapi.db import db_connect
+from zapisstavyapi.db import connect_to_db
 from zapisstavyapi.main import app
 
 
@@ -28,12 +28,12 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
     mock_conn.commit = AsyncMock()
     mock_conn.rollback = AsyncMock()
 
-    # Mock the db_connect dependency to return your mock connection
-    async def override_db_connect() -> AsyncGenerator[AsyncMock, None]:
+    # Mock the dependency to return your mock connection
+    async def override_connect_to_db() -> AsyncGenerator[AsyncMock, None]:
         yield mock_conn
 
     # Override the dependency in your app
-    app.dependency_overrides[db_connect] = override_db_connect
+    app.dependency_overrides[connect_to_db] = override_connect_to_db
 
     async with app.router.lifespan_context(app):
         async with AsyncClient(
