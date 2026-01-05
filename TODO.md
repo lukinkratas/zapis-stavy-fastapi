@@ -14,6 +14,8 @@ yield async_client, mock_conn, mock_cursor
 - [ ] test coverage 95%+
 - [ ] add prometheus ?
 - [ ] pydantic-settings? e.g.: loggin level?
+- [ ] uuid_length = 8 for DEV
+- [ ] logging level DEBUG only for DEV, INFO for TEST/PROD
 
 - [ ] pydantic-settings for .env - DB_URL/ROLLBACK settings for database https://fastapi.tiangolo.com/advanced/settings/
 - [x] lifespan docs https://fastapi.tiangolo.com/advanced/events/
