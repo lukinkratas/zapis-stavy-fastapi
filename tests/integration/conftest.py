@@ -16,7 +16,7 @@ def anyio_backend() -> str:
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
     def override_get_settings() -> Settings:
         return Settings(
-            POSTGRES_DB="zapisstavy_test", POSTGRES_HOST="localhost", ENV_STATE="test"
+            POSTGRES_DB="zapisstavy_dev", POSTGRES_HOST="localhost", ENV_STATE="test"
         )
 
     app.dependency_overrides[get_settings] = override_get_settings

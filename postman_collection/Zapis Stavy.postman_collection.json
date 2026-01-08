@@ -73,37 +73,6 @@
 			"response": []
 		},
 		{
-			"name": "create reading on meter",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"value\": 99,\n  \"meter_id\": \"default\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/reading",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"reading"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "list readings on meter",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -121,7 +90,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/meter/default/reading",
+					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea/reading",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -132,7 +101,7 @@
 					"port": "8000",
 					"path": [
 						"meter",
-						"default",
+						"5ad4f210-cdfb-4196-82f7-af6afda013ea",
 						"reading"
 					]
 				}
@@ -157,7 +126,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/meter/default",
+					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -168,7 +137,38 @@
 					"port": "8000",
 					"path": [
 						"meter",
-						"default"
+						"5ad4f210-cdfb-4196-82f7-af6afda013ea"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create reading",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"value\": 99.0,\n  \"meter_id\": \"5ad4f210-cdfb-4196-82f7-af6afda013ea\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/reading",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reading"
 					]
 				}
 			},

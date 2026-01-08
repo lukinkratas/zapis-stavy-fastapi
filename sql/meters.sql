@@ -8,7 +8,7 @@ CREATE TABLE meters (
     PRIMARY key (id)
 );
 
-INSERT INTO meters (id, name)
-VALUES ('5ad4f210-cdfb-4196-82f7-af6afda013ea', 'default');
+INSERT INTO meters (id, user_id, name)
+VALUES ('5ad4f210-cdfb-4196-82f7-af6afda013ea', 'e49a1d7f-50fc-4095-9740-346b79f4711b', 'default');
 
 -- SELECT * FROM meters;
