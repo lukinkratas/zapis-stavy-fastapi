@@ -2,6 +2,15 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
+from psycopg import sql
+
+
+def format_sql_query(sql_query: sql.Composed | sql.SQL) -> str:
+    """Format SQL for logs."""
+    sql_query_str = sql.as_string(sql_query)
+    sql_query_lines = sql_query_str.split("\n")
+    return " ".join([query_line.strip() for query_line in sql_query_lines])
+
 
 def get_func_name_and_args(
     func: Callable[..., Any], args: tuple[Any, ...]

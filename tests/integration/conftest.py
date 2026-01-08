@@ -1,10 +1,10 @@
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from zapisstavyapi.config import Settings
-from zapisstavyapi.main import app, get_settings
+from api.config import Settings
+from api.main import app, get_settings
 
 
 @pytest.fixture(scope="session")
@@ -14,7 +14,7 @@ def anyio_backend() -> str:
 
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    def override_get_settings() -> Generator[Settings, None]:
+    def override_get_settings() -> Settings:
         return Settings(
             POSTGRES_DB="zapisstavy_test", POSTGRES_HOST="localhost", ENV_STATE="test"
         )

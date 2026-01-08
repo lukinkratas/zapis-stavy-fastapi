@@ -5,8 +5,8 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncCursor, Connection
 
-from zapisstavyapi.db import connect_to_db
-from zapisstavyapi.main import app
+from api.db import connect_to_db
+from api.main import app
 
 
 @pytest.fixture(scope="session")

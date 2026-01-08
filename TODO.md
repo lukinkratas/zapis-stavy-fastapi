@@ -1,6 +1,5 @@
 yield async_client, mock_conn, mock_cursor
 solve mypy
-use loguru instead of logging?
 
 - [x] add linter, formatter, typechecker
 - [x] add db
@@ -10,6 +9,8 @@ use loguru instead of logging?
 - [x] logging level DEBUG only for DEV, INFO for TEST/PROD
 - [x] uuid_length = 8 for DEV
 - [x] pydantic-settings
+- [x] split dbmodels, models and routes
+- [x] pre-commit switch to make cmds
 
 - [ ] add user auth
 - [ ] add api version into url

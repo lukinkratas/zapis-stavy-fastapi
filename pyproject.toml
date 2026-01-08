@@ -8,10 +8,13 @@ dependencies = [
     "asgi-correlation-id>=4.3.4",
     "fastapi>=0.128.0",
     "logtail-python>=0.3.4",
+    "passlib[bcrypt]>=1.7.4",
     "psycopg[binary,pool]>=3.3.2",
     "pydantic-settings>=2.12.0",
     "python-dotenv>=1.2.1",
+    "python-jose>=3.5.0",
     "python-json-logger>=4.0.0",
+    "python-multipart>=0.0.21",
     "uvicorn[standard]>=0.38.0",
 ]
 [dependency-groups]
@@ -48,7 +51,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"zapisstavyapi/models/*" = ["D101"] # missing docstring in public class
+"api/models/*" = ["D101"] # missing docstring in public class
 "tests/*" = [
     "D102", # missing docstring in public method
     "D103", # missing docstring in public function

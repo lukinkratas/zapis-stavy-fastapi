@@ -4,28 +4,8 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import AsyncClient
 
+from api.models.meters import MeterResponseJson
 from tests.assertions import assert_meter, assert_reading
-from zapisstavyapi.models import MeterResponseJson, ReadingResponseJson
-
-
-@pytest.fixture
-def default_meter() -> dict[str, Any]:
-    return {
-        "id": "5ad4f210-cdfb-4196-82f7-af6afda013ea",
-        "created_at": "2026-01-03T20:57:12.525797Z",
-        "name": "default",
-        "description": None,
-    }
-
-
-@pytest.fixture
-def default_reading(default_meter: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "id": "d09b982f-ffe7-42d1-809f-5c61eeac9f99",
-        "created_at": "2026-01-03T20:57:12.543268Z",
-        "meter_id": default_meter["id"],
-        "value": 11.0,
-    }
 
 
 class TestUnitMeter:
@@ -65,7 +45,7 @@ class TestUnitMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_meter(
-        self, async_client: AsyncClient, default_meter: MeterResponseJson
+        self, async_client: AsyncClient, default_meter: dict[str, Any]
     ) -> None:
         async_client.mock_cursor.fetchone = AsyncMock(return_value=default_meter)
         name = "default"
@@ -81,8 +61,8 @@ class TestUnitMeter:
     async def test_get_readings_on_meter(
         self,
         async_client: AsyncClient,
-        default_meter: MeterResponseJson,
-        default_reading: ReadingResponseJson,
+        default_meter: dict[str, Any],
+        default_reading: dict[str, Any],
     ) -> None:
         async_client.mock_cursor.fetchall = AsyncMock(return_value=[default_reading])
         meter_id = default_meter["id"]
@@ -118,8 +98,8 @@ class TestIntegrationReading:
     async def test_create_and_delete_reading(
         self,
         async_client: AsyncClient,
-        default_meter: MeterResponseJson,
-        default_reading: ReadingResponseJson,
+        default_meter: dict[str, Any],
+        default_reading: dict[str, Any],
     ) -> None:
         async_client.mock_cursor.fetchone = AsyncMock(return_value=default_reading)
         meter_id = default_meter["id"]
@@ -142,7 +122,7 @@ class TestIntegrationReading:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_reading(
-        self, async_client: AsyncClient, default_reading: ReadingResponseJson
+        self, async_client: AsyncClient, default_reading: dict[str, Any]
     ) -> None:
         async_client.mock_cursor.fetchone = AsyncMock(return_value=default_reading)
         value = 11.0

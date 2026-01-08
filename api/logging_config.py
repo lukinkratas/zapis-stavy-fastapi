@@ -7,7 +7,11 @@ def configure_logging(settings: Settings) -> None:
     """Configure logging."""
     handlers = ["stdout", "rotating_file"]
 
-    if settings.ENV_STATE == "prod":
+    if (
+        settings.ENV_STATE == "prod"
+        and settings.LOGTAIL_TOKEN is not None
+        and settings.LOGTAIL_HOST is not None
+    ):
         handlers.append("logtail")
 
     cfg = {
@@ -67,7 +71,7 @@ def configure_logging(settings: Settings) -> None:
             },
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "zapisstavyapi.log",
+                "filename": "api.log",
                 "formatter": "json",
                 "level": "DEBUG",
                 "maxBytes": 1024 * 1024,  # 1MB
@@ -79,12 +83,13 @@ def configure_logging(settings: Settings) -> None:
                 "class": "logtail.LogtailHandler",
                 "formatter": "simple",
                 "level": "INFO",
+                "filters": ["correlation_id"],
                 "source_token": settings.LOGTAIL_TOKEN,
                 "host": settings.LOGTAIL_HOST,
             },
         },
         "loggers": {
-            "zapisstavyapi": {
+            "api": {
                 "handlers": handlers,
                 "level": "DEBUG" if settings.ENV_STATE == "dev" else "INFO",
                 "propagate": False,

@@ -1,14 +1,14 @@
-.PHONY: install install-all install-dev format lint lint-fix typecheck test test-int clean-up serve-dev
+.PHONY: install install-all install-dev fmt lint lint-fix typechk test test-int clean-up serve-dev
 
 help:
 	@echo "Available targets:"
 	@echo "  install          - Install the package and its dependencies"
 	@echo "  install-all      - Install the package with all extras"
 	@echo "  install-dev      - Install the package with dev dependencies"
-	@echo "  format           - Format the code using Ruff"
+	@echo "  fmt              - Format the code using Ruff"
 	@echo "  lint             - Check linting of the code using Ruff"
 	@echo "  lint-fix         - Check and fix linting if the code using Ruff"
-	@echo "  typecheck        - Type check the code using mypy"
+	@echo "  typechk          - Type check the code using mypy"
 	@echo "  clean-up         - Clean up"
 	@echo "  test             - Run tests"
 	@echo "  test             - Run ingtegration tests"
@@ -24,7 +24,7 @@ install-all:
 install-dev:
 	uv sync --group dev
 
-format:
+fmt:
 	uv run --dev ruff format
 
 lint:
@@ -33,17 +33,17 @@ lint:
 lint-fix:
 	uv run --dev ruff check --fix
 
-typecheck:
+typechk:
 	uv run --dev mypy .
 
 test:
-	uv run --dev pytest tests/unit -vv -p no:warnings --cov=zapisstavyapi --cov-report=term-missing --cov-branch
+	uv run --dev pytest tests/unit -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
 
 test-int:
-	uv run --dev pytest tests/integration -vv -p no:warnings --cov=zapisstavyapi --cov-report=term-missing --cov-branch
+	uv run --dev pytest tests/integration -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
 
 clean-up:
 	rm -rvf .coverage
 
 serve-dev:
-	uv run uvicorn zapisstavyapi.main:app --reload
+	uv run uvicorn api.main:app --reload

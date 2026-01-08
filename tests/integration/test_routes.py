@@ -5,11 +5,10 @@ import pytest
 from httpx import AsyncClient
 
 from tests.assertions import assert_meter, assert_reading
-from zapisstavyapi.models import MeterResponseJson, ReadingResponseJson
 
 
 async def assert_meters(
-    async_client: AsyncClient, expected_list_of_meters: list[MeterResponseJson]
+    async_client: AsyncClient, expected_list_of_meters: list[dict[str, Any]]
 ) -> None:
     response = await async_client.get("/meter")
     meters = response.json()
@@ -19,31 +18,11 @@ async def assert_meters(
 async def assert_readings_on_meter(
     async_client: AsyncClient,
     meter_id: uuid.UUID,
-    expected_list_of_readings: list[ReadingResponseJson],
+    expected_list_of_readings: list[dict[str, Any]],
 ) -> None:
     response = await async_client.get(f"/meter/{meter_id}/reading")
     readings = response.json()
     assert readings == expected_list_of_readings
-
-
-@pytest.fixture
-def default_meter() -> dict[str, Any]:
-    return {
-        "id": "5ad4f210-cdfb-4196-82f7-af6afda013ea",
-        "created_at": "2026-01-03T20:57:12.525797Z",
-        "name": "default",
-        "description": None,
-    }
-
-
-@pytest.fixture
-def default_reading(default_meter: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "id": "d09b982f-ffe7-42d1-809f-5c61eeac9f99",
-        "created_at": "2026-01-03T20:57:12.543268Z",
-        "meter_id": default_meter["id"],
-        "value": 11.0,
-    }
 
 
 @pytest.fixture
@@ -83,7 +62,7 @@ class TestIntegrationMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_all_meters(
-        self, async_client: AsyncClient, default_meter: MeterResponseJson
+        self, async_client: AsyncClient, default_meter: dict[str, Any]
     ) -> None:
         response = await async_client.get("/meter")
 
@@ -94,7 +73,7 @@ class TestIntegrationMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_create_and_delete_meter(
-        self, async_client: AsyncClient, default_meter: MeterResponseJson
+        self, async_client: AsyncClient, default_meter: dict[str, Any]
     ) -> None:
         await assert_meters(async_client, [default_meter])
 
@@ -118,7 +97,7 @@ class TestIntegrationMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_meter(
-        self, async_client: AsyncClient, created_meter: MeterResponseJson
+        self, async_client: AsyncClient, created_meter: dict[str, Any]
     ) -> None:
         name = "test_updated"
         mid = created_meter["id"]
@@ -133,8 +112,8 @@ class TestIntegrationMeter:
     async def test_get_readings_on_meter(
         self,
         async_client: AsyncClient,
-        default_meter: MeterResponseJson,
-        default_reading: ReadingResponseJson,
+        default_meter: dict[str, Any],
+        default_reading: dict[str, Any],
     ) -> None:
         meter_id = default_meter["id"]
         response = await async_client.get(f"/meter/{meter_id}/reading")
@@ -147,8 +126,8 @@ class TestIntegrationMeter:
     async def test_get_meter_with_readings(
         self,
         async_client: AsyncClient,
-        default_meter: MeterResponseJson,
-        default_reading: ReadingResponseJson,
+        default_meter: dict[str, Any],
+        default_reading: dict[str, Any],
     ) -> None:
         meter_id = default_meter["id"]
         response = await async_client.get(f"/meter/{meter_id}")
@@ -168,8 +147,8 @@ class TestIntegrationReading:
     async def test_create_and_delete_reading(
         self,
         async_client: AsyncClient,
-        default_meter: MeterResponseJson,
-        default_reading: ReadingResponseJson,
+        default_meter: dict[str, Any],
+        default_reading: dict[str, Any],
     ) -> None:
         meter_id = default_meter["id"]
         await assert_readings_on_meter(async_client, meter_id, [default_reading])
@@ -198,7 +177,7 @@ class TestIntegrationReading:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_reading(
-        self, async_client: AsyncClient, created_reading: ReadingResponseJson
+        self, async_client: AsyncClient, created_reading: dict[str, Any]
     ) -> None:
         value = 55.0
         rid = created_reading["id"]

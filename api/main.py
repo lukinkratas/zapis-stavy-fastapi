@@ -12,7 +12,9 @@ from psycopg_pool import AsyncConnectionPool
 from .config import Settings
 from .db import get_conn_info
 from .logging_config import configure_logging
-from .routes import router as meter_router
+from .routes.meters import router as meters_router
+from .routes.readings import router as readings_router
+from .routes.users import router as users_router
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)
 
-app.include_router(meter_router)
+app.include_router(meters_router)
+app.include_router(readings_router)
+app.include_router(users_router)
 
 
 @app.exception_handler(HTTPException)

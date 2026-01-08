@@ -18,21 +18,28 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
+        args: [--config-file=./pyproject.toml]
 
   # - repo: local
   #   hooks:
+
   #     - id: ruff-format
   #       name: ruff format
   #       language: system
-  #       entry: uv run --dev ruff format
+  #       entry: make fmt
   #       types: [python]
-  #     - id: ruff-lint
-  #       name: ruff lint
+  #       require_serial: true
+
+  #     - id: ruff-lint-fix
+  #       name: ruff lint fix
   #       language: system
-  #       entry: uv run --dev ruff check --fix
+  #       entry: make lint-fix
   #       types: [python]
+  #       require_serial: true
+
   #     - id: mypy-type-check
   #       name: mypy type check
   #       language: system
-  #       entry: uv run --dev mypy
+  #       entry: make typechk
   #       types: [python]
+  #       require_serial: true
