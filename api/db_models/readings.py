@@ -11,7 +11,7 @@ from ..models.readings import (
     ReadingUpdateRequestBody,
 )
 from ..utils import format_sql_query, log_async_func
-from .const import INSERT_QUERY
+from .const import INSERT_QUERY, DELETE_QUERY
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +71,7 @@ class ReadingsTable:
     async def delete(cls, conn: AsyncConnection, id: uuid.UUID) -> None:
         """Delete reading record from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
-            query = sql.SQL("""
-                DELETE FROM readings
-                WHERE id = %(id)s;
-            """)
+            query = DELETE_QUERY.format(table=sql.Identifier("readings"))
             logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"id": id})
 

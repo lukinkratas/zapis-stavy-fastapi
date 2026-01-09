@@ -5,3 +5,8 @@ INSERT_QUERY = sql.SQL("""
     VALUES ({value_placeholders})
     RETURNING *;
 """)
+
+DELETE_QUERY = sql.SQL("""
+    DELETE FROM {table}
+    WHERE id = %(id)s;
+""")

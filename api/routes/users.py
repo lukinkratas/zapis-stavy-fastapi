@@ -1,5 +1,6 @@
+import uuid
 import logging
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from psycopg import Connection
@@ -27,3 +28,20 @@ async def create_user(
     Returns: user response dict
     """
     return await UsersTable.insert(conn, user)
+
+@router.delete("/user/{id}")
+@log_async_func(logger.info)
+async def delete_meter(
+    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
+) -> dict[str, Any]:
+    """Delete a  user from the database.
+
+    Args:
+        id: uuid of user
+        conn: database connection
+
+    Returns:
+        dict with detail
+    """
+    await UsersTable.delete(conn, id)
+    return {"message": f"User {id} deleted successfully"}

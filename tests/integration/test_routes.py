@@ -24,13 +24,27 @@ async def assert_readings_on_meter(
     readings = response.json()
     assert readings == expected_list_of_readings
 
+@pytest.fixture
+async def created_user(
+    async_client: AsyncClient,
+) -> AsyncGenerator[dict[str, Any], None]:
+    email = "test@test.net"
+    password = "pswd1234"
+    response = await async_client.post("/register", json={"email": email, "password": password})
+    created_user = response.json()
+
+    yield created_user
+
+    uid = created_user["id"]
+    await async_client.delete(f"/user/{uid}")
 
 @pytest.fixture
 async def created_meter(
-    async_client: AsyncClient,
+    async_client: AsyncClient, created_user: dict[str, Any]
 ) -> AsyncGenerator[dict[str, Any], None]:
+    user_id = created_user["id"]
     name = "test"
-    response = await async_client.post("/meter", json={"name": name})
+    response = await async_client.post("/meter", json={"user_id": user_id, "name": name})
     created_meter = response.json()
 
     yield created_meter
@@ -73,13 +87,14 @@ class TestIntegrationMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_create_and_delete_meter(
-        self, async_client: AsyncClient, default_meter: dict[str, Any]
+        self, async_client: AsyncClient, default_user: dict[str, Any], default_meter: dict[str, Any]
     ) -> None:
         await assert_meters(async_client, [default_meter])
 
         # create meter
+        user_id = default_user["id"]
         name = "test"
-        response = await async_client.post("/meter", json={"name": name})
+        response = await async_client.post("/meter", json={"user_id": user_id, "name": name})
         assert response.status_code == 201
 
         new_meter = response.json()

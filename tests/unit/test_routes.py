@@ -5,6 +5,7 @@ import pytest
 from httpx import AsyncClient
 
 from api.models.meters import MeterResponseJson
+from api.models.users import UserResponseJson
 from tests.assertions import assert_meter, assert_reading
 
 
@@ -26,12 +27,13 @@ class TestUnitMeter:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_create_and_delete_meter(
-        self, async_client: AsyncClient, default_meter: MeterResponseJson
+        self, async_client: AsyncClient, default_user: UserResponseJson, default_meter: MeterResponseJson
     ) -> None:
         async_client.mock_cursor.fetchone = AsyncMock(return_value=default_meter)
         # create meter
+        user_id = default_user["id"]
         name = "default"
-        response = await async_client.post("/meter", json={"name": name})
+        response = await async_client.post("/meter", json={"user_id": user_id, "name": name})
         assert response.status_code == 201
 
         new_meter = response.json()

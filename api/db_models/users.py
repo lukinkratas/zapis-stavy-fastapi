@@ -1,3 +1,4 @@
+import uuid
 import logging
 from typing import Any
 
@@ -7,7 +8,7 @@ from psycopg.rows import dict_row
 
 from ..models.users import UserCreateRequestBody
 from ..utils import format_sql_query, log_async_func
-from .const import INSERT_QUERY
+from .const import INSERT_QUERY, DELETE_QUERY
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +45,18 @@ class UsersTable:
                 raise
 
             return new_user
+
+    @classmethod
+    @log_async_func(logger.debug)
+    async def delete(cls, conn: AsyncConnection, id: uuid.UUID) -> None:
+        """Delete meter record from db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            query = DELETE_QUERY.format(table=sql.Identifier("users"))
+            logger.debug(f"SQL query: {format_sql_query(query)}")
+            await cur.execute(query, {"id": id})
+
+            try:
+                await conn.commit()
+            except Exception:
+                await conn.rollback()
+                raise
