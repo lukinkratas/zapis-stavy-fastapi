@@ -11,7 +11,7 @@ from ..models.readings import (
     ReadingUpdateRequestBody,
 )
 from ..utils import format_sql_query, log_async_func
-from .const import INSERT_QUERY, DELETE_QUERY
+from .const import DELETE_QUERY, INSERT_QUERY, UPDATE_QUERY
 
 logger = logging.getLogger(__name__)
 
@@ -99,12 +99,8 @@ class ReadingsTable:
                 )
                 for col in data.keys()
             )
-            query = sql.SQL("""
-                UPDATE readings
-                SET {set_clause}
-                WHERE id = %(id)s RETURNING *;
-            """).format(
-                set_clause=set_clause,
+            query = UPDATE_QUERY.format(
+                table=sql.Identifier("readings"), set_clause=set_clause
             )
             logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data | {"id": id})

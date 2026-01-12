@@ -30,7 +30,7 @@ async def create_reading(
         reading: reading create request payload from client
         conn: database connection
 
-    Returns: reading response dict
+    Returns: reading dict
     """
     return await ReadingsTable.insert(conn, reading)
 
@@ -46,8 +46,7 @@ async def delete_reading(
         id: uuid of reading
         conn: database connection
 
-    Returns:
-        dict with detail
+    Returns: dict with detail
     """
     await ReadingsTable.delete(conn, id)
     return {"message": f"Reading {id} deleted successfully"}
@@ -67,6 +66,6 @@ async def update_reading(
         reading: reading update request payload from client
         conn: database connection
 
-    Returns: reading response dict
+    Returns: reading dict
     """
     return await ReadingsTable.update(conn, id, reading)

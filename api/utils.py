@@ -50,3 +50,24 @@ def log_async_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
         return async_wrapper
 
     return decorator
+
+
+def log_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
+    """Decorator factory that accepts a logging function."""
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        """Decorator, that wraps the function."""
+
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            func_name, args_copy = get_func_name_and_args(func, args)
+
+            log_func(f"{func_name} was called with args={args_copy}, {kwargs=}.")
+            result = func(*args, **kwargs)
+            log_func(f"{func_name} finished successfully with {result=}.")
+
+            return result
+
+        return wrapper
+
+    return decorator

@@ -2,6 +2,13 @@ from typing import Any
 
 from api.models.meters import MeterResponseJson
 from api.models.readings import ReadingResponseJson
+from api.models.users import UserResponseJson
+
+
+def assert_user(user: dict[str, Any], **kwargs: Any) -> None:
+    assert UserResponseJson.model_validate(user)
+    for key, val in kwargs.items():
+        assert user[key] == val
 
 
 def assert_meter(meter: dict[str, Any], **kwargs: Any) -> None:

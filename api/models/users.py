@@ -17,3 +17,4 @@ class UserResponseJson(BaseModel):
     id: uuid.UUID
     created_at: datetime.datetime
     email: str
+    password: str

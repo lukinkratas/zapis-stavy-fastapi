@@ -8,7 +8,7 @@ def configure_logging(settings: Settings) -> None:
     handlers = ["stdout", "rotating_file"]
 
     if (
-        settings.ENV_STATE == "prod"
+        settings.ENV == "prod"
         and settings.LOGTAIL_TOKEN is not None
         and settings.LOGTAIL_HOST is not None
     ):
@@ -20,7 +20,7 @@ def configure_logging(settings: Settings) -> None:
         "filters": {
             "correlation_id": {
                 "()": "asgi_correlation_id.CorrelationIdFilter",
-                "uuid_length": 8 if settings.ENV_STATE == "dev" else 32,
+                "uuid_length": 8 if settings.ENV == "dev" else 32,
                 "default_value": "-",
             }
         },
@@ -91,7 +91,7 @@ def configure_logging(settings: Settings) -> None:
         "loggers": {
             "api": {
                 "handlers": handlers,
-                "level": "DEBUG" if settings.ENV_STATE == "dev" else "INFO",
+                "level": "DEBUG" if settings.ENV == "dev" else "INFO",
                 "propagate": False,
             },
         },

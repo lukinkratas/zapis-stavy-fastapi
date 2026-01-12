@@ -34,7 +34,7 @@ async def create_meter(
         meter: meter create request payload from client
         conn: database connection
 
-    Returns: meter response dict
+    Returns: meter dict
     """
     return await MetersTable.insert(conn, meter)
 
@@ -71,24 +71,9 @@ async def update_meter(
         meter: meter update request payload from client
         conn: database connection
 
-    Returns: meter response dict
+    Returns: meter dict
     """
     return await MetersTable.update(conn, id, meter)
-
-
-@router.get("/meter", response_model=list[MeterResponseJson])
-@log_async_func(logger.info)
-async def get_all_meters(
-    conn: Annotated[Connection, Depends(connect_to_db)],
-) -> list[MeterResponseJson]:
-    """List all meter dicts in the database.
-
-    Args:
-        conn: database connection
-
-    Returns: list of meter response dicts
-    """
-    return await MetersTable.select_all(conn)
 
 
 @router.get("/meter/{id}/reading", response_model=list[ReadingResponseJson])
@@ -102,7 +87,7 @@ async def get_readings_on_meter(
         id: uuid of meter
         conn: database connection
 
-    Returns: list of readings response dict
+    Returns: list of reading dicts
     """
     return await ReadingsTable.select_by_meter_id(conn, id)
 
@@ -119,8 +104,8 @@ async def get_meter_with_readings(
         conn: database connection
 
     Returns:
-        dict with meter resonse dict and list of its' corresponding
-        reading response dicts all together
+        dict with meter dict and list of its' corresponding
+        readings dicts all together
     """
     return {
         "meter": await MetersTable.select_by_id(conn, id),

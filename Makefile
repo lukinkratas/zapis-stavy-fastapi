@@ -37,13 +37,13 @@ typechk:
 	uv run --dev mypy .
 
 test:
-	uv run --dev pytest tests/unit -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
+	uv run --dev pytest tests/unit -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-report=html:htmlcov
 
 test-int:
-	uv run --dev pytest tests/integration -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
+	uv run --dev pytest tests/integration -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-report=html:htmlcov
 
 clean-up:
-	rm -rvf .coverage
+	rm -rvf .coverage htmlcov api.log*
 
 serve-dev:
 	uv run uvicorn api.main:app --reload
