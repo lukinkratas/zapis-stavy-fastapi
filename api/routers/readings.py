@@ -16,6 +16,7 @@ from ..utils import log_async_func
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+readings_table = ReadingsTable()
 
 
 @router.post("/reading", status_code=201, response_model=ReadingResponseJson)
@@ -23,7 +24,7 @@ router = APIRouter()
 async def create_reading(
     reading: ReadingCreateRequestBody,
     conn: Annotated[Connection, Depends(connect_to_db)],
-) -> ReadingResponseJson:
+) -> dict[str, Any]:
     """Add new reading into the database.
 
     Args:
@@ -32,7 +33,7 @@ async def create_reading(
 
     Returns: reading dict
     """
-    return await ReadingsTable.insert(conn, reading)
+    return await readings_table.insert(conn, data=reading.model_dump())
 
 
 @router.delete("/reading/{id}")
@@ -48,7 +49,7 @@ async def delete_reading(
 
     Returns: dict with detail
     """
-    await ReadingsTable.delete(conn, id)
+    await readings_table.delete(conn, id)
     return {"message": f"Reading {id} deleted successfully"}
 
 
@@ -68,4 +69,4 @@ async def update_reading(
 
     Returns: reading dict
     """
-    return await ReadingsTable.update(conn, id, reading)
+    return await readings_table.update(conn, id, data=reading.model_dump())

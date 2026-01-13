@@ -18,6 +18,7 @@ from ..utils import log_async_func, log_func
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+users_table = UsersTable()
 
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -62,7 +63,7 @@ async def get_user(conn: AsyncConnection, email: str) -> dict[str, Any]:
 
     Returns: user dict
     """
-    return await UsersTable.select_by_email(conn, email)
+    return await users_table.select_by_email(conn, email)
 
 
 @log_async_func(logger.info)

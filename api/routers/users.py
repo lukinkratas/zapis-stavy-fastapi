@@ -17,13 +17,14 @@ from .auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+users_table = UsersTable()
 
 
 @router.post("/register", status_code=201, response_model=UserResponseJson)
 @log_async_func(logger.info)
 async def register_user(
     user: UserCreateRequestBody, conn: Annotated[Connection, Depends(connect_to_db)]
-) -> UserResponseJson:
+) -> dict[str, Any]:
     """Add new user into the database.
 
     Args:
@@ -35,7 +36,7 @@ async def register_user(
     # TODO: fixme
     password = user.password
     user.password = get_password_hash(password)
-    return await UsersTable.insert(conn, user)
+    return await users_table.insert(conn, data=user.model_dump())
 
 
 @router.delete("/user/{id}")
@@ -52,7 +53,7 @@ async def delete_user(
     Returns:
         dict with detail
     """
-    await UsersTable.delete(conn, id)
+    await users_table.delete(conn, id)
     return {"message": f"User {id} deleted successfully"}
 
 
@@ -62,7 +63,7 @@ async def update_user(
     id: uuid.UUID,
     user: UserUpdateRequestBody,
     conn: Annotated[Connection, Depends(connect_to_db)],
-) -> UserResponseJson:
+) -> dict[str, Any]:
     """Update a meter in the database.
 
     Args:
@@ -72,4 +73,4 @@ async def update_user(
 
     Returns: meter dict
     """
-    return await UsersTable.update(conn, id, user)
+    return await users_table.update(conn, id, data=user.model_dump())
