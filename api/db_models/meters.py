@@ -10,7 +10,7 @@ from ..models.meters import (
     MeterCreateRequestBody,
     MeterUpdateRequestBody,
 )
-from ..utils import format_sql_query, log_async_func
+from ..utils import build_set_clause, format_sql_query, log_async_func
 from .const import (
     DELETE_QUERY,
     INSERT_QUERY,
@@ -72,20 +72,6 @@ class MetersTable:
 
     @classmethod
     @log_async_func(logger.debug)
-    async def select_by_id(cls, conn: AsyncConnection, id: uuid.UUID) -> dict[str, Any]:
-        """Select meter record by ID from db."""
-        async with conn.cursor(row_factory=dict_row) as cur:
-            query = SELECT_BY_ID_QUERY.format(table=sql.Identifier("meters"))
-            logger.debug(f"SQL query: {format_sql_query(query)}")
-            await cur.execute(query, {"id": id})
-
-            meter = await cur.fetchone()
-            if meter is None:
-                raise HTTPException(status_code=404, detail=f"Meter {id} not found")
-            return meter
-
-    @classmethod
-    @log_async_func(logger.debug)
     async def update(
         cls, conn: AsyncConnection, id: uuid.UUID, meter: MeterUpdateRequestBody
     ) -> dict[str, Any]:
@@ -93,16 +79,8 @@ class MetersTable:
         async with conn.cursor(row_factory=dict_row) as cur:
             data = meter.model_dump()
 
-            # build SET clause: col = %(col)s
-            set_clause = sql.SQL(", ").join(
-                sql.SQL("{columns} = {value_placeholder}").format(
-                    columns=sql.Identifier(col),
-                    value_placeholder=sql.Placeholder(col),
-                )
-                for col in data.keys()
-            )
             query = UPDATE_QUERY.format(
-                table=sql.Identifier("meters"), set_clause=set_clause
+                table=sql.Identifier("meters"), set_clause=build_set_clause(data.keys())
             )
             logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data | {"id": id})
@@ -120,3 +98,17 @@ class MetersTable:
                 raise
 
             return updated_meter
+
+    @classmethod
+    @log_async_func(logger.debug)
+    async def select_by_id(cls, conn: AsyncConnection, id: uuid.UUID) -> dict[str, Any]:
+        """Select meter record by ID from db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            query = SELECT_BY_ID_QUERY.format(table=sql.Identifier("meters"))
+            logger.debug(f"SQL query: {format_sql_query(query)}")
+            await cur.execute(query, {"id": id})
+
+            meter = await cur.fetchone()
+            if meter is None:
+                raise HTTPException(status_code=404, detail=f"Meter {id} not found")
+            return meter

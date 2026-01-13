@@ -10,7 +10,7 @@ from ..models.readings import (
     ReadingCreateRequestBody,
     ReadingUpdateRequestBody,
 )
-from ..utils import format_sql_query, log_async_func
+from ..utils import build_set_clause, format_sql_query, log_async_func
 from .const import DELETE_QUERY, INSERT_QUERY, UPDATE_QUERY
 
 logger = logging.getLogger(__name__)
@@ -91,16 +91,9 @@ class ReadingsTable:
             data = reading.model_dump()
             data.pop("meter_id", None)
 
-            # build SET clause: col = %(col)s
-            set_clause = sql.SQL(", ").join(
-                sql.SQL("{columns} = {value_placeholder}").format(
-                    columns=sql.Identifier(col),
-                    value_placeholder=sql.Placeholder(col),
-                )
-                for col in data.keys()
-            )
             query = UPDATE_QUERY.format(
-                table=sql.Identifier("readings"), set_clause=set_clause
+                table=sql.Identifier("readings"),
+                set_clause=build_set_clause(data.keys()),
             )
             logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, data | {"id": id})

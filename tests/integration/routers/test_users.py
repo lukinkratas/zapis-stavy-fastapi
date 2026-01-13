@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from httpx import AsyncClient
 
@@ -26,3 +28,16 @@ class TestIntegrationUser:
         uid = new_user["id"]
         response = await async_client.delete(f"/user/{uid}")
         assert response.status_code == 200
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_user(
+        self, async_client: AsyncClient, registered_user: dict[str, Any]
+    ) -> None:
+        mid = registered_user["id"]
+        request_body = {"email": "update@update.net", "password": "update5six7"}
+        response = await async_client.put(f"/user/{mid}", json=request_body)
+        assert response.status_code == 200
+
+        updated_user = response.json()
+        assert_user(updated_user, **request_body)

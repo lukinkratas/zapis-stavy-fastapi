@@ -2,6 +2,8 @@ from typing import Any
 
 import pytest
 
+from api.routers.auth import get_password_hash
+
 
 @pytest.fixture
 def default_user() -> dict[str, Any]:
@@ -14,13 +16,17 @@ def default_user() -> dict[str, Any]:
 
 
 @pytest.fixture
+def hashed_password(default_user: dict[str, Any]) -> str:
+    return get_password_hash(default_user["password"])
+
+
+@pytest.fixture
 def default_meter(default_user: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": "5ad4f210-cdfb-4196-82f7-af6afda013ea",
         "created_at": "2026-01-12T14:28:54.840054Z",
         "user_id": default_user["id"],
         "name": "default",
-        "description": None,
     }
 
 

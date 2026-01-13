@@ -5,14 +5,14 @@ from pydantic import BaseModel
 
 
 class ReadingCreateRequestBody(BaseModel):
-    """Reading request body model for validation."""
+    """Reading create request body model for validation."""
 
     meter_id: uuid.UUID
     value: float | None = None
 
 
 class ReadingUpdateRequestBody(BaseModel):
-    """Reading request body model for validation."""
+    """Reading update request body model for validation."""
 
     value: float
 

@@ -7,18 +7,16 @@ from .readings import ReadingResponseJson
 
 
 class MeterCreateRequestBody(BaseModel):
-    """Meter request body model for validation."""
+    """Meter create request body model for validation."""
 
     user_id: uuid.UUID
     name: str
-    description: str | None = None
 
 
 class MeterUpdateRequestBody(BaseModel):
-    """Meter request body model for validation."""
+    """Meter update request body model for validation."""
 
     name: str | None = None
-    description: str | None = None
 
 
 class MeterResponseJson(BaseModel):
@@ -28,7 +26,6 @@ class MeterResponseJson(BaseModel):
     created_at: datetime.datetime
     user_id: uuid.UUID
     name: str
-    description: str | None
 
 
 class MeterWithReadingsResponseJson(BaseModel):

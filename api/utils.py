@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from functools import wraps
-from typing import Any
+from typing import Any, Iterable
 
 from psycopg import sql
 
@@ -10,6 +10,23 @@ def format_sql_query(sql_query: sql.Composed | sql.SQL) -> str:
     sql_query_str = sql.as_string(sql_query)
     sql_query_lines = sql_query_str.split("\n")
     return " ".join([query_line.strip() for query_line in sql_query_lines])
+
+
+def build_set_clause(columns: Iterable[str]) -> sql.Composed:
+    """Build SET clause: col = %(col)s from columns for UPDATE query.
+
+    Args:
+        columns: iterable of column names
+
+    Returns: set clause as SQL query object
+    """
+    return sql.SQL(", ").join(
+        sql.SQL("{columns} = {value_placeholder}").format(
+            columns=sql.Identifier(col),
+            value_placeholder=sql.Placeholder(col),
+        )
+        for col in columns
+    )
 
 
 def get_func_name_and_args(

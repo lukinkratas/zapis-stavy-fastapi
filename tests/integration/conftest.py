@@ -31,11 +31,8 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 async def registered_user(
     async_client: AsyncClient,
 ) -> AsyncGenerator[dict[str, Any], None]:
-    email = "test@test.net"
-    password = "pswd1234"
-    response = await async_client.post(
-        "/register", json={"email": email, "password": password}
-    )
+    request_body = {"email": "test@test.net", "password": "pswd123s"}
+    response = await async_client.post("/register", json=request_body)
     registered_user = response.json()
 
     yield registered_user
@@ -48,11 +45,8 @@ async def registered_user(
 async def created_meter(
     async_client: AsyncClient, registered_user: dict[str, Any]
 ) -> AsyncGenerator[dict[str, Any], None]:
-    user_id = registered_user["id"]
-    name = "test"
-    response = await async_client.post(
-        "/meter", json={"user_id": user_id, "name": name}
-    )
+    request_body = {"user_id": registered_user["id"], "name": "test"}
+    response = await async_client.post("/meter", json=request_body)
     created_meter = response.json()
 
     yield created_meter
@@ -65,11 +59,8 @@ async def created_meter(
 async def created_reading(
     async_client: AsyncClient, created_meter: dict[str, Any]
 ) -> AsyncGenerator[dict[str, Any], None]:
-    meter_id = created_meter["id"]
-    value = 99.0
-    response = await async_client.post(
-        "/reading", json={"meter_id": meter_id, "value": value}
-    )
+    request_body = {"meter_id": created_meter["id"], "value": 99.0}
+    response = await async_client.post("/reading", json=request_body)
     created_reading = response.json()
 
     yield created_reading

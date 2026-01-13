@@ -1,6 +1,5 @@
 yield async_client, mock_conn, mock_cursor
 solve mypy
-users update endpoint
 tests - add raise errors tests, improve coverage
     - test_get_user
     - test get_user_not_found
@@ -13,6 +12,7 @@ tests - add raise errors tests, improve coverage
     - test_authenticate_user
     - test_authenticate_user_not_found
     - test_authenticate_user_wrong_password
+- build_set_clause into db_models.utils
 
 - [x] add linter, formatter, typechecker
 - [x] add db

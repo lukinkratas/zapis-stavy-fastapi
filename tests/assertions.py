@@ -1,8 +1,13 @@
 from typing import Any
 
+from api.models.auth import Token
 from api.models.meters import MeterResponseJson
 from api.models.readings import ReadingResponseJson
 from api.models.users import UserResponseJson
+
+
+def assert_token(token: dict[str, Any], **kwargs: Any) -> None:
+    assert Token.model_validate(token)
 
 
 def assert_user(user: dict[str, Any], **kwargs: Any) -> None:

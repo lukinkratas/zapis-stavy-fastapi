@@ -1,29 +1,22 @@
 import logging
 import uuid
-from typing import Annotated, Any, AsyncGenerator
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
-from psycopg import AsyncConnection, Connection
+from psycopg import Connection
 
-from ..config import settings
-from ..db import connect_to_db, get_conn_info
+from ..db import connect_to_db
 from ..db_models.users import UsersTable
-from ..models.users import UserCreateRequestBody, UserResponseJson
+from ..models.users import (
+    UserCreateRequestBody,
+    UserResponseJson,
+    UserUpdateRequestBody,
+)
 from ..utils import log_async_func
 from .auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-@log_async_func(logger.info)
-async def get_all_users() -> AsyncGenerator[list[UserResponseJson], None]:
-    """List all users in the database.
-
-    Returns: list of user dicts
-    """
-    async with await AsyncConnection.connect(conninfo=get_conn_info(settings)) as conn:
-        yield await UsersTable.select_all(conn)
 
 
 @router.post("/register", status_code=201, response_model=UserResponseJson)
@@ -61,3 +54,22 @@ async def delete_user(
     """
     await UsersTable.delete(conn, id)
     return {"message": f"User {id} deleted successfully"}
+
+
+@router.put("/user/{id}", response_model=UserResponseJson)
+@log_async_func(logger.info)
+async def update_user(
+    id: uuid.UUID,
+    user: UserUpdateRequestBody,
+    conn: Annotated[Connection, Depends(connect_to_db)],
+) -> UserResponseJson:
+    """Update a meter in the database.
+
+    Args:
+        id: uuid of meter
+        user: user update request payload from client
+        conn: database connection
+
+    Returns: meter dict
+    """
+    return await UsersTable.update(conn, id, user)
