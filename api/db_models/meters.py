@@ -10,13 +10,8 @@ from ..models.meters import (
     MeterCreateRequestBody,
     MeterUpdateRequestBody,
 )
-from ..utils import build_set_clause, format_sql_query, log_async_func
-from .const import (
-    DELETE_QUERY,
-    INSERT_QUERY,
-    SELECT_BY_ID_QUERY,
-    UPDATE_QUERY,
-)
+from ..utils import format_sql_query, log_async_func
+from .base import BaseTable
 
 logger = logging.getLogger(__name__)
 
@@ -30,45 +25,13 @@ class MetersTable:
         cls, conn: AsyncConnection, meter: MeterCreateRequestBody
     ) -> dict[str, Any]:
         """Insert new meter record into db."""
-        async with conn.cursor(row_factory=dict_row) as cur:
-            data = meter.model_dump()
-            query = INSERT_QUERY.format(
-                table=sql.Identifier("meters"),
-                columns=sql.SQL(", ").join(map(sql.Identifier, data.keys())),
-                value_placeholders=sql.SQL(", ").join(
-                    map(sql.Placeholder, data.keys())
-                ),
-            )
-            logger.debug(f"SQL query: {format_sql_query(query)}")
-            await cur.execute(query, data)
-
-            new_meter = await cur.fetchone()
-
-            if new_meter is None:
-                raise HTTPException(status_code=404, detail="Meter cannot be created")
-
-            try:
-                await conn.commit()
-            except Exception:
-                await conn.rollback()
-                raise
-
-            return new_meter
+        return await BaseTable.insert(conn, meter.model_dump(), table="meters")
 
     @classmethod
     @log_async_func(logger.debug)
     async def delete(cls, conn: AsyncConnection, id: uuid.UUID) -> None:
         """Delete meter record from db."""
-        async with conn.cursor(row_factory=dict_row) as cur:
-            query = DELETE_QUERY.format(table=sql.Identifier("meters"))
-            logger.debug(f"SQL query: {format_sql_query(query)}")
-            await cur.execute(query, {"id": id})
-
-            try:
-                await conn.commit()
-            except Exception:
-                await conn.rollback()
-                raise
+        return await BaseTable.delete(conn, id, table="meters")
 
     @classmethod
     @log_async_func(logger.debug)
@@ -76,39 +39,25 @@ class MetersTable:
         cls, conn: AsyncConnection, id: uuid.UUID, meter: MeterUpdateRequestBody
     ) -> dict[str, Any]:
         """Update meter record in db."""
-        async with conn.cursor(row_factory=dict_row) as cur:
-            data = meter.model_dump()
-
-            query = UPDATE_QUERY.format(
-                table=sql.Identifier("meters"), set_clause=build_set_clause(data.keys())
-            )
-            logger.debug(f"SQL query: {format_sql_query(query)}")
-            await cur.execute(query, data | {"id": id})
-
-            updated_meter = await cur.fetchone()
-            if updated_meter is None:
-                raise HTTPException(
-                    status_code=404, detail=f"Meter {id} cannot be updated"
-                )
-
-            try:
-                await conn.commit()
-            except Exception:
-                await conn.rollback()
-                raise
-
-            return updated_meter
+        data = meter.model_dump()
+        data.pop("user_id", None)
+        return await BaseTable.update(conn, id, data, table="meters")
 
     @classmethod
     @log_async_func(logger.debug)
     async def select_by_id(cls, conn: AsyncConnection, id: uuid.UUID) -> dict[str, Any]:
         """Select meter record by ID from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
-            query = SELECT_BY_ID_QUERY.format(table=sql.Identifier("meters"))
+            query = sql.SQL("""
+                SELECT * FROM {table}
+                WHERE id = %(id)s;
+            """).format(table=sql.Identifier("meters"))
             logger.debug(f"SQL query: {format_sql_query(query)}")
             await cur.execute(query, {"id": id})
 
             meter = await cur.fetchone()
+
             if meter is None:
                 raise HTTPException(status_code=404, detail=f"Meter {id} not found")
+
             return meter
