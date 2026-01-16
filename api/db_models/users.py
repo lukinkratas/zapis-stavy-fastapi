@@ -31,6 +31,11 @@ class UsersTable(BaseTable):
             await cur.execute(query, {"email": email})
 
             user = await cur.fetchone()
+
             if user is None:
                 raise HTTPException(status_code=404, detail=f"User {id} not found")
+
             return user
+
+
+users_table = UsersTable()

@@ -3,10 +3,10 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
-from psycopg import Connection
+from psycopg import AsyncConnection
 
 from ..db import connect_to_db
-from ..db_models.users import UsersTable
+from ..db_models.users import users_table
 from ..models.users import (
     UserCreateRequestBody,
     UserResponseJson,
@@ -17,13 +17,13 @@ from .auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-users_table = UsersTable()
 
 
 @router.post("/register", status_code=201, response_model=UserResponseJson)
 @log_async_func(logger.info)
 async def register_user(
-    user: UserCreateRequestBody, conn: Annotated[Connection, Depends(connect_to_db)]
+    user: UserCreateRequestBody,
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> dict[str, Any]:
     """Add new user into the database.
 
@@ -42,7 +42,7 @@ async def register_user(
 @router.delete("/user/{id}")
 @log_async_func(logger.info)
 async def delete_user(
-    id: uuid.UUID, conn: Annotated[Connection, Depends(connect_to_db)]
+    id: uuid.UUID, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
 ) -> dict[str, Any]:
     """Delete a user from the database.
 
@@ -62,7 +62,7 @@ async def delete_user(
 async def update_user(
     id: uuid.UUID,
     user: UserUpdateRequestBody,
-    conn: Annotated[Connection, Depends(connect_to_db)],
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> dict[str, Any]:
     """Update a meter in the database.
 

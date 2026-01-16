@@ -10,6 +10,16 @@
 		{
 			"name": "create meter",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWZhdWx0QGVtYWlsLm5ldCIsImV4cCI6MTc2ODMzNzY1MX0.yY8y-w_6mgQFpu2u451tQNl9OVmfogaTHMLeB4Kux3A",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -53,7 +63,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea",
+					"raw": "http://127.0.0.1:8000/meter/acf4660f-5e6b-464c-aa55-91ced73340f6",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -64,7 +74,7 @@
 					"port": "8000",
 					"path": [
 						"meter",
-						"5ad4f210-cdfb-4196-82f7-af6afda013ea"
+						"acf4660f-5e6b-464c-aa55-91ced73340f6"
 					]
 				}
 			},
@@ -97,40 +107,6 @@
 					"path": [
 						"meter",
 						"5ad4f210-cdfb-4196-82f7-af6afda013ea"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "list all meters",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter"
 					]
 				}
 			},
@@ -338,17 +314,8 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/5d5bb43d-a4bc-457a-9e5a-d78573286593",
+					"raw": "http://127.0.0.1:8000/user/14f318d6-2efd-4ae6-8c2e-e7625eb8c127",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -359,7 +326,44 @@
 					"port": "8000",
 					"path": [
 						"user",
-						"5d5bb43d-a4bc-457a-9e5a-d78573286593"
+						"14f318d6-2efd-4ae6-8c2e-e7625eb8c127"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "default@email.net",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "xxx111",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/token",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"token"
 					]
 				}
 			},

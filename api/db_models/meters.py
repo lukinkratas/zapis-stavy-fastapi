@@ -37,3 +37,6 @@ class MetersTable(BaseTable):
                 raise HTTPException(status_code=404, detail=f"Meter {id} not found")
 
             return meter
+
+
+meters_table = MetersTable()

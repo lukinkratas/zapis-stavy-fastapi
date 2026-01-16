@@ -2,7 +2,7 @@ import logging
 from typing import AsyncGenerator
 
 from fastapi import Request
-from psycopg import Connection
+from psycopg import AsyncConnection
 from psycopg.conninfo import make_conninfo
 
 from .config import Settings
@@ -22,7 +22,7 @@ def get_conn_info(settings: Settings) -> str:
     return make_conninfo(**conn_info_dict)
 
 
-async def connect_to_db(request: Request) -> AsyncGenerator[Connection, None]:
+async def connect_to_db(request: Request) -> AsyncGenerator[AsyncConnection, None]:
     """Create connection in connection pool."""
     # NOTE: this func cannot decorated, as it is used as endpoint dependency
     async with request.app.state.pool.connection() as conn:

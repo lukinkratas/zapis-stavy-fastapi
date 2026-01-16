@@ -12,11 +12,18 @@ class TestIntegrationReading:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_create_and_delete_reading(
-        self, async_client: AsyncClient, default_meter: dict[str, Any]
+        self,
+        async_client: AsyncClient,
+        created_meter: dict[str, Any],
+        token: str,
     ) -> None:
         # create reading
-        request_body = {"meter_id": default_meter["id"], "value": 99.0}
-        response = await async_client.post("/reading", json=request_body)
+        request_body = {"meter_id": created_meter["id"], "value": 99.0}
+        response = await async_client.post(
+            "/reading",
+            json=request_body,
+            headers={"Authorization": f"Bearer {token}"},
+        )
         assert response.status_code == 201
 
         new_reading = response.json()

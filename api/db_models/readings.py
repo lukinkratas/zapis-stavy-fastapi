@@ -39,3 +39,6 @@ class ReadingsTable(BaseTable):
             )
 
             return await cur.fetchall()
+
+
+readings_table = ReadingsTable()

@@ -9,30 +9,30 @@ from api.db_models.users import UsersTable
 from tests.assertions import assert_token
 
 
-class TestIntegrationAuth:
+class TestUnitAuth:
     """Integration tests for auth."""
 
-    @pytest.mark.integration
     @pytest.mark.anyio
     async def test_login(
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        default_user: dict[str, Any],
-        hashed_password: str,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
     ) -> None:
-        default_user_from_db = default_user.copy()
-        default_user_from_db["password"] = hashed_password
+        # mocking - returns user from db with hashed password
         mocker.patch.object(
             UsersTable,
             "select_by_email",
-            new=AsyncMock(return_value=default_user_from_db),
+            new=AsyncMock(return_value=registered_user),
         )
-        request_body = {
-            "email": default_user["email"],
-            "password": default_user["password"],
+
+        # get token - required plain password and user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],
         }
-        response = await async_client.post("/token", json=request_body)
+        response = await async_client.post("/token", data=data)
         assert response.status_code == 200
 
         token = response.json()

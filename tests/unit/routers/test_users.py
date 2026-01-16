@@ -8,24 +8,26 @@ from pytest_mock import MockerFixture
 from api.db_models.users import UsersTable
 from tests.assertions import assert_user
 
+from ..utils import user_factory
 
-class TestIntegrationUser:
+
+class TestUnitUser:
     """Integration tests for users."""
 
-    @pytest.mark.integration
     @pytest.mark.anyio
     async def test_register_and_delete_user(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        default_user: dict[str, Any],
     ) -> None:
+        credentials = {"email": "register@register.net", "password": "123456seven"}
+
+        # mocking
+        new_user = user_factory(credentials)
+        mocker.patch.object(UsersTable, "insert", new=AsyncMock(return_value=new_user))
+
         # register user
-        mocker.patch.object(
-            UsersTable, "insert", new=AsyncMock(return_value=default_user)
-        )
-        request_body = {"email": "integration@test.net", "password": "123456seven"}
-        response = await async_client.post("/register", json=request_body)
+        response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
 
         new_user = response.json()
@@ -37,20 +39,24 @@ class TestIntegrationUser:
         response = await async_client.delete(f"/user/{uid}")
         assert response.status_code == 200
 
-    @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_user(
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        default_user: dict[str, Any],
+        registered_user: dict[str, Any],
     ) -> None:
+        updated_credentials = {"email": "update@update.net", "password": "5six7"}
+
+        # mocking
+        updated_user = user_factory(updated_credentials)
         mocker.patch.object(
-            UsersTable, "update", new=AsyncMock(return_value=default_user)
+            UsersTable, "update", new=AsyncMock(return_value=updated_user)
         )
-        mid = default_user["id"]
-        request_body = {"email": "update@update.net", "password": "5six7"}
-        response = await async_client.put(f"/user/{mid}", json=request_body)
+
+        # update registered user
+        mid = registered_user["id"]
+        response = await async_client.put(f"/user/{mid}", json=updated_credentials)
         assert response.status_code == 200
 
         updated_user = response.json()

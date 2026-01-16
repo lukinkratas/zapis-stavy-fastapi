@@ -4,21 +4,19 @@ from typing import Annotated, Any
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from psycopg import AsyncConnection, Connection
+from psycopg import AsyncConnection
 from pwdlib import PasswordHash
 
 from ..config import settings
 from ..db import connect_to_db
-from ..db_models.users import UsersTable
+from ..db_models.users import users_table
 from ..models.auth import Token
-from ..models.users import UserCreateRequestBody, UserResponseJson
 from ..utils import log_async_func, log_func
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-users_table = UsersTable()
 
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -69,7 +67,7 @@ async def get_user(conn: AsyncConnection, email: str) -> dict[str, Any]:
 @log_async_func(logger.info)
 async def authenticate_user(
     conn: AsyncConnection, email: str, password: str
-) -> UserResponseJson:
+) -> dict[str, Any]:
     """Authenticate user.
 
     Args:
@@ -110,11 +108,13 @@ def create_access_token(email: str) -> str:
 
 @log_async_func(logger.info)
 async def get_current_user(
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
-) -> UserResponseJson:
+) -> dict[str, Any]:
     """Get current user from token.
 
     Args:
+        conn: database connection
         token: JWT token with encoded email
 
     Returns: user dict
@@ -132,7 +132,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
 
-    user = await get_user(email=email)
+    user = await get_user(conn, email=email)
 
     if not user:
         raise credentials_exception
@@ -143,16 +143,16 @@ async def get_current_user(
 @router.post("/token", response_model=Token)
 @log_async_func(logger.info)
 async def login(
-    user: UserCreateRequestBody, conn: Annotated[Connection, Depends(connect_to_db)]
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> Token:
     """Authenticate user.
 
     Args:
-        user: user create request payload from client
+        form_data: form data with credentials from client
         conn: database connection
 
     Returns: access token
     """
-    user = await authenticate_user(conn, user.email, user.password)
-    access_token = create_access_token(user["email"])
-    return Token(access_token=access_token, token_type="bearer")
+    user = await authenticate_user(conn, form_data.username, form_data.password)
+    return Token(access_token=create_access_token(user["email"]), token_type="bearer")

@@ -1,4 +1,3 @@
-yield async_client, mock_conn, mock_cursor
 solve mypy
 tests - add raise errors tests, improve coverage
     - test_get_user
@@ -12,6 +11,7 @@ tests - add raise errors tests, improve coverage
     - test_authenticate_user
     - test_authenticate_user_not_found
     - test_authenticate_user_wrong_password
+mock registered user, created meter and reading in unit tests + then remove default user from db
 
 - [x] add linter, formatter, typechecker
 - [x] add db

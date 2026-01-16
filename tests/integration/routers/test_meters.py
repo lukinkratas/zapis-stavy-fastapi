@@ -14,11 +14,15 @@ class TestIntegrationMeter:
     async def test_create_and_delete_meter(
         self,
         async_client: AsyncClient,
-        default_user: dict[str, Any],
+        token: str,
     ) -> None:
         # create meter
-        request_body = {"user_id": default_user["id"], "name": "test"}
-        response = await async_client.post("/meter", json=request_body)
+        request_body = {"name": "test"}
+        response = await async_client.post(
+            "/meter",
+            json=request_body,
+            headers={"Authorization": f"Bearer {token}"},
+        )
         assert response.status_code == 201
 
         new_meter = response.json()
@@ -47,28 +51,28 @@ class TestIntegrationMeter:
     async def test_get_readings_on_meter(
         self,
         async_client: AsyncClient,
-        default_meter: dict[str, Any],
-        default_reading: dict[str, Any],
+        created_meter: dict[str, Any],
+        created_reading: dict[str, Any],
     ) -> None:
-        mid = default_meter["id"]
+        mid = created_meter["id"]
         response = await async_client.get(f"/meter/{mid}/reading")
         assert response.status_code == 200
         readings = response.json()
-        assert default_reading in readings
+        assert created_reading in readings
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_meter_with_readings(
         self,
         async_client: AsyncClient,
-        default_meter: dict[str, Any],
-        default_reading: dict[str, Any],
+        created_meter: dict[str, Any],
+        created_reading: dict[str, Any],
     ) -> None:
-        meter_id = default_meter["id"]
+        meter_id = created_meter["id"]
         response = await async_client.get(f"/meter/{meter_id}")
         assert response.status_code == 200
         meter_with_readings = response.json()
         assert meter_with_readings == {
-            "meter": default_meter,
-            "readings": [default_reading],
+            "meter": created_meter,
+            "readings": [created_reading],
         }

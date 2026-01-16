@@ -9,7 +9,6 @@ from .readings import ReadingResponseJson
 class MeterCreateRequestBody(BaseModel):
     """Meter create request body model for validation."""
 
-    user_id: uuid.UUID
     name: str
 
 

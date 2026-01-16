@@ -23,4 +23,5 @@ class ReadingResponseJson(BaseModel):
     id: uuid.UUID
     created_at: datetime.datetime
     meter_id: uuid.UUID
+    user_id: uuid.UUID
     value: float

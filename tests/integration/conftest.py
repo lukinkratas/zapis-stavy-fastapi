@@ -13,13 +13,6 @@ def anyio_backend() -> str:
 
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    # def override_get_settings() -> Settings:
-    #     return Settings(
-    #         POSTGRES_DB="zapisstavy_dev", POSTGRES_HOST="localhost", ENV="test"
-    #     )
-
-    # app.dependency_overrides[get_settings] = override_get_settings
-
     async with app.router.lifespan_context(app):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
@@ -28,11 +21,15 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
+def credentials() -> dict[str, str]:
+    return {"email": "test@test.net", "password": "pswd1234"}
+
+
+@pytest.fixture
 async def registered_user(
-    async_client: AsyncClient,
+    async_client: AsyncClient, credentials: dict[str, str]
 ) -> AsyncGenerator[dict[str, Any], None]:
-    request_body = {"email": "test@test.net", "password": "pswd123s"}
-    response = await async_client.post("/register", json=request_body)
+    response = await async_client.post("/register", json=credentials)
     registered_user = response.json()
 
     yield registered_user
@@ -42,11 +39,35 @@ async def registered_user(
 
 
 @pytest.fixture
+async def token(
+    async_client: AsyncClient,
+    credentials: dict[str, str],
+    registered_user: dict[str, str],
+) -> str:
+    # requires user to be registered, credentials are not sufficient
+    data = {
+        "username": credentials["email"],
+        "password": credentials["password"],
+    }
+    response = await async_client.post(
+        "/token",
+        data=data,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    token = response.json()
+    return token["access_token"]
+
+
+@pytest.fixture
 async def created_meter(
-    async_client: AsyncClient, registered_user: dict[str, Any]
+    async_client: AsyncClient, token: str
 ) -> AsyncGenerator[dict[str, Any], None]:
-    request_body = {"user_id": registered_user["id"], "name": "test"}
-    response = await async_client.post("/meter", json=request_body)
+    request_body = {"name": "test"}
+    response = await async_client.post(
+        "/meter",
+        json=request_body,
+        headers={"Authorization": f"Bearer {token}"},
+    )
     created_meter = response.json()
 
     yield created_meter
@@ -57,10 +78,14 @@ async def created_meter(
 
 @pytest.fixture
 async def created_reading(
-    async_client: AsyncClient, created_meter: dict[str, Any]
+    async_client: AsyncClient, created_meter: dict[str, Any], token: str
 ) -> AsyncGenerator[dict[str, Any], None]:
     request_body = {"meter_id": created_meter["id"], "value": 99.0}
-    response = await async_client.post("/reading", json=request_body)
+    response = await async_client.post(
+        "/reading",
+        json=request_body,
+        headers={"Authorization": f"Bearer {token}"},
+    )
     created_reading = response.json()
 
     yield created_reading
