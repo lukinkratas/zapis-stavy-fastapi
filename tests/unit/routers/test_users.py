@@ -5,7 +5,7 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.db_models.users import UsersTable
+from api.models.users import UsersTable
 from tests.assertions import assert_user
 
 from ..utils import user_factory
@@ -37,7 +37,23 @@ class TestUnitUser:
         mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
         uid = new_user["id"]
         response = await async_client.delete(f"/user/{uid}")
-        assert response.status_code == 200
+        assert response.status_code == 204
+
+    @pytest.mark.parametrize(
+        "credentials",
+        [
+            {"username": "register@register.net", "password": "123456seven"},
+            {"password": "123456seven"},
+            {"email": "register@register.net"},
+        ],
+    )
+    @pytest.mark.anyio
+    async def test_register_invalid_schema(
+        self, async_client: AsyncClient, credentials: dict[str, str]
+    ) -> None:
+        # register user
+        response = await async_client.post("/register", json=credentials)
+        assert response.status_code == 422
 
     @pytest.mark.anyio
     async def test_update_user(
@@ -55,8 +71,8 @@ class TestUnitUser:
         )
 
         # update registered user
-        mid = registered_user["id"]
-        response = await async_client.put(f"/user/{mid}", json=updated_credentials)
+        uid = registered_user["id"]
+        response = await async_client.put(f"/user/{uid}", json=updated_credentials)
         assert response.status_code == 200
 
         updated_user = response.json()

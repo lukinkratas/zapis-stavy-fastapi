@@ -13,12 +13,12 @@ def format_sql_query(sql_query: sql.Composed | sql.SQL) -> str:
 
 
 def build_set_clause(columns: Iterable[str]) -> sql.Composed:
-    """Build SET clause: col = %(col)s from columns for UPDATE query.
+    """Build comma delimited SET clause: col = %(col)s from columns for UPDATE query.
 
     Args:
         columns: iterable of column names
 
-    Returns: set clause as SQL query object
+    Returns: SET clause as SQL query object
     """
     return sql.SQL(", ").join(
         sql.SQL("{columns} = {value_placeholder}").format(

@@ -18,11 +18,6 @@ from .routers.users import router as users_router
 
 logger = logging.getLogger(__name__)
 
-# @lru_cache
-# def get_settings() -> Settings:
-#     """Load Postgres ans FastAPI config."""
-#     return Settings()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:

@@ -2,12 +2,13 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
+from psycopg.errors import UniqueViolation
 
 from ..db import connect_to_db
-from ..db_models.users import users_table
-from ..models.users import (
+from ..models.users import users_table
+from ..schemas.users import (
     UserCreateRequestBody,
     UserResponseJson,
     UserUpdateRequestBody,
@@ -32,29 +33,41 @@ async def register_user(
         conn: database connection
 
     Returns: user dict
+
+    Raises:
+        HTTPException: if user cannot be inserted in the database
     """
     # TODO: fixme
     password = user.password
     user.password = get_password_hash(password)
-    return await users_table.insert(conn, data=user.model_dump())
+    data = user.model_dump()
+
+    try:
+        registered_user = await users_table.insert(conn, data)
+
+    except UniqueViolation:
+        raise HTTPException(status_code=409, detail="User already exists")
+
+    return registered_user
 
 
-@router.delete("/user/{id}")
+@router.delete("/user/{id}", status_code=204)
 @log_async_func(logger.info)
 async def delete_user(
     id: uuid.UUID, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
-) -> dict[str, Any]:
+) -> None:
     """Delete a user from the database.
 
     Args:
         id: uuid of user
         conn: database connection
 
-    Returns:
-        dict with detail
+    Returns: None
+
+    Raises:
+        HTTPException: if user cannot be deleted from the database
     """
     await users_table.delete(conn, id)
-    return {"message": f"User {id} deleted successfully"}
 
 
 @router.put("/user/{id}", response_model=UserResponseJson)
@@ -72,5 +85,14 @@ async def update_user(
         conn: database connection
 
     Returns: meter dict
+
+    Raises:
+        HTTPException: if user cannot be updated in the database
     """
-    return await users_table.update(conn, id, data=user.model_dump())
+    data = user.model_dump()
+    updated_user = await users_table.update(conn, id, data)
+
+    if updated_user is None:
+        raise HTTPException(status_code=404, detail="Cannot update user")
+
+    return updated_user

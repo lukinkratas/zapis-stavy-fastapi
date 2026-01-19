@@ -1,34 +1,36 @@
-import datetime
+import logging
 import uuid
+from typing import Any
 
-from pydantic import BaseModel
+from psycopg import AsyncConnection, sql
+from psycopg.rows import dict_row
 
-from .readings import ReadingResponseJson
+from ..utils import format_sql_query, log_async_func
+from .base import BaseTable
 
-
-class MeterCreateRequestBody(BaseModel):
-    """Meter create request body model for validation."""
-
-    name: str
-
-
-class MeterUpdateRequestBody(BaseModel):
-    """Meter update request body model for validation."""
-
-    name: str | None = None
+logger = logging.getLogger(__name__)
 
 
-class MeterResponseJson(BaseModel):
-    """Meter response json model for validation."""
+class MetersTable(BaseTable):
+    """Meters database model."""
 
-    id: uuid.UUID
-    created_at: datetime.datetime
-    user_id: uuid.UUID
-    name: str
+    def __init__(self) -> None:
+        super().__init__(table="meters")
+
+    @log_async_func(logger.debug)
+    async def select_by_id(
+        self, conn: AsyncConnection, id: uuid.UUID, user_id: uuid.UUID
+    ) -> dict[str, Any]:
+        """Select meter record by ID from db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            query = sql.SQL("""
+                SELECT * FROM {table}
+                WHERE id = %(id)s AND user_id = %(user_id)s;
+            """).format(table=sql.Identifier(self.table))
+            logger.debug(f"SQL query: {format_sql_query(query)}")
+            await cur.execute(query, {"id": id, "user_id": user_id})
+
+            return await cur.fetchone()
 
 
-class MeterWithReadingsResponseJson(BaseModel):
-    """Meter and its' corresponsing readings response json model for validation."""
-
-    meter: MeterResponseJson
-    readings: list[ReadingResponseJson]
+meters_table = MetersTable()

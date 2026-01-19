@@ -51,7 +51,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"api/models/*" = ["D101"] # missing docstring in public class
+"api/schemas/*" = ["D101"] # missing docstring in public class
 "tests/*" = [
     "D102", # missing docstring in public method
     "D103", # missing docstring in public function

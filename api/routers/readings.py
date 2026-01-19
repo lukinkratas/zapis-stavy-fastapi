@@ -2,12 +2,12 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
 
 from ..db import connect_to_db
-from ..db_models.readings import readings_table
-from ..models.readings import (
+from ..models.readings import readings_table
+from ..schemas.readings import (
     ReadingCreateRequestBody,
     ReadingResponseJson,
     ReadingUpdateRequestBody,
@@ -34,27 +34,35 @@ async def create_reading(
         current_user: current authorized user
 
     Returns: reading dict
+
+    Raises:
+        HTTPException: if reading cannot be inserted in the database
     """
     data = reading.model_dump()
     data["user_id"] = current_user["id"]
     return await readings_table.insert(conn, data)
 
 
-@router.delete("/reading/{id}")
+@router.delete("/reading/{id}", status_code=204)
 @log_async_func(logger.info)
 async def delete_reading(
-    id: uuid.UUID, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
-) -> dict[str, Any]:
+    id: uuid.UUID,
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+) -> None:
     """Delete a reading from the database.
 
     Args:
         id: uuid of reading
         conn: database connection
+        current_user: current authorized user
 
-    Returns: dict with detail
+    Returns: None
+
+    Raises:
+        HTTPException: if reading cannot be deleted from the database
     """
-    await readings_table.delete(conn, id)
-    return {"message": f"Reading {id} deleted successfully"}
+    await readings_table.delete(conn, id, current_user["id"])
 
 
 @router.put("/reading/{id}", response_model=ReadingResponseJson)
@@ -63,6 +71,7 @@ async def update_reading(
     id: uuid.UUID,
     reading: ReadingUpdateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> ReadingResponseJson:
     """Update a reading in the database.
 
@@ -70,7 +79,17 @@ async def update_reading(
         id: uuid of reading
         reading: reading update request payload from client
         conn: database connection
+        current_user: current authorized user
 
     Returns: reading dict
+
+    Raises:
+        HTTPException: if reading cannot be updated in the database
     """
-    return await readings_table.update(conn, id, data=reading.model_dump())
+    data = reading.model_dump()
+    updated_reading = await readings_table.update(conn, id, current_user["id"], data)
+
+    if updated_reading is None:
+        raise HTTPException(status_code=404, detail="Cannot update reading")
+
+    return updated_reading

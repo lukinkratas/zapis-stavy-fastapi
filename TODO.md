@@ -1,17 +1,7 @@
 solve mypy
-tests - add raise errors tests, improve coverage
-    - test_get_user
-    - test get_user_not_found
-    - test_register_user
-    - test_register_user_already_exists
-    - test_password_hashes
-    - test_login_user
-    - test_login_user_not_exists
-    - test_create_access_token
-    - test_authenticate_user
-    - test_authenticate_user_not_found
-    - test_authenticate_user_wrong_password
-mock registered user, created meter and reading in unit tests + then remove default user from db
+email obfuscation
+obfuscate args and kwargs
+schema optional instead of None
 
 - [x] add linter, formatter, typechecker
 - [x] add db

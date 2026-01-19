@@ -1,6 +1,29 @@
+import logging
 from logging.config import dictConfig
 
 from .config import Settings
+
+
+def mask_email(email: str, masked_length: int) -> str:
+    """Mask email - replace characters with stars."""
+    name, domain = email.split("@")
+    orig_chars = name[:masked_length]
+    masked_chars = "*" * (len(name) - masked_length)
+    return f"{orig_chars}{masked_chars}@{domain}"
+
+
+class EmailMaskingFilter(logging.Filter):
+    """Email masking used in logging filters."""
+
+    def __init__(self, name: str = "", masked_length: int = 2) -> None:
+        super().__init__(name)
+        self.masked_length = masked_length
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Mask logging records containing email."""
+        if "email" in record.__dict__:
+            record.email = mask_email(record.email, self.masked_length)
+        return True
 
 
 def configure_logging(settings: Settings) -> None:
@@ -22,7 +45,11 @@ def configure_logging(settings: Settings) -> None:
                 "()": "asgi_correlation_id.CorrelationIdFilter",
                 "uuid_length": 8 if settings.ENV == "dev" else 32,
                 "default_value": "-",
-            }
+            },
+            "mask_email": {
+                "()": EmailMaskingFilter,
+                "masked_length": 2 if settings.ENV == "dev" else 0,
+            },
         },
         "formatters": {
             "simple": {
@@ -67,7 +94,7 @@ def configure_logging(settings: Settings) -> None:
                 "class": "logging.StreamHandler",
                 "formatter": "simple",
                 "level": "DEBUG",
-                "filters": ["correlation_id"],
+                "filters": ["correlation_id", "mask_email"],
             },
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -77,13 +104,13 @@ def configure_logging(settings: Settings) -> None:
                 "maxBytes": 1024 * 1024,  # 1MB
                 "backupCount": 5,
                 "encoding": "utf8",
-                "filters": ["correlation_id"],
+                "filters": ["correlation_id", "mask_email"],
             },
             "logtail": {
                 "class": "logtail.LogtailHandler",
                 "formatter": "simple",
                 "level": "INFO",
-                "filters": ["correlation_id"],
+                "filters": ["correlation_id", "mask_email"],
                 "source_token": settings.LOGTAIL_TOKEN,
                 "host": settings.LOGTAIL_HOST,
             },

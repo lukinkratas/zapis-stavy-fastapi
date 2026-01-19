@@ -5,7 +5,7 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.db_models.readings import ReadingsTable
+from api.models.readings import ReadingsTable
 from tests.assertions import assert_reading
 
 from ..utils import reading_factory
@@ -45,8 +45,10 @@ class TestUnitReading:
         # delete created reading
         mocker.patch.object(ReadingsTable, "delete", new=AsyncMock(return_value=None))
         rid = new_reading["id"]
-        response = await async_client.delete(f"/reading/{rid}")
-        assert response.status_code == 200
+        response = await async_client.delete(
+            f"/reading/{rid}", headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response.status_code == 204
 
     @pytest.mark.anyio
     async def test_update_reading(
@@ -54,6 +56,7 @@ class TestUnitReading:
         async_client: AsyncClient,
         mocker: MockerFixture,
         created_reading: dict[str, Any],
+        token: str,
     ) -> None:
         updated_reading_payload = {"value": 55.0}
 
@@ -66,7 +69,9 @@ class TestUnitReading:
         # update reading
         rid = created_reading["id"]
         response = await async_client.put(
-            f"/reading/{rid}", json=updated_reading_payload
+            f"/reading/{rid}",
+            json=updated_reading_payload,
+            headers={"Authorization": f"Bearer {token}"},
         )
         assert response.status_code == 200
 

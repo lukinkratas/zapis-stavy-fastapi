@@ -5,8 +5,8 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.db_models.meters import MetersTable
-from api.db_models.readings import ReadingsTable
+from api.models.meters import MetersTable
+from api.models.readings import ReadingsTable
 from tests.assertions import assert_meter
 
 from ..utils import meter_factory
@@ -45,8 +45,10 @@ class TestUnitMeter:
         # delete created meter
         mocker.patch.object(MetersTable, "delete", new=AsyncMock(return_value=None))
         mid = new_meter["id"]
-        response = await async_client.delete(f"/meter/{mid}")
-        assert response.status_code == 200
+        response = await async_client.delete(
+            f"/meter/{mid}", headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response.status_code == 204
 
     @pytest.mark.anyio
     async def test_update_meter(
@@ -54,6 +56,7 @@ class TestUnitMeter:
         mocker: MockerFixture,
         async_client: AsyncClient,
         created_meter: dict[str, Any],
+        token: str,
     ) -> None:
         updated_meter_payload = {"name": "update"}
 
@@ -65,7 +68,11 @@ class TestUnitMeter:
 
         # update meter
         mid = created_meter["id"]
-        response = await async_client.put(f"/meter/{mid}", json=updated_meter_payload)
+        response = await async_client.put(
+            f"/meter/{mid}",
+            json=updated_meter_payload,
+            headers={"Authorization": f"Bearer {token}"},
+        )
         assert response.status_code == 200
 
         updated_meter = response.json()
@@ -78,6 +85,7 @@ class TestUnitMeter:
         mocker: MockerFixture,
         created_meter: dict[str, Any],
         created_reading: dict[str, Any],
+        token: str,
     ) -> None:
         mocker.patch.object(
             ReadingsTable,
@@ -85,7 +93,9 @@ class TestUnitMeter:
             new=AsyncMock(return_value=[created_reading]),
         )
         mid = created_meter["id"]
-        response = await async_client.get(f"/meter/{mid}/reading")
+        response = await async_client.get(
+            f"/meter/{mid}/reading", headers={"Authorization": f"Bearer {token}"}
+        )
         assert response.status_code == 200
 
     @pytest.mark.anyio
@@ -95,6 +105,7 @@ class TestUnitMeter:
         mocker: MockerFixture,
         created_meter: dict[str, Any],
         created_reading: dict[str, Any],
+        token: str,
     ) -> None:
         # mocking
         mocker.patch.object(
@@ -107,7 +118,9 @@ class TestUnitMeter:
         )
 
         meter_id = created_meter["id"]
-        response = await async_client.get(f"/meter/{meter_id}")
+        response = await async_client.get(
+            f"/meter/{meter_id}", headers={"Authorization": f"Bearer {token}"}
+        )
         assert response.status_code == 200
         meter_with_readings = response.json()
         assert meter_with_readings == {

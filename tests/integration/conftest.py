@@ -1,9 +1,11 @@
+from datetime import timedelta
 from typing import Any, AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from api.main import app
+from api.routers.auth import create_access_token
 
 
 @pytest.fixture(scope="session")
@@ -21,8 +23,23 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
+def random_uuid() -> str:
+    return "9f9e8dbc-b2e8-4797-ab97-f0bb08385112"
+
+
+@pytest.fixture
 def credentials() -> dict[str, str]:
     return {"email": "test@test.net", "password": "pswd1234"}
+
+
+@pytest.fixture
+def not_registered_email() -> str:
+    return "not.registered@test.net"
+
+
+@pytest.fixture
+def invalid_password() -> str:
+    return "invalid"
 
 
 @pytest.fixture
@@ -56,6 +73,16 @@ async def token(
     )
     token = response.json()
     return token["access_token"]
+
+
+@pytest.fixture
+def not_registered_email_token(not_registered_email: str) -> str:
+    return create_access_token(not_registered_email)
+
+
+@pytest.fixture
+def expired_token(credentials: dict[str, str]) -> str:
+    return create_access_token(credentials["email"], timedelta(-1))
 
 
 @pytest.fixture

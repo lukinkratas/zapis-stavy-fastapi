@@ -1,12 +1,12 @@
 from typing import Any
 
-from api.models.auth import Token
-from api.models.meters import MeterResponseJson
-from api.models.readings import ReadingResponseJson
-from api.models.users import UserResponseJson
+from api.schemas.auth import Token
+from api.schemas.meters import MeterResponseJson
+from api.schemas.readings import ReadingResponseJson
+from api.schemas.users import UserResponseJson
 
 
-def assert_token(token: dict[str, Any], **kwargs: Any) -> None:
+def assert_token(token: dict[str, Any]) -> None:
     assert Token.model_validate(token)
 
 
