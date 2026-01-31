@@ -1,7 +1,7 @@
 solve mypy
-email obfuscation
+email masking
 obfuscate args and kwargs
-schema optional instead of None
+move invalid and expired token into unit tests?
 
 - [x] add linter, formatter, typechecker
 - [x] add db
