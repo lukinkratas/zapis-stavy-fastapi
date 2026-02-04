@@ -15,6 +15,7 @@ move invalid and expired token into unit tests?
 - [x] pre-commit switch to make cmds
 - [x] pyjwt vs jose jwt: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 - [ ] respond with {entity, detail?}
+- [ ] get request refactor - move return and success msg from try block to end of func
 
 - [ ] add user auth
 - [ ] add api version into url
