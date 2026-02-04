@@ -1,10 +1,7 @@
-.PHONY: install install-all install-dev fmt lint lint-fix typechk test test-int test-all clean-up serve-dev
+.PHONY: fmt lint lint-fix typechk test test-int test-all clean-up serve-dev
 
 help:
 	@echo "Available targets:"
-	@echo "  install          - Install the package and its dependencies"
-	@echo "  install-all      - Install the package with all extras"
-	@echo "  install-dev      - Install the package with dev dependencies"
 	@echo "  fmt              - Format the code using Ruff"
 	@echo "  lint             - Check linting of the code using Ruff"
 	@echo "  lint-fix         - Check and fix linting if the code using Ruff"
@@ -15,15 +12,6 @@ help:
 	@echo "  test-int         - Run all tests with html coverage"
 	@echo "  serve-dev        - Serve the application with reloading"
 	@echo "  help             - Show this help message"
-
-install:
-	uv sync
-
-install-all:
-	uv sync --all-extras
-
-install-dev:
-	uv sync --group dev
 
 fmt:
 	uv run --dev ruff format
