@@ -1,3 +1,17 @@
+- [ ] use confirmation token
+
+1.2 DELETE endpoints return 204 even when resource doesn't exist (api/routers/users.py, api/routers/meters.py)                         
+  DELETE /user/{id} and DELETE /meter/{id} return 204 regardless of whether the row existed. This silently swallows client errors (wrong 
+  ID, double-delete). Consider returning 404 when rowcount == 0.
+
+1.3 User endpoints lack authorization (api/routers/users.py)                                                                           
+  DELETE /user/{id} and PUT /user/{id} have no auth dependency. Any unauthenticated caller can delete or update any user by            
+  guessing/enumerating UUIDs. These must require get_current_user and verify the caller owns the resource.
+
+1.4 Password returned in user responses (api/schemas/users.py)                                                                         
+  UserResponseJson includes the password (hashed) field. Even hashed, exposing password hashes to API consumers is a security          
+  anti-pattern. Remove it from the response schema.
+
 - [ ] add locations?
 - [x] limiting
 - [x] routers prefixes
