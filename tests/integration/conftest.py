@@ -5,7 +5,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from api.main import app
-from api.routers.auth import create_access_token
+from api.auth import create_access_token, create_jwt_token
 
 
 @pytest.fixture(scope="session")
@@ -15,6 +15,7 @@ def anyio_backend() -> str:
 
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
+    app.state.limiter.enabled = False
     async with app.router.lifespan_context(app):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
@@ -81,8 +82,8 @@ def not_registered_email_token(not_registered_email: str) -> str:
 
 
 @pytest.fixture
-def expired_token(credentials: dict[str, str]) -> str:
-    return create_access_token(credentials["email"], timedelta(-1))
+def expired_access_token(credentials: dict[str, str]) -> str:
+    return create_jwt_token({"type": "access", "sub": credentials["email"]}, timedelta(-1))
 
 
 @pytest.fixture
@@ -101,21 +102,3 @@ async def created_meter(
 
     mid = created_meter["id"]
     await async_client.delete(f"/meter/{mid}")
-
-
-@pytest.fixture
-async def created_reading(
-    async_client: AsyncClient, created_meter: dict[str, Any], token: str
-) -> AsyncGenerator[dict[str, Any], None]:
-    request_body = {"meter_id": created_meter["id"], "value": 99.0}
-    response = await async_client.post(
-        "/reading",
-        json=request_body,
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    created_reading = response.json()
-
-    yield created_reading
-
-    rid = created_reading["id"]
-    await async_client.delete(f"/reading/{rid}")

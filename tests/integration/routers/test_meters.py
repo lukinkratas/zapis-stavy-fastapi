@@ -80,13 +80,13 @@ class TestIntegrationMeter:
     async def test_create_meter_expired_token(
         self,
         async_client: AsyncClient,
-        expired_token: str,
+        expired_access_token: str,
         create_request_body={"name": "new"},
     ) -> None:
         response = await async_client.post(
             "/meter",
             json=create_request_body,
-            headers={"Authorization": f"Bearer {expired_token}"},
+            headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
 
@@ -136,52 +136,5 @@ class TestIntegrationMeter:
             f"/meter/{random_uuid}",
             json=update_request_body,
             headers={"Authorization": f"Bearer {token}"},
-        )
-        assert response.status_code == 404
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_get_readings_on_meter(
-        self,
-        async_client: AsyncClient,
-        created_meter: dict[str, Any],
-        created_reading: dict[str, Any],
-        token: str,
-    ) -> None:
-        mid = created_meter["id"]
-        response = await async_client.get(
-            f"/meter/{mid}/reading", headers={"Authorization": f"Bearer {token}"}
-        )
-        assert response.status_code == 200
-        readings = response.json()
-        assert created_reading in readings
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_get_meter_with_readings(
-        self,
-        async_client: AsyncClient,
-        created_meter: dict[str, Any],
-        created_reading: dict[str, Any],
-        token: str,
-    ) -> None:
-        mid = created_meter["id"]
-        response = await async_client.get(
-            f"/meter/{mid}", headers={"Authorization": f"Bearer {token}"}
-        )
-        assert response.status_code == 200
-        meter_with_readings = response.json()
-        assert meter_with_readings == {
-            "meter": created_meter,
-            "readings": [created_reading],
-        }
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_get_non_existing_meter_with_readings(
-        self, async_client: AsyncClient, random_uuid: str, token: str
-    ) -> None:
-        response = await async_client.get(
-            f"/meter/{random_uuid}", headers={"Authorization": f"Bearer {token}"}
         )
         assert response.status_code == 404

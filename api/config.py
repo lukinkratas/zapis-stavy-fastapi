@@ -6,17 +6,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Postgres and FastAPI config."""
 
-    POSTGRES_DB: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_HOST: str = "localhost"
-    ENV: Literal["dev", "test", "prod"] = "dev"
+    DB_NAME: str
+    DB_USERNAME: str
+    DB_PASSWORD: str
+    DB_PORT: int = 5432
+    DB_HOST: str = "localhost"
     LOGTAIL_TOKEN: str | None = None
     LOGTAIL_HOST: str | None = None
     SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    ALGORITHM: str = "HS256"
 
     model_config = SettingsConfigDict(env_file=".env")
 

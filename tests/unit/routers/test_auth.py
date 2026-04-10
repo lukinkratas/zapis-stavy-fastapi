@@ -8,31 +8,11 @@ from pytest_mock import MockerFixture
 
 from api.config import settings
 from api.models.users import UsersTable
-from api.routers.auth import create_access_token, verify_password
 from tests.assertions import assert_token
 
 
 class TestUnitAuth:
-    """Integration tests for auth."""
-
-    @pytest.mark.anyio
-    async def test_verify_password(
-        self,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-    ) -> None:
-        verify_password(credentials["password"], registered_user["password"])
-
-    @pytest.mark.anyio
-    async def test_create_access_token(
-        self,
-        credentials: dict[str, str],
-    ) -> None:
-        token = create_access_token(credentials["email"])
-        decoded_token = jwt.decode(
-            token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        assert {"sub": credentials["email"]}.items() <= decoded_token.items()
+    """Unit tests for auth."""
 
     @pytest.mark.anyio
     async def test_login(

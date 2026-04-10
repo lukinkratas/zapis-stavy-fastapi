@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from api.routers.auth import get_password_hash
+from api.auth import get_password_hash
 
 
 def user_factory(credentials: dict[str, str]) -> dict[str, Any]:

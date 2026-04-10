@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
@@ -14,7 +14,7 @@ from ..schemas.users import (
     UserUpdateRequestBody,
 )
 from ..utils import log_async_func
-from .auth import get_password_hash
+from ..auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

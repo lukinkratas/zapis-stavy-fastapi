@@ -1,37 +1,20 @@
 import logging
 from logging.config import dictConfig
+import os
+from dotenv import load_dotenv
 
 from .config import Settings
 
+load_dotenv(override=True)
 
-def mask_email(email: str, masked_length: int) -> str:
-    """Mask email - replace characters with stars."""
-    name, domain = email.split("@")
-    orig_chars = name[:masked_length]
-    masked_chars = "*" * (len(name) - masked_length)
-    return f"{orig_chars}{masked_chars}@{domain}"
-
-
-class EmailMaskingFilter(logging.Filter):
-    """Email masking used in logging filters."""
-
-    def __init__(self, name: str = "", masked_length: int = 2) -> None:
-        super().__init__(name)
-        self.masked_length = masked_length
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        """Mask logging records containing email."""
-        if "email" in record.__dict__:
-            record.email = mask_email(record.email, self.masked_length)
-        return True
-
+ENV = os.getenv("ENV") or "dev"
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging."""
     handlers = ["stdout", "rotating_file"]
 
     if (
-        settings.ENV == "prod"
+        ENV == "prod"
         and settings.LOGTAIL_TOKEN is not None
         and settings.LOGTAIL_HOST is not None
     ):
@@ -43,12 +26,8 @@ def configure_logging(settings: Settings) -> None:
         "filters": {
             "correlation_id": {
                 "()": "asgi_correlation_id.CorrelationIdFilter",
-                "uuid_length": 8 if settings.ENV == "dev" else 32,
+                "uuid_length": 8 if ENV == "dev" else 32,
                 "default_value": "-",
-            },
-            "mask_email": {
-                "()": EmailMaskingFilter,
-                "masked_length": 2 if settings.ENV == "dev" else 0,
             },
         },
         "formatters": {
@@ -94,7 +73,7 @@ def configure_logging(settings: Settings) -> None:
                 "class": "logging.StreamHandler",
                 "formatter": "simple",
                 "level": "DEBUG",
-                "filters": ["correlation_id", "mask_email"],
+                "filters": ["correlation_id"],
             },
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -104,13 +83,13 @@ def configure_logging(settings: Settings) -> None:
                 "maxBytes": 1024 * 1024,  # 1MB
                 "backupCount": 5,
                 "encoding": "utf8",
-                "filters": ["correlation_id", "mask_email"],
+                "filters": ["correlation_id"],
             },
             "logtail": {
                 "class": "logtail.LogtailHandler",
                 "formatter": "simple",
                 "level": "INFO",
-                "filters": ["correlation_id", "mask_email"],
+                "filters": ["correlation_id"],
                 "source_token": settings.LOGTAIL_TOKEN,
                 "host": settings.LOGTAIL_HOST,
             },
@@ -118,7 +97,7 @@ def configure_logging(settings: Settings) -> None:
         "loggers": {
             "api": {
                 "handlers": handlers,
-                "level": "DEBUG" if settings.ENV == "dev" else "INFO",
+                "level": "DEBUG" if ENV == "dev" else "INFO",
                 "propagate": False,
             },
         },
