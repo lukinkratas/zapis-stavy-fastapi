@@ -8,10 +8,9 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import Response
 from psycopg_pool import AsyncConnectionPool
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
-
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
 from .config import settings
 from .db import get_conn_info
@@ -38,13 +37,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(lifespan=lifespan)
 app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["1/minute"])
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
 
 app.include_router(meters_router)
 app.include_router(users_router)
 app.include_router(auth_router)
+
 
 @app.exception_handler(HTTPException)
 async def http_exception_handle_logging(

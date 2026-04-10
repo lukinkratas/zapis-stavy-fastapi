@@ -1,24 +1,18 @@
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any
+from typing import Annotated
 
-import jwt
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jwt.exceptions import InvalidTokenError
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from psycopg import AsyncConnection
-from pwdlib import PasswordHash
-from dotenv import load_dotenv
 
-from ..config import settings
-from ..db import connect_to_db
-from ..models.users import users_table
-from ..schemas.auth import Token
-from ..utils import log_async_func, log_func
 from ..auth import authenticate_user, create_access_token
+from ..db import connect_to_db
+from ..schemas.auth import Token
+from ..utils import log_async_func
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
 
 @router.post("/token", response_model=Token)
 @log_async_func(logger.info)

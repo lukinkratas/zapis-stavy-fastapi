@@ -1,7 +1,7 @@
+- [ ] add locations?
 - [x] limiting
 - [x] routers prefixes
 - [x] auth separetely
-- [ ] only users and locations?
 solve mypy
 email masking
 obfuscate args and kwargs

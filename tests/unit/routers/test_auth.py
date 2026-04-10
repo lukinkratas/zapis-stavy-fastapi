@@ -1,12 +1,10 @@
 from typing import Any
 from unittest.mock import AsyncMock
 
-import jwt
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.config import settings
 from api.models.users import UsersTable
 from tests.assertions import assert_token
 

@@ -2,10 +2,11 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
+from ..auth import get_current_user
 from ..db import connect_to_db
 from ..models.meters import meters_table
 from ..schemas.meters import (
@@ -14,7 +15,6 @@ from ..schemas.meters import (
     MeterUpdateRequestBody,
 )
 from ..utils import log_async_func
-from ..auth import get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/meter")
@@ -26,7 +26,7 @@ async def create_meter(
     meter: MeterCreateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
     """Add new meter into the database.
 
     Args:

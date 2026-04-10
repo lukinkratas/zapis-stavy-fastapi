@@ -20,7 +20,7 @@ class MetersTable(BaseTable):
     @log_async_func(logger.debug)
     async def select_by_id(
         self, conn: AsyncConnection, id: uuid.UUID, user_id: uuid.UUID
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Select meter record by ID from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
             query = sql.SQL("""

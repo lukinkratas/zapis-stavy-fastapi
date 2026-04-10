@@ -12,14 +12,13 @@ logger = logging.getLogger(__name__)
 
 def get_conn_info(settings: Settings) -> str:
     """Return connection info as string for psycopg database connection."""
-    conn_info_dict = dict(
+    return make_conninfo(
         dbname=settings.DB_NAME,
         user=settings.DB_USERNAME,
         password=settings.DB_PASSWORD,
         host=settings.DB_HOST,
         port=settings.DB_PORT,
     )
-    return make_conninfo(**conn_info_dict)
 
 
 async def connect_to_db(request: Request) -> AsyncGenerator[AsyncConnection, None]:

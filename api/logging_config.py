@@ -1,6 +1,6 @@
-import logging
-from logging.config import dictConfig
 import os
+from logging.config import dictConfig
+
 from dotenv import load_dotenv
 
 from .config import Settings
@@ -8,6 +8,7 @@ from .config import Settings
 load_dotenv(override=True)
 
 ENV = os.getenv("ENV") or "dev"
+
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging."""

@@ -32,7 +32,7 @@ class UsersTable(BaseTable):
     @log_async_func(logger.debug)
     async def update(
         self, conn: AsyncConnection, id: uuid.UUID, data: dict[str, Any]
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Update user record in db."""
         async with conn.transaction():
             async with conn.cursor(row_factory=dict_row) as cur:
@@ -52,7 +52,7 @@ class UsersTable(BaseTable):
     @log_async_func(logger.debug)
     async def select_by_email(
         self, conn: AsyncConnection, email: str
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Select user record by email from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
             query = sql.SQL("""

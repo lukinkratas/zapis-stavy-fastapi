@@ -4,16 +4,14 @@ from typing import Annotated, Any
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from psycopg import AsyncConnection
 from pwdlib import PasswordHash
-from dotenv import load_dotenv
 
 from .config import settings
 from .db import connect_to_db
 from .models.users import users_table
-from .schemas.auth import Token
 from .utils import log_async_func, log_func
 
 logger = logging.getLogger(__name__)
@@ -97,6 +95,7 @@ async def authenticate_user(
 
     return user
 
+
 @log_func(logger.info)
 def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     """Create JWT token.
@@ -108,7 +107,10 @@ def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     Return: encoded JWT token
     """
     expire = datetime.now(timezone.utc) + expires_delta
-    return jwt.encode(data | {"exp": expire}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(
+        data | {"exp": expire}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+
 
 @log_func(logger.info)
 def create_confirmation_token(email: str) -> str:
@@ -120,6 +122,7 @@ def create_confirmation_token(email: str) -> str:
     Return: encoded JWT token
     """
     return create_jwt_token({"type": "confirmation", "sub": email}, timedelta(hours=24))
+
 
 @log_func(logger.info)
 def create_access_token(email: str) -> str:

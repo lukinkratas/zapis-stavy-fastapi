@@ -3,6 +3,7 @@ import uuid
 
 from pydantic import BaseModel
 
+
 class MeterCreateRequestBody(BaseModel):
     """Meter create request body model for validation."""
 

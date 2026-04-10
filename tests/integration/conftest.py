@@ -4,8 +4,8 @@ from typing import Any, AsyncGenerator
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from api.main import app
 from api.auth import create_access_token, create_jwt_token
+from api.main import app
 
 
 @pytest.fixture(scope="session")
@@ -83,7 +83,9 @@ def not_registered_email_token(not_registered_email: str) -> str:
 
 @pytest.fixture
 def expired_access_token(credentials: dict[str, str]) -> str:
-    return create_jwt_token({"type": "access", "sub": credentials["email"]}, timedelta(-1))
+    return create_jwt_token(
+        {"type": "access", "sub": credentials["email"]}, timedelta(-1)
+    )
 
 
 @pytest.fixture

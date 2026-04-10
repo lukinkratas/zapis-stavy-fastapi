@@ -5,11 +5,11 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
 
+from api.auth import create_access_token
 from api.db import connect_to_db
 from api.main import app
-from api.auth import create_access_token
 
-from .utils import meter_factory, reading_factory, user_factory
+from .utils import meter_factory, user_factory
 
 
 @pytest.fixture(scope="session")

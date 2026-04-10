@@ -18,7 +18,7 @@ class BaseTable:
 
     async def insert(
         self, conn: AsyncConnection, data: dict[str, Any]
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Insert new record into db."""
         async with conn.transaction():
             async with conn.cursor(row_factory=dict_row) as cur:
@@ -58,7 +58,7 @@ class BaseTable:
         id: uuid.UUID,
         user_id: uuid.UUID,
         data: dict[str, Any],
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Update record in db."""
         async with conn.transaction():
             async with conn.cursor(row_factory=dict_row) as cur:

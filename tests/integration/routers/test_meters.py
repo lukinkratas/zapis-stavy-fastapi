@@ -81,7 +81,7 @@ class TestIntegrationMeter:
         self,
         async_client: AsyncClient,
         expired_access_token: str,
-        create_request_body={"name": "new"},
+        create_request_body: dict[str, str],
     ) -> None:
         response = await async_client.post(
             "/meter",
