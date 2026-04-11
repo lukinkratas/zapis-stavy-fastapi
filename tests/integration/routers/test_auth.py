@@ -86,9 +86,9 @@ class TestIntegrationAuth:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_get_current_user(self, conn: AsyncConnection, token: str) -> None:
+    async def test_get_current_user(self, conn: AsyncConnection, access_token: str) -> None:
         # requires user to be registered
-        user = await get_current_user(conn, token)
+        user = await get_current_user(conn, access_token)
         assert_user(user)
 
     @pytest.mark.integration

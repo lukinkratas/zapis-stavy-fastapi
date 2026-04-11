@@ -20,7 +20,7 @@ class TestUnitLocation:
         async_client: AsyncClient,
         mocker: MockerFixture,
         registered_user: dict[str, Any],
-        token: str,
+        access_token: str,
     ) -> None:
         location_payload = {"name": "new"}
 
@@ -34,7 +34,7 @@ class TestUnitLocation:
         response = await async_client.post(
             "/location",
             json=location_payload,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
 
@@ -45,7 +45,7 @@ class TestUnitLocation:
         mocker.patch.object(LocationsTable, "delete", new=AsyncMock(return_value=None))
         mid = new_location["id"]
         response = await async_client.delete(
-            f"/location/{mid}", headers={"Authorization": f"Bearer {token}"}
+            f"/location/{mid}", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 204
 
@@ -55,7 +55,7 @@ class TestUnitLocation:
         mocker: MockerFixture,
         async_client: AsyncClient,
         created_location: dict[str, Any],
-        token: str,
+        access_token: str,
     ) -> None:
         updated_location_payload = {"name": "update"}
 
@@ -70,7 +70,7 @@ class TestUnitLocation:
         response = await async_client.put(
             f"/location/{mid}",
             json=updated_location_payload,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 

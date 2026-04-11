@@ -78,7 +78,7 @@ async def registered_user(
 
 
 @pytest.fixture
-async def token(
+async def access_token(
     async_client: AsyncClient,
     credentials: dict[str, str],
     registered_user: dict[str, str],
@@ -111,13 +111,13 @@ def expired_access_token(credentials: dict[str, str]) -> str:
 
 @pytest.fixture
 async def created_location(
-    async_client: AsyncClient, token: str
+    async_client: AsyncClient, access_token: str
 ) -> AsyncGenerator[dict[str, Any], None]:
     request_body = {"name": "test"}
     response = await async_client.post(
         "/location",
         json=request_body,
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
     created_location = response.json()
 

@@ -22,14 +22,14 @@ class TestIntegrationLocation:
     async def test_create_and_delete_location(
         self,
         async_client: AsyncClient,
-        token: str,
+        access_token: str,
         create_request_body: dict[str, str],
     ) -> None:
         # create location
         response = await async_client.post(
             "/location",
             json=create_request_body,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
 
@@ -39,7 +39,7 @@ class TestIntegrationLocation:
         # delete created location
         mid = new_location["id"]
         response = await async_client.delete(
-            f"/location/{mid}", headers={"Authorization": f"Bearer {token}"}
+            f"/location/{mid}", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 204
 
@@ -48,7 +48,7 @@ class TestIntegrationLocation:
     async def test_create_existing_location(
         self,
         async_client: AsyncClient,
-        token: str,
+        access_token: str,
         created_location: dict[str, Any],
     ) -> None:
         # requires location to be already created
@@ -56,7 +56,7 @@ class TestIntegrationLocation:
         response = await async_client.post(
             "/location",
             json=create_request_body,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 409
 
@@ -96,10 +96,10 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         random_uuid: str,
-        token: str,
+        access_token: str,
     ) -> None:
         response = await async_client.delete(
-            f"/location/{random_uuid}", headers={"Authorization": f"Bearer {token}"}
+            f"/location/{random_uuid}", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 204
 
@@ -110,13 +110,13 @@ class TestIntegrationLocation:
         async_client: AsyncClient,
         created_location: dict[str, Any],
         update_request_body: dict[str, str],
-        token: str,
+        access_token: str,
     ) -> None:
         mid = created_location["id"]
         response = await async_client.put(
             f"/location/{mid}",
             json=update_request_body,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
@@ -130,11 +130,11 @@ class TestIntegrationLocation:
         async_client: AsyncClient,
         random_uuid: str,
         update_request_body: dict[str, str],
-        token: str,
+        access_token: str,
     ) -> None:
         response = await async_client.put(
             f"/location/{random_uuid}",
             json=update_request_body,
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
