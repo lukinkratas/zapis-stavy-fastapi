@@ -93,6 +93,15 @@ class TestIntegrationAuth:
 
     @pytest.mark.integration
     @pytest.mark.anyio
+    async def test_get_current_user_not_registered_email_token(
+        self, conn: AsyncConnection, not_registered_email_token: str
+    ) -> None:
+        # requires user to be registered
+        with pytest.raises(HTTPException):
+            await get_current_user(conn, not_registered_email_token)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
     async def test_get_current_user_expired_token(
         self, conn: AsyncConnection, expired_access_token: str
     ) -> None:
