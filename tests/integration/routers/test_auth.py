@@ -6,7 +6,12 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.db import get_conn_info
-from api.routers.auth import credentials_exception, get_user
+from api.routers.auth import (
+    authenticate_user,
+    credentials_exception,
+    get_current_user,
+    get_user,
+)
 from tests.assertions import assert_token, assert_user
 
 
@@ -29,17 +34,71 @@ class TestIntegrationAuth:
         conn: AsyncConnection,
         registered_user: dict[str, Any],
     ) -> None:
-        # requires user to be registered
+        # requires user to be already registered
         user = await get_user(conn, registered_user["email"])
         assert_user(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_get_non_registered_user(
+    async def test_get_user_not_registered_email(
         self, conn: AsyncConnection, not_registered_email: str
     ) -> None:
         with pytest.raises(HTTPException):
             await get_user(conn, not_registered_email)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_authenticate_user(
+        self,
+        conn: AsyncConnection,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+    ) -> None:
+        # requires user to be already registered
+        user = await authenticate_user(conn, **credentials)
+        assert_user(user)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_authenticate_user_not_registered_email(
+        self,
+        conn: AsyncConnection,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+        not_registered_email: str,
+    ) -> None:
+        # requires user to be already registered
+        with pytest.raises(HTTPException):
+            await authenticate_user(conn, not_registered_email, credentials["password"])
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_authenticate_user_invalid_password(
+        self,
+        conn: AsyncConnection,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+        invalid_password: str,
+    ) -> None:
+        # requires user to be already registered
+        with pytest.raises(HTTPException):
+            await authenticate_user(conn, credentials["email"], invalid_password)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_get_current_user(self, conn: AsyncConnection, token: str) -> None:
+        # requires user to be registered
+        user = await get_current_user(conn, token)
+        assert_user(user)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_get_current_user_expired_token(
+        self, conn: AsyncConnection, expired_access_token: str
+    ) -> None:
+        # requires user to be registered
+        with pytest.raises(HTTPException):
+            await get_current_user(conn, expired_access_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio

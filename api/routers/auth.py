@@ -136,7 +136,9 @@ def create_confirmation_token(email: str) -> str:
 
     Return: encoded JWT token
     """
-    return _create_jwt_token({"type": "confirmation", "sub": email}, timedelta(hours=24))
+    return _create_jwt_token(
+        {"type": "confirmation", "sub": email}, timedelta(hours=24)
+    )
 
 
 @log_async_func(logger.info)

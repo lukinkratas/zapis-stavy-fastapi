@@ -8,7 +8,7 @@ from httpx import ASGITransport, AsyncClient
 from testcontainers.postgres import PostgresContainer
 
 from api.main import app
-from api.routers.auth import create_access_token, create_jwt_token
+from api.routers.auth import _create_jwt_token, create_access_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -104,7 +104,7 @@ def not_registered_email_token(not_registered_email: str) -> str:
 
 @pytest.fixture
 def expired_access_token(credentials: dict[str, str]) -> str:
-    return create_jwt_token(
+    return _create_jwt_token(
         {"type": "access", "sub": credentials["email"]}, timedelta(-1)
     )
 

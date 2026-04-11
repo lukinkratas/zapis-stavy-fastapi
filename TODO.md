@@ -130,7 +130,7 @@
   ├─────────┼──────────┼─────────────────────────────────────────────────────┤
   │ 2.3     │ LOW      │ Logging may capture sensitive data                  │
   ├─────────┼──────────┼─────────────────────────────────────────────────────┤
-  │ 6.2     │ LOW      │ Missing docstrings 
+  │ 6.2     │ LOW      │ Missing docstrings
 
 - [x] limiting
 - [x] routers prefixes
