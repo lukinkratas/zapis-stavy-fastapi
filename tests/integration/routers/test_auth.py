@@ -5,8 +5,8 @@ from fastapi import HTTPException
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.auth import credentials_exception, get_user
 from api.db import get_conn_info
+from api.routers.auth import credentials_exception, get_user
 from tests.assertions import assert_token, assert_user
 
 

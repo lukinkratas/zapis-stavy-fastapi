@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from httpx import AsyncClient
 
-from api.auth import verify_password
+from api.routers.auth import verify_password
 from tests.assertions import assert_user
 
 

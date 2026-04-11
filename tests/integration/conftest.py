@@ -7,10 +7,11 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from testcontainers.postgres import PostgresContainer
 
-from api.auth import create_access_token, create_jwt_token
 from api.main import app
+from api.routers.auth import create_access_token, create_jwt_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
+
 
 @pytest.fixture(scope="session")
 def anyio_backend() -> str:

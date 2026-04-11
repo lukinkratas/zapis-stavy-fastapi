@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
-from ..auth import get_password_hash
 from ..db import connect_to_db
 from ..models.users import users_table
 from ..schemas.users import (
@@ -15,6 +14,7 @@ from ..schemas.users import (
     UserUpdateRequestBody,
 )
 from ..utils import log_async_func
+from .auth import get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -5,9 +5,9 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
 
-from api.auth import create_access_token
 from api.db import connect_to_db
 from api.main import app
+from api.routers.auth import create_access_token
 
 from .utils import location_factory, user_factory
 
