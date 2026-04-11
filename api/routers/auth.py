@@ -93,7 +93,6 @@ async def authenticate_user(
     Raises:
         HTTPException: if user not found in the database or password mismatch.
     """
-    logger.debug("Authenticating user", extra={"email": email})
     user = await get_user(conn, email)
 
     if not verify_password(password, user["password"]):
@@ -103,7 +102,7 @@ async def authenticate_user(
 
 
 @log_func(logger.info)
-def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
+def _create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     """Create JWT token.
 
     Args:
@@ -125,7 +124,7 @@ def create_access_token(email: str) -> str:
 
     Return: encoded JWT token
     """
-    return create_jwt_token({"type": "access", "sub": email}, timedelta(minutes=15))
+    return _create_jwt_token({"type": "access", "sub": email}, timedelta(minutes=15))
 
 
 @log_func(logger.info)
@@ -137,7 +136,7 @@ def create_confirmation_token(email: str) -> str:
 
     Return: encoded JWT token
     """
-    return create_jwt_token({"type": "confirmation", "sub": email}, timedelta(hours=24))
+    return _create_jwt_token({"type": "confirmation", "sub": email}, timedelta(hours=24))
 
 
 @log_async_func(logger.info)
