@@ -1,7 +1,7 @@
 from typing import Any
 
 from api.schemas.auth import Token
-from api.schemas.meters import MeterResponseJson
+from api.schemas.locations import LocationResponseJson
 from api.schemas.users import UserResponseJson
 
 
@@ -15,7 +15,7 @@ def assert_user(user: dict[str, Any], **kwargs: Any) -> None:
         assert user[key] == val
 
 
-def assert_meter(meter: dict[str, Any], **kwargs: Any) -> None:
-    assert MeterResponseJson.model_validate(meter)
+def assert_location(location: dict[str, Any], **kwargs: Any) -> None:
+    assert LocationResponseJson.model_validate(location)
     for key, val in kwargs.items():
-        assert meter[key] == val
+        assert location[key] == val

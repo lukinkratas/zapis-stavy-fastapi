@@ -16,7 +16,7 @@ from .config import settings
 from .db import get_conn_info
 from .logging_config import configure_logging
 from .routers.auth import router as auth_router
-from .routers.meters import router as meters_router
+from .routers.locations import router as locations_router
 from .routers.users import router as users_router
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
 
-app.include_router(meters_router)
+app.include_router(locations_router)
 app.include_router(users_router)
 app.include_router(auth_router)
 

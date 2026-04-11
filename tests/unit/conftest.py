@@ -9,7 +9,7 @@ from api.auth import create_access_token
 from api.db import connect_to_db
 from api.main import app
 
-from .utils import meter_factory, user_factory
+from .utils import location_factory, user_factory
 
 
 @pytest.fixture(scope="session")
@@ -57,5 +57,5 @@ async def token(credentials: dict[str, str]) -> str:
 
 
 @pytest.fixture
-async def created_meter(registered_user: dict[str, Any]) -> dict[str, Any]:
-    return meter_factory({"name": "test"}, registered_user["id"])
+async def created_location(registered_user: dict[str, Any]) -> dict[str, Any]:
+    return location_factory({"name": "test"}, registered_user["id"])

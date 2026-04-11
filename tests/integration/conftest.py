@@ -89,18 +89,18 @@ def expired_access_token(credentials: dict[str, str]) -> str:
 
 
 @pytest.fixture
-async def created_meter(
+async def created_location(
     async_client: AsyncClient, token: str
 ) -> AsyncGenerator[dict[str, Any], None]:
     request_body = {"name": "test"}
     response = await async_client.post(
-        "/meter",
+        "/location",
         json=request_body,
         headers={"Authorization": f"Bearer {token}"},
     )
-    created_meter = response.json()
+    created_location = response.json()
 
-    yield created_meter
+    yield created_location
 
-    mid = created_meter["id"]
-    await async_client.delete(f"/meter/{mid}")
+    mid = created_location["id"]
+    await async_client.delete(f"/location/{mid}")

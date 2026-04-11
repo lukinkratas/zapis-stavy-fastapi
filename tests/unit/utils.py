@@ -15,7 +15,7 @@ def user_factory(credentials: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def meter_factory(payload: dict[str, str], user_id: str) -> dict[str, Any]:
+def location_factory(payload: dict[str, str], user_id: str) -> dict[str, Any]:
     return payload | {
         "id": str(uuid.uuid4()),
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),

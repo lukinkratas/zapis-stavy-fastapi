@@ -11,17 +11,17 @@ from .base import BaseTable
 logger = logging.getLogger(__name__)
 
 
-class MetersTable(BaseTable):
-    """Meters database model."""
+class LocationsTable(BaseTable):
+    """Locations database model."""
 
     def __init__(self) -> None:
-        super().__init__(table="meters")
+        super().__init__(table="locations")
 
     @log_async_func(logger.debug)
     async def select_by_id(
         self, conn: AsyncConnection, id: uuid.UUID, user_id: uuid.UUID
     ) -> dict[str, Any] | None:
-        """Select meter record by ID from db."""
+        """Select location record by ID from db."""
         async with conn.cursor(row_factory=dict_row) as cur:
             query = sql.SQL("""
                 SELECT * FROM {table}
@@ -33,4 +33,4 @@ class MetersTable(BaseTable):
             return await cur.fetchone()
 
 
-meters_table = MetersTable()
+locations_table = LocationsTable()

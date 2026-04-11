@@ -3,11 +3,11 @@ from typing import Any
 import pytest
 from httpx import AsyncClient
 
-from tests.assertions import assert_meter
+from tests.assertions import assert_location
 
 
-class TestIntegrationMeter:
-    """Integration tests for meters."""
+class TestIntegrationLocation:
+    """Integration tests for locations."""
 
     @pytest.fixture
     def create_request_body(self) -> dict[str, str]:
@@ -19,42 +19,42 @@ class TestIntegrationMeter:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_and_delete_meter(
+    async def test_create_and_delete_location(
         self,
         async_client: AsyncClient,
         token: str,
         create_request_body: dict[str, str],
     ) -> None:
-        # create meter
+        # create location
         response = await async_client.post(
-            "/meter",
+            "/location",
             json=create_request_body,
             headers={"Authorization": f"Bearer {token}"},
         )
         assert response.status_code == 201
 
-        new_meter = response.json()
-        assert_meter(new_meter, **create_request_body)
+        new_location = response.json()
+        assert_location(new_location, **create_request_body)
 
-        # delete created meter
-        mid = new_meter["id"]
+        # delete created location
+        mid = new_location["id"]
         response = await async_client.delete(
-            f"/meter/{mid}", headers={"Authorization": f"Bearer {token}"}
+            f"/location/{mid}", headers={"Authorization": f"Bearer {token}"}
         )
         assert response.status_code == 204
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_existing_meter(
+    async def test_create_existing_location(
         self,
         async_client: AsyncClient,
         token: str,
-        created_meter: dict[str, Any],
+        created_location: dict[str, Any],
     ) -> None:
-        # requires meter to be already created
-        create_request_body = {"name": created_meter["name"]}
+        # requires location to be already created
+        create_request_body = {"name": created_location["name"]}
         response = await async_client.post(
-            "/meter",
+            "/location",
             json=create_request_body,
             headers={"Authorization": f"Bearer {token}"},
         )
@@ -62,14 +62,14 @@ class TestIntegrationMeter:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_meter_not_registered_email_token(
+    async def test_create_location_not_registered_email_token(
         self,
         async_client: AsyncClient,
         not_registered_email_token: str,
         create_request_body: dict[str, str],
     ) -> None:
         response = await async_client.post(
-            "/meter",
+            "/location",
             json=create_request_body,
             headers={"Authorization": f"Bearer {not_registered_email_token}"},
         )
@@ -77,14 +77,14 @@ class TestIntegrationMeter:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_meter_expired_token(
+    async def test_create_location_expired_token(
         self,
         async_client: AsyncClient,
         expired_access_token: str,
         create_request_body: dict[str, str],
     ) -> None:
         response = await async_client.post(
-            "/meter",
+            "/location",
             json=create_request_body,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -92,40 +92,40 @@ class TestIntegrationMeter:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_non_existing_meter(
+    async def test_delete_non_existing_location(
         self,
         async_client: AsyncClient,
         random_uuid: str,
         token: str,
     ) -> None:
         response = await async_client.delete(
-            f"/meter/{random_uuid}", headers={"Authorization": f"Bearer {token}"}
+            f"/location/{random_uuid}", headers={"Authorization": f"Bearer {token}"}
         )
         assert response.status_code == 204
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_meter(
+    async def test_update_location(
         self,
         async_client: AsyncClient,
-        created_meter: dict[str, Any],
+        created_location: dict[str, Any],
         update_request_body: dict[str, str],
         token: str,
     ) -> None:
-        mid = created_meter["id"]
+        mid = created_location["id"]
         response = await async_client.put(
-            f"/meter/{mid}",
+            f"/location/{mid}",
             json=update_request_body,
             headers={"Authorization": f"Bearer {token}"},
         )
         assert response.status_code == 200
 
-        updated_meter = response.json()
-        assert_meter(updated_meter, **update_request_body)
+        updated_location = response.json()
+        assert_location(updated_location, **update_request_body)
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_non_existing_meter(
+    async def test_update_non_existing_location(
         self,
         async_client: AsyncClient,
         random_uuid: str,
@@ -133,7 +133,7 @@ class TestIntegrationMeter:
         token: str,
     ) -> None:
         response = await async_client.put(
-            f"/meter/{random_uuid}",
+            f"/location/{random_uuid}",
             json=update_request_body,
             headers={"Authorization": f"Bearer {token}"},
         )
