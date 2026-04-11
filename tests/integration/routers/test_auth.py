@@ -6,7 +6,6 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.auth import credentials_exception, get_user
-from api.config import settings
 from api.db import get_conn_info
 from tests.assertions import assert_token, assert_user
 
@@ -20,9 +19,7 @@ class TestIntegrationAuth:
 
     @pytest.fixture
     async def conn(self) -> AsyncGenerator[AsyncConnection, None]:
-        async with await AsyncConnection.connect(
-            conninfo=get_conn_info(settings)
-        ) as conn:
+        async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
             yield conn
 
     @pytest.mark.integration

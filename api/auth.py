@@ -1,21 +1,26 @@
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
 import jwt
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from psycopg import AsyncConnection
 from pwdlib import PasswordHash
 
-from .config import settings
 from .db import connect_to_db
 from .models.users import users_table
 from .utils import log_async_func, log_func
 
+load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+SECRET_KEY = os.environ["SECRET_KEY"]
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -107,9 +112,7 @@ def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     Return: encoded JWT token
     """
     expire = datetime.now(timezone.utc) + expires_delta
-    return jwt.encode(
-        data | {"exp": expire}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
-    )
+    return jwt.encode(data | {"exp": expire}, key=SECRET_KEY, algorithm=ALGORITHM)
 
 
 @log_func(logger.info)
@@ -153,9 +156,7 @@ async def get_current_user(
         HTTPException: if token is not valid or user is not found in the database.
     """
     try:
-        payload = jwt.decode(
-            token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
 
     except InvalidTokenError as e:

@@ -12,7 +12,6 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
-from .config import settings
 from .db import get_conn_info
 from .logging_config import configure_logging
 from .routers.auth import router as auth_router
@@ -25,10 +24,10 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Setup and teardown of the app."""
-    configure_logging(settings)
+    configure_logging()
     logger.info("Setup")
 
-    async with AsyncConnectionPool(conninfo=get_conn_info(settings)) as pool:
+    async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
         app.state.pool = pool
         yield
 

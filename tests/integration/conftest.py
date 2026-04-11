@@ -1,12 +1,16 @@
+import os
 from datetime import timedelta
+from pathlib import Path
 from typing import Any, AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_jwt_token
 from api.main import app
 
+ROOT = Path(__file__).parent.parent.parent.resolve()
 
 @pytest.fixture(scope="session")
 def anyio_backend() -> str:
@@ -16,11 +20,27 @@ def anyio_backend() -> str:
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
     app.state.limiter.enabled = False
-    async with app.router.lifespan_context(app):
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as async_client:
-            yield async_client
+
+    with (
+        PostgresContainer("postgres:14")
+        .with_volume_mapping(
+            str(ROOT / "scripts/init-db.sh"), "/docker-entrypoint-initdb.d/init-db.sh"
+        )
+        .with_volume_mapping(
+            str(ROOT / "sql/"), "/docker-entrypoint-initdb.d/sql/"
+        ) as postgres
+    ):
+        os.environ["DB_NAME"] = postgres.dbname
+        os.environ["DB_USERNAME"] = postgres.username
+        os.environ["DB_PASSWORD"] = postgres.password
+        os.environ["DB_PORT"] = str(postgres.get_exposed_port(5432))
+        os.environ["DB_HOST"] = postgres.get_container_host_ip()
+
+        async with app.router.lifespan_context(app):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as async_client:
+                yield async_client
 
 
 @pytest.fixture

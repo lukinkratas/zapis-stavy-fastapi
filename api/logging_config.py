@@ -3,22 +3,18 @@ from logging.config import dictConfig
 
 from dotenv import load_dotenv
 
-from .config import Settings
-
 load_dotenv(override=True)
 
-ENV = os.getenv("ENV") or "dev"
+ENV = os.getenv("ENV", "dev")
+LOGTAIL_TOKEN = os.getenv("LOGTAIL_TOKEN")
+LOGTAIL_HOST = os.getenv("LOGTAIL_HOST")
 
 
-def configure_logging(settings: Settings) -> None:
+def configure_logging() -> None:
     """Configure logging."""
     handlers = ["stdout", "rotating_file"]
 
-    if (
-        ENV == "prod"
-        and settings.LOGTAIL_TOKEN is not None
-        and settings.LOGTAIL_HOST is not None
-    ):
+    if ENV == "prod" and LOGTAIL_TOKEN is not None and LOGTAIL_HOST is not None:
         handlers.append("logtail")
 
     cfg = {
@@ -91,8 +87,8 @@ def configure_logging(settings: Settings) -> None:
                 "formatter": "simple",
                 "level": "INFO",
                 "filters": ["correlation_id"],
-                "source_token": settings.LOGTAIL_TOKEN,
-                "host": settings.LOGTAIL_HOST,
+                "source_token": LOGTAIL_TOKEN,
+                "host": LOGTAIL_HOST,
             },
         },
         "loggers": {

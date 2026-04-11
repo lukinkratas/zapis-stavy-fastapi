@@ -8,8 +8,6 @@ make test
 ```
 
 ```sh
-# deploy db
-docker compose up -d
 # run integration tests
 make test-int
 ```

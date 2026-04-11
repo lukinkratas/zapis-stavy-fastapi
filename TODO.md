@@ -1,6 +1,6 @@
 - [x] switch from meters to locations
 - [ ] use confirmation token
-- [ ] testcontainers for integration tests
+- [x] testcontainers for integration tests
 
   1.2 DELETE endpoints return 204 even when resource doesn't exist (api/routers/users.py, api/routers/meters.py)
   DELETE /user/{id} and DELETE /meter/{id} return 204 regardless of whether the row existed. This silently swallows

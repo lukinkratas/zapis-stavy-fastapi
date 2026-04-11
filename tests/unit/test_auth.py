@@ -3,8 +3,13 @@ from typing import Any
 import jwt
 import pytest
 
-from api.auth import create_access_token, create_confirmation_token, verify_password
-from api.config import settings
+from api.auth import (
+    ALGORITHM,
+    SECRET_KEY,
+    create_access_token,
+    create_confirmation_token,
+    verify_password,
+)
 
 
 class TestUnitAuth:
@@ -24,9 +29,7 @@ class TestUnitAuth:
         credentials: dict[str, str],
     ) -> None:
         token = create_access_token(credentials["email"])
-        decoded_token = jwt.decode(
-            token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
         assert decoded_token["sub"] == credentials["email"]
         assert decoded_token["type"] == "access"
 
@@ -36,8 +39,6 @@ class TestUnitAuth:
         credentials: dict[str, str],
     ) -> None:
         token = create_confirmation_token(credentials["email"])
-        decoded_token = jwt.decode(
-            token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
         assert decoded_token["sub"] == credentials["email"]
         assert decoded_token["type"] == "confirmation"

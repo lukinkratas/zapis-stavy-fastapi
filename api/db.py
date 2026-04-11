@@ -1,23 +1,24 @@
 import logging
+import os
 from typing import AsyncGenerator
 
+from dotenv import load_dotenv
 from fastapi import Request
 from psycopg import AsyncConnection
 from psycopg.conninfo import make_conninfo
 
-from .config import Settings
-
+load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 
 
-def get_conn_info(settings: Settings) -> str:
+def get_conn_info() -> str:
     """Return connection info as string for psycopg database connection."""
     return make_conninfo(
-        dbname=settings.DB_NAME,
-        user=settings.DB_USERNAME,
-        password=settings.DB_PASSWORD,
-        host=settings.DB_HOST,
-        port=settings.DB_PORT,
+        dbname=os.environ["DB_NAME"],
+        user=os.environ["DB_USERNAME"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.getenv("DB_HOST", "localhost"),
+        port=os.getenv("DB_PORT", 5432),
     )
 
 

@@ -9,7 +9,7 @@ help:
 	@echo "  clean-up         - Clean up"
 	@echo "  test             - Run unit tests"
 	@echo "  test-int         - Run ingtegration tests"
-	@echo "  test-int         - Run all tests with html coverage"
+	@echo "  test-cov         - Run all tests with html coverage"
 	@echo "  serve-dev        - Serve the application with reloading"
 	@echo "  help             - Show this help message"
 
@@ -31,7 +31,7 @@ test:
 test-int:
 	uv run --dev pytest tests/integration -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
 
-test-all:
+test-cov:
 	uv run --dev pytest tests/ -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-fail-under=95 --cov-report=html:htmlcov
 
 clean-up:
