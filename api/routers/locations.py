@@ -98,6 +98,6 @@ async def update_location(
     updated_location = await locations_table.update(conn, id, current_user["id"], data)
 
     if updated_location is None:
-        raise HTTPException(status_code=404, detail="Cannot update location")
+        raise HTTPException(status_code=404, detail="Location not found")
 
     return updated_location

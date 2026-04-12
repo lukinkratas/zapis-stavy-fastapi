@@ -99,7 +99,8 @@ class TestIntegrationLocation:
         access_token: str,
     ) -> None:
         response = await async_client.delete(
-            f"/location/{random_uuid}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{random_uuid}",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 204
 

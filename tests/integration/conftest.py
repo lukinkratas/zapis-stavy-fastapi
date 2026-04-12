@@ -8,7 +8,11 @@ from httpx import ASGITransport, AsyncClient
 from testcontainers.postgres import PostgresContainer
 
 from api.main import app
-from api.routers.auth import _create_jwt_token, create_access_token
+from api.routers.auth import (
+    _create_jwt_token,
+    create_access_token,
+    create_confirmation_token,
+)
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -107,6 +111,11 @@ def expired_access_token(credentials: dict[str, str]) -> str:
     return _create_jwt_token(
         {"type": "access", "sub": credentials["email"]}, timedelta(-1)
     )
+
+
+@pytest.fixture
+def confirmation_token(credentials: dict[str, str]) -> str:
+    return create_confirmation_token(credentials["email"])
 
 
 @pytest.fixture

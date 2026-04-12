@@ -43,8 +43,7 @@ class TestIntegrationAuth:
     async def test_get_user_not_registered_email(
         self, conn: AsyncConnection, not_registered_email: str
     ) -> None:
-        with pytest.raises(HTTPException):
-            await get_user(conn, not_registered_email)
+        assert await get_user(conn, not_registered_email) is None
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -86,7 +85,9 @@ class TestIntegrationAuth:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_get_current_user(self, conn: AsyncConnection, access_token: str) -> None:
+    async def test_get_current_user(
+        self, conn: AsyncConnection, access_token: str
+    ) -> None:
         # requires user to be registered
         user = await get_current_user(conn, access_token)
         assert_user(user)
@@ -108,6 +109,15 @@ class TestIntegrationAuth:
         # requires user to be registered
         with pytest.raises(HTTPException):
             await get_current_user(conn, expired_access_token)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_get_current_user_confirmation_token(
+        self, conn: AsyncConnection, confirmation_token: str
+    ) -> None:
+        # requires user to be registered
+        with pytest.raises(HTTPException):
+            await get_current_user(conn, confirmation_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio
