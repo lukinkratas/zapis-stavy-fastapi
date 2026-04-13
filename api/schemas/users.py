@@ -25,3 +25,4 @@ class UserResponseJson(BaseModel):
     created_at: datetime.datetime
     email: str
     password: str
+    confirmed: bool

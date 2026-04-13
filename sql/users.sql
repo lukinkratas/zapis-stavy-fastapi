@@ -3,6 +3,7 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     email TEXT NOT NULL,
     password TEXT NOT NULL,
+    confirmed BOOLEAN DEFAULT FALSE,
     CONSTRAINT unique_user_email UNIQUE (email),
     PRIMARY key (id)
 );

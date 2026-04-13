@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
@@ -14,7 +14,7 @@ from ..schemas.users import (
     UserUpdateRequestBody,
 )
 from ..utils import log_async_func
-from .auth import get_password_hash
+from .auth import get_password_hash, create_confirmation_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,9 +23,10 @@ router = APIRouter()
 @router.post("/register", status_code=201, response_model=UserResponseJson)
 @log_async_func(logger.info)
 async def register_user(
+    request: Request, 
     user: UserCreateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-) -> dict[str, Any] | None:
+) -> dict[str, Any]:
     """Add new user into the database.
 
     Args:
@@ -46,9 +47,12 @@ async def register_user(
         registered_user = await users_table.insert(conn, data)
 
     except UniqueViolation:
-        raise HTTPException(status_code=409, detail="User already exists")
+        raise HTTPException(status_code=409, detail="User already exists.")
 
-    return registered_user
+    return {
+        "detail": "User registered. Please confirm your email.",
+        "confirmation_url": request.url_for("confirm", token=create_confirmation_token(user.email))
+    }
 
 
 @router.delete("/user/{id}", status_code=204)
@@ -93,6 +97,6 @@ async def update_user(
     updated_user = await users_table.update(conn, id, data)
 
     if updated_user is None:
-        raise HTTPException(status_code=404, detail="Cannot update user")
+        raise HTTPException(status_code=404, detail="User not found.")
 
     return updated_user

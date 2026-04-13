@@ -215,3 +215,11 @@ async def login(
     """
     user = await authenticate_user(conn, form_data.username, form_data.password)
     return Token(access_token=create_access_token(user["email"]), token_type="bearer")
+
+@router.get("/confirm/{token}")
+@log_async_func(logger.info)
+async def confirm(token: Token, conn: Annotated[AsyncConnection, Depends(connect_to_db)]) -> dict[str, Any]:
+    email = get_subject(token, typ="confirmation")
+    user = await get_user(conn, email)
+    await users_table.update(conn, user["id"], {"confirmed": True})
+    return {"detail": "User confirmed."}
