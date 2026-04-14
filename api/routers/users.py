@@ -14,22 +14,23 @@ from ..schemas.users import (
     UserUpdateRequestBody,
 )
 from ..utils import log_async_func
-from .auth import get_password_hash, create_confirmation_token
+from .auth import create_confirmation_token, get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/register", status_code=201, response_model=UserResponseJson)
+@router.post("/register", status_code=201)
 @log_async_func(logger.info)
 async def register_user(
-    request: Request, 
+    request: Request,
     user: UserCreateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> dict[str, Any]:
     """Add new user into the database.
 
     Args:
+        request: FastAPI request object (used for accessing headers, client info, etc.).
         user: user create request payload from client
         conn: database connection
 
@@ -39,9 +40,8 @@ async def register_user(
         HTTPException: if user cannot be inserted in the database
     """
     # TODO: fixme
-    password = user.password
-    user.password = get_password_hash(password)
     data = user.model_dump()
+    data["password"] = get_password_hash(user.password)
 
     try:
         registered_user = await users_table.insert(conn, data)
@@ -51,7 +51,10 @@ async def register_user(
 
     return {
         "detail": "User registered. Please confirm your email.",
-        "confirmation_url": request.url_for("confirm", token=create_confirmation_token(user.email))
+        "user": registered_user,
+        "confirmation_url": str(
+            request.url_for("confirm", token=create_confirmation_token(user.email))
+        ),
     }
 
 
@@ -94,6 +97,8 @@ async def update_user(
         HTTPException: if user cannot be updated in the database
     """
     data = user.model_dump()
+    data["password"] = get_password_hash(user.password)
+
     updated_user = await users_table.update(conn, id, data)
 
     if updated_user is None:

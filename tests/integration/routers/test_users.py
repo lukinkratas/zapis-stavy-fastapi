@@ -22,7 +22,7 @@ class TestIntegrationUser:
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
 
-        new_user = response.json()
+        new_user = response.json()["user"]
         # pop password, cause it is hashed
         password = credentials.pop("password")
         assert verify_password(password, new_user["password"])
@@ -66,7 +66,7 @@ class TestIntegrationUser:
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert_user(updated_user, **update_request_body)
+        assert_user(updated_user, email="update@update.net")
 
     @pytest.mark.integration
     @pytest.mark.anyio

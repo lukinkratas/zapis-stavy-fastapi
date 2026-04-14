@@ -73,7 +73,7 @@ async def registered_user(
     async_client: AsyncClient, credentials: dict[str, str]
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post("/register", json=credentials)
-    registered_user = response.json()
+    registered_user = response.json()["user"]
 
     yield registered_user
 

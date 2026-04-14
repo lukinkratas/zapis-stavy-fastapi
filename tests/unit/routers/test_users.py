@@ -30,7 +30,7 @@ class TestUnitUser:
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
 
-        new_user = response.json()
+        new_user = response.json()["user"]
         assert_user(new_user)
 
         # delete registered user

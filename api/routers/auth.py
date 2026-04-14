@@ -159,10 +159,7 @@ def get_subject(token: str, typ: Literal["access", "confirmation"]) -> str:
 
     email = payload.get("sub")
 
-    if email is None:
-        raise token_exception
-
-    if payload.get("type") != typ:
+    if email is None or payload.get("type") != typ:
         raise token_exception
 
     return email
@@ -216,9 +213,20 @@ async def login(
     user = await authenticate_user(conn, form_data.username, form_data.password)
     return Token(access_token=create_access_token(user["email"]), token_type="bearer")
 
+
 @router.get("/confirm/{token}")
 @log_async_func(logger.info)
-async def confirm(token: Token, conn: Annotated[AsyncConnection, Depends(connect_to_db)]) -> dict[str, Any]:
+async def confirm(
+    token: str, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
+) -> dict[str, Any]:
+    """Update user to confirmed = True based on email from token.
+
+    Args:
+        token: encoded JWT token
+        conn: database connection
+
+    Returns: dict with detail message
+    """
     email = get_subject(token, typ="confirmation")
     user = await get_user(conn, email)
     await users_table.update(conn, user["id"], {"confirmed": True})
