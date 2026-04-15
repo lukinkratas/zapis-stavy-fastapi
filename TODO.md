@@ -3,6 +3,8 @@
 - [x] testcontainers for integration tests
 - [ ] review unit tests - make them truly unit
 - [x] id as sub for access token and confirmation token -> confirmation token update table without get_user middle step, be careful with get_uset + authenticate user (comes with email from web form)
+- [ ] register endpoint user field returns password bug
+- [ ] add e2e testing
 
   1.2 DELETE endpoints return 204 even when resource doesn't exist (api/routers/users.py, api/routers/meters.py)
   DELETE /user/{id} and DELETE /meter/{id} return 204 regardless of whether the row existed. This silently swallows

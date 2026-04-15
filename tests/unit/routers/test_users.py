@@ -20,11 +20,17 @@ class TestUnitUser:
         async_client: AsyncClient,
         mocker: MockerFixture,
     ) -> None:
-        credentials = {"email": "register@register.net", "password": "123456seven"}
+        credentials = {"email": "test@test.net", "password": "123456seven"}
+        user_from_db = {
+            "email": "test@test.net",
+            "password": get_password_hash("123456seven")
+            "id": str(uuid.uuid4()),
+            "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        }
 
         # mocking
-        new_user = user_factory(credentials)
-        mocker.patch.object(UsersTable, "insert", new=AsyncMock(return_value=new_user))
+        # new_user = user_factory(credentials)
+        mocker.patch.object(UsersTable, "insert", new=AsyncMock(return_value=user_from_db))
 
         # register user
         response = await async_client.post("/register", json=credentials)
