@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any, Literal
 
@@ -63,19 +64,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 @log_async_func(logger.info)
-async def get_user(conn: AsyncConnection, email: str) -> dict[str, Any]:
-    """Get user from the database.
-
-    Args:
-        conn: database connection
-        email: email of the user
-
-    Returns: user dict
-    """
-    return await users_table.select_by_email(conn, email)
-
-
-@log_async_func(logger.info)
 async def authenticate_user(
     conn: AsyncConnection, email: str, password: str
 ) -> dict[str, Any]:
@@ -91,7 +79,7 @@ async def authenticate_user(
     Raises:
         HTTPException: if user is not found in the database or password mismatch.
     """
-    user = await get_user(conn, email)
+    user = await users_table.select_by_email(conn, email)
 
     if user is None:
         raise credentials_exception
@@ -117,28 +105,34 @@ def _create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
 
 
 @log_func(logger.info)
-def create_access_token(email: str) -> str:
+def create_access_token(
+    user_id: uuid.UUID, expires_delta: timedelta = timedelta(minutes=15)
+) -> str:
     """Create access token.
 
     Args:
-        email: email to be encoded
+        user_id: user id to be encoded
+        expires_delta: expire period of token
 
     Returns: encoded JWT token
     """
-    return _create_jwt_token({"type": "access", "sub": email}, timedelta(minutes=15))
+    return _create_jwt_token({"type": "access", "sub": str(user_id)}, expires_delta)
 
 
 @log_func(logger.info)
-def create_confirmation_token(email: str) -> str:
+def create_confirmation_token(
+    user_id: uuid.UUID, expires_delta: timedelta = timedelta(hours=24)
+) -> str:
     """Create confirmation token.
 
     Args:
-        email: email to be encoded
+        user_id: user id to be encoded
+        expires_delta: expire period of token
 
     Returns: encoded JWT token
     """
     return _create_jwt_token(
-        {"type": "confirmation", "sub": email}, timedelta(hours=24)
+        {"type": "confirmation", "sub": str(user_id)}, expires_delta
     )
 
 
@@ -149,7 +143,7 @@ def get_subject(token: str, typ: Literal["access", "confirmation"]) -> str:
         token: encoded JWT token
         typ: token type, either access or confirmation
 
-    Returns: decoded email
+    Returns: decoded user id
     """
     try:
         payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
@@ -157,12 +151,12 @@ def get_subject(token: str, typ: Literal["access", "confirmation"]) -> str:
     except InvalidTokenError as e:
         raise token_exception from e
 
-    email = payload.get("sub")
+    user_id = payload.get("sub")
 
-    if email is None or payload.get("type") != typ:
+    if user_id is None or payload.get("type") != typ:
         raise token_exception
 
-    return email
+    return user_id
 
 
 @log_async_func(logger.info)
@@ -182,8 +176,8 @@ async def get_current_user(
     Raises:
         HTTPException: if user is not found in the database.
     """
-    email = get_subject(token, typ="access")
-    user = await get_user(conn, email)
+    user_id = get_subject(token, typ="access")
+    user = await users_table.select_by_id(conn, user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -211,7 +205,7 @@ async def login(
         HTTPException: if user not found in the database or password mismatch.
     """
     user = await authenticate_user(conn, form_data.username, form_data.password)
-    return Token(access_token=create_access_token(user["email"]), token_type="bearer")
+    return Token(access_token=create_access_token(user["id"]), token_type="bearer")
 
 
 @router.get("/confirm/{token}")
@@ -227,7 +221,6 @@ async def confirm(
 
     Returns: dict with detail message
     """
-    email = get_subject(token, typ="confirmation")
-    user = await get_user(conn, email)
-    await users_table.update(conn, user["id"], {"confirmed": True})
+    user_id = get_subject(token, typ="confirmation")
+    await users_table.update(conn, user_id, {"confirmed": True})
     return {"detail": "User confirmed."}

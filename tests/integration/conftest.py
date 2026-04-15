@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import timedelta
 from pathlib import Path
 from typing import Any, AsyncGenerator
@@ -9,7 +10,6 @@ from testcontainers.postgres import PostgresContainer
 
 from api.main import app
 from api.routers.auth import (
-    _create_jwt_token,
     create_access_token,
     create_confirmation_token,
 )
@@ -82,40 +82,23 @@ async def registered_user(
 
 
 @pytest.fixture
-async def access_token(
-    async_client: AsyncClient,
-    credentials: dict[str, str],
-    registered_user: dict[str, str],
-) -> str:
-    # requires user to be registered, credentials are not sufficient
-    data = {
-        "username": credentials["email"],
-        "password": credentials["password"],
-    }
-    response = await async_client.post(
-        "/token",
-        data=data,
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    token = response.json()
-    return token["access_token"]
+def access_token(async_client: AsyncClient, registered_user: dict[str, str]) -> str:
+    return create_access_token(registered_user["id"])
 
 
 @pytest.fixture
 def not_registered_email_token(not_registered_email: str) -> str:
-    return create_access_token(not_registered_email)
+    return create_access_token(uuid.uuid4())
 
 
 @pytest.fixture
-def expired_access_token(credentials: dict[str, str]) -> str:
-    return _create_jwt_token(
-        {"type": "access", "sub": credentials["email"]}, timedelta(-1)
-    )
+def expired_access_token(registered_user: dict[str, str]) -> str:
+    return create_access_token(uuid.uuid4(), timedelta(-1))
 
 
 @pytest.fixture
-def confirmation_token(credentials: dict[str, str]) -> str:
-    return create_confirmation_token(credentials["email"])
+def confirmation_token(registered_user: dict[str, str]) -> str:
+    return create_confirmation_token(registered_user["id"])
 
 
 @pytest.fixture

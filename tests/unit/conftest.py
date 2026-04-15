@@ -52,8 +52,8 @@ def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
 
 
 @pytest.fixture
-async def access_token(credentials: dict[str, str]) -> str:
-    return create_access_token(credentials["email"])
+async def access_token(registered_user: dict[str, str]) -> str:
+    return create_access_token(registered_user["id"])
 
 
 @pytest.fixture

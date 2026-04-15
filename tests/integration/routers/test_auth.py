@@ -10,7 +10,6 @@ from api.routers.auth import (
     authenticate_user,
     credentials_exception,
     get_current_user,
-    get_user,
 )
 from tests.assertions import assert_token, assert_user
 
@@ -26,24 +25,6 @@ class TestIntegrationAuth:
     async def conn(self) -> AsyncGenerator[AsyncConnection, None]:
         async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
             yield conn
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_get_user(
-        self,
-        conn: AsyncConnection,
-        registered_user: dict[str, Any],
-    ) -> None:
-        # requires user to be already registered
-        user = await get_user(conn, registered_user["email"])
-        assert_user(user)
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_get_user_not_registered_email(
-        self, conn: AsyncConnection, not_registered_email: str
-    ) -> None:
-        assert await get_user(conn, not_registered_email) is None
 
     @pytest.mark.integration
     @pytest.mark.anyio
