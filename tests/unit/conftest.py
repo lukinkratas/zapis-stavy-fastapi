@@ -1,3 +1,5 @@
+import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Any, AsyncGenerator
 from unittest.mock import AsyncMock
 
@@ -7,9 +9,11 @@ from psycopg import AsyncConnection
 
 from api.db import connect_to_db
 from api.main import app
-from api.routers.auth import create_access_token
-
-from .utils import location_factory, user_factory
+from api.routers.auth import (
+    create_access_token,
+    create_confirmation_token,
+    get_password_hash,
+)
 
 
 @pytest.fixture(scope="session")
@@ -42,20 +46,48 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def credentials() -> dict[str, str]:
-    return {"email": "test@test.net", "password": "pswd1234"}
+def password() -> str:
+    return "password"
 
 
 @pytest.fixture
-def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
-    return user_factory(credentials)
+def credentials(password: str) -> dict[str, str]:
+    return {"email": "test@test.net", "password": password}
 
 
 @pytest.fixture
-async def access_token(registered_user: dict[str, str]) -> str:
-    return create_access_token(registered_user["id"])
+def user_id() -> str:
+    return str(uuid.uuid4())
 
 
 @pytest.fixture
-async def created_location(registered_user: dict[str, Any]) -> dict[str, Any]:
-    return location_factory({"name": "test"}, registered_user["id"])
+def hashed_password(password: str) -> str:
+    return get_password_hash(password)
+
+
+@pytest.fixture
+def user_from_db(
+    credentials: dict[str, str], user_id: str, hashed_password: str
+) -> dict[str, Any]:
+    return {
+        "email": credentials["email"],
+        "password": hashed_password,
+        "id": user_id,
+        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        "confirmed": False,
+    }
+
+
+@pytest.fixture
+async def access_token(user_id: str) -> str:
+    return create_access_token(user_id)
+
+
+@pytest.fixture
+async def confirmation_token(user_id: str) -> str:
+    return create_confirmation_token(user_id)
+
+
+@pytest.fixture
+async def expired_confirmation_token(user_id: str) -> str:
+    return create_confirmation_token(user_id, expires_delta=timedelta(-1))

@@ -137,7 +137,7 @@ def create_confirmation_token(
 
 
 def get_subject(token: str, typ: Literal["access", "confirmation"]) -> str:
-    """Get subject email from JWT token.
+    """Get subject from JWT token.
 
     Args:
         token: encoded JWT token
@@ -222,5 +222,9 @@ async def confirm(
     Returns: dict with detail message
     """
     user_id = get_subject(token, typ="confirmation")
+    # check user exists
+    user = await users_table.select_by_id(conn, user_id)
+    if user is None:
+        raise token_exception
     await users_table.update(conn, user_id, {"confirmed": True})
     return {"detail": "User confirmed."}

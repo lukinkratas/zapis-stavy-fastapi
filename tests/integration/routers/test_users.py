@@ -1,35 +1,32 @@
+import uuid
 from typing import Any
 
 import pytest
 from httpx import AsyncClient
 
 from api.routers.auth import verify_password
-from tests.assertions import assert_user
+from api.schemas.users import UserResponseJson
 
 
 class TestIntegrationUser:
     """Integration tests for users."""
 
-    @pytest.fixture
-    def update_request_body(self) -> dict[str, str]:
-        return {"email": "update@update.net", "password": "update5six7"}
-
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_register_and_delete_user(self, async_client: AsyncClient) -> None:
+    async def test_register_and_delete_user(
+        self, async_client: AsyncClient, credentials: dict[str, str]
+    ) -> None:
         # register user
-        credentials = {"email": "integration@test.net", "password": "123456seven"}
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
 
-        new_user = response.json()["user"]
-        # pop password, cause it is hashed
-        password = credentials.pop("password")
-        assert verify_password(password, new_user["password"])
-        assert_user(new_user, **credentials)
+        registered_user = response.json()["user"]
+        assert UserResponseJson.model_validate(registered_user)
+        assert registered_user["email"] == credentials["email"]
+        assert verify_password(credentials["password"], registered_user["password"])
 
         # delete registered user
-        uid = new_user["id"]
+        uid = registered_user["id"]
         response = await async_client.delete(f"/user/{uid}")
         assert response.status_code == 204
 
@@ -39,7 +36,7 @@ class TestIntegrationUser:
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        user_from_db: dict[str, Any],
     ) -> None:
         # requires user to be already registered
         response = await async_client.post("/register", json=credentials)
@@ -47,10 +44,8 @@ class TestIntegrationUser:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_non_registered_user(
-        self, async_client: AsyncClient, random_uuid: str
-    ) -> None:
-        response = await async_client.delete(f"/user/{random_uuid}")
+    async def test_delete_non_registered_user(self, async_client: AsyncClient) -> None:
+        response = await async_client.delete(f"/user/{uuid.uuid4()}")
         assert response.status_code == 204
 
     @pytest.mark.integration
@@ -58,25 +53,21 @@ class TestIntegrationUser:
     async def test_update_user(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
-        update_request_body: dict[str, str],
+        user_id: str,
     ) -> None:
-        uid = registered_user["id"]
-        response = await async_client.put(f"/user/{uid}", json=update_request_body)
+        update_body = {"email": "update@test.net", "password": "update"}
+        response = await async_client.put(f"/user/{user_id}", json=update_body)
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert_user(updated_user, email="update@update.net")
+        assert UserResponseJson.model_validate(updated_user)
+        assert updated_user["email"] == update_body["email"]
+        # TODO: fetch the password from db (not to be displayed in UserResponseJson)
+        # assert verify_password(update_body["password"], updated_user.password)
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_non_registered_user(
-        self,
-        async_client: AsyncClient,
-        random_uuid: str,
-        update_request_body: dict[str, str],
-    ) -> None:
-        response = await async_client.put(
-            f"/user/{random_uuid}", json=update_request_body
-        )
+    async def test_update_non_registered_user(self, async_client: AsyncClient) -> None:
+        update_body = {"email": "update@test.net", "password": "update"}
+        response = await async_client.put(f"/user/{uuid.uuid4()}", json=update_body)
         assert response.status_code == 404

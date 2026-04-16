@@ -1,3 +1,5 @@
+import uuid
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -6,9 +8,8 @@ from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.models.users import UsersTable
-from tests.assertions import assert_user
-
-from ..utils import user_factory
+from api.routers.auth import get_password_hash
+from api.schemas.users import UserResponseJson
 
 
 class TestUnitUser:
@@ -19,38 +20,33 @@ class TestUnitUser:
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
+        credentials: dict[str, str],
+        user_from_db: dict[str, Any],
     ) -> None:
-        credentials = {"email": "test@test.net", "password": "123456seven"}
-        user_from_db = {
-            "email": "test@test.net",
-            "password": get_password_hash("123456seven")
-            "id": str(uuid.uuid4()),
-            "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        }
-
-        # mocking
-        # new_user = user_factory(credentials)
-        mocker.patch.object(UsersTable, "insert", new=AsyncMock(return_value=user_from_db))
+        # mock
+        mocker.patch.object(
+            UsersTable, "insert", new=AsyncMock(return_value=user_from_db)
+        )
 
         # register user
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
 
-        new_user = response.json()["user"]
-        assert_user(new_user)
+        registered_user = response.json()["user"]
+        assert UserResponseJson.model_validate(registered_user)
 
         # delete registered user
         mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
-        uid = new_user["id"]
+        uid = registered_user["id"]
         response = await async_client.delete(f"/user/{uid}")
         assert response.status_code == 204
 
     @pytest.mark.parametrize(
         "credentials",
         [
-            {"username": "register@register.net", "password": "123456seven"},
-            {"password": "123456seven"},
-            {"email": "register@register.net"},
+            {"email": "test@test.net"},
+            {"password": "password"},
+            {"username": "test@test.net", "password": "password"},
         ],
     )
     @pytest.mark.anyio
@@ -66,20 +62,23 @@ class TestUnitUser:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
     ) -> None:
-        updated_credentials = {"email": "update@update.net", "password": "5six7"}
+        update_payload = {"email": "test@test.net", "password": "update"}
+        user_from_db = {
+            "email": update_payload["email"],
+            "password": get_password_hash(update_payload["password"]),
+            "id": str(uuid.uuid4()),
+            "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        }
 
-        # mocking
-        updated_user = user_factory(updated_credentials)
+        # mock
         mocker.patch.object(
-            UsersTable, "update", new=AsyncMock(return_value=updated_user)
+            UsersTable, "update", new=AsyncMock(return_value=user_from_db)
         )
 
-        # update registered user
-        uid = registered_user["id"]
-        response = await async_client.put(f"/user/{uid}", json=updated_credentials)
+        # update user
+        response = await async_client.put(f"/user/{uuid.uuid4()}", json=update_payload)
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert_user(updated_user)
+        assert UserResponseJson.model_validate(updated_user)

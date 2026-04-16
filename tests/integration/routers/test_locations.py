@@ -1,21 +1,14 @@
+import uuid
 from typing import Any
 
 import pytest
 from httpx import AsyncClient
 
-from tests.assertions import assert_location
+from api.schemas.locations import LocationResponseJson
 
 
 class TestIntegrationLocation:
     """Integration tests for locations."""
-
-    @pytest.fixture
-    def create_request_body(self) -> dict[str, str]:
-        return {"name": "new"}
-
-    @pytest.fixture
-    def update_request_body(self) -> dict[str, str]:
-        return {"name": "update"}
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -23,23 +16,23 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         access_token: str,
-        create_request_body: dict[str, str],
+        location_payload: dict[str, str],
     ) -> None:
         # create location
         response = await async_client.post(
             "/location",
-            json=create_request_body,
+            json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
 
         new_location = response.json()
-        assert_location(new_location, **create_request_body)
+        assert LocationResponseJson.model_validate(new_location)
 
         # delete created location
-        mid = new_location["id"]
+        lid = new_location["id"]
         response = await async_client.delete(
-            f"/location/{mid}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{lid}", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 204
 
@@ -49,13 +42,13 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         access_token: str,
-        created_location: dict[str, Any],
+        location_payload: dict[str, str],
+        location_from_db: dict[str, Any],
     ) -> None:
         # requires location to be already created
-        create_request_body = {"name": created_location["name"]}
         response = await async_client.post(
             "/location",
-            json=create_request_body,
+            json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 409
@@ -65,13 +58,13 @@ class TestIntegrationLocation:
     async def test_create_location_not_registered_email_token(
         self,
         async_client: AsyncClient,
-        not_registered_email_token: str,
-        create_request_body: dict[str, str],
+        not_registered_access_token: str,
+        location_payload: dict[str, str],
     ) -> None:
         response = await async_client.post(
             "/location",
-            json=create_request_body,
-            headers={"Authorization": f"Bearer {not_registered_email_token}"},
+            json=location_payload,
+            headers={"Authorization": f"Bearer {not_registered_access_token}"},
         )
         assert response.status_code == 401
 
@@ -81,11 +74,11 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         expired_access_token: str,
-        create_request_body: dict[str, str],
+        location_payload: dict[str, str],
     ) -> None:
         response = await async_client.post(
             "/location",
-            json=create_request_body,
+            json=location_payload,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -95,11 +88,10 @@ class TestIntegrationLocation:
     async def test_delete_non_existing_location(
         self,
         async_client: AsyncClient,
-        random_uuid: str,
         access_token: str,
     ) -> None:
         response = await async_client.delete(
-            f"/location/{random_uuid}",
+            f"/location/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 204
@@ -109,33 +101,31 @@ class TestIntegrationLocation:
     async def test_update_location(
         self,
         async_client: AsyncClient,
-        created_location: dict[str, Any],
-        update_request_body: dict[str, str],
         access_token: str,
+        location_id: str,
     ) -> None:
-        mid = created_location["id"]
+        update_payload = {"name": "update"}
         response = await async_client.put(
-            f"/location/{mid}",
-            json=update_request_body,
+            f"/location/{location_id}",
+            json=update_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
         updated_location = response.json()
-        assert_location(updated_location, **update_request_body)
+        assert LocationResponseJson.model_validate(updated_location)
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_non_existing_location(
         self,
         async_client: AsyncClient,
-        random_uuid: str,
-        update_request_body: dict[str, str],
         access_token: str,
     ) -> None:
+        update_payload = {"name": "update"}
         response = await async_client.put(
-            f"/location/{random_uuid}",
-            json=update_request_body,
+            f"/location/{uuid.uuid4()}",
+            json=update_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404

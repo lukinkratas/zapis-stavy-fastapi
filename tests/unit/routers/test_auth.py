@@ -18,60 +18,50 @@ from api.routers.auth import (
     get_subject,
     verify_password,
 )
-from tests.assertions import assert_token
+from api.schemas.auth import Token
 
 
 class TestUnitAuth:
     """Unit tests for auth."""
 
     @pytest.mark.anyio
-    async def test_verify_password(
-        self,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-    ) -> None:
-        verify_password(credentials["password"], registered_user["password"])
+    async def test_verify_password(self, password: str, hashed_password: str) -> None:
+        verify_password(password, hashed_password)
 
     @pytest.mark.anyio
-    async def test_create_access_token(self) -> None:
-        email = "test@test.net"
-        token = create_access_token(email)
+    async def test_create_access_token(self, user_id: str) -> None:
+        token = create_access_token(user_id)
         decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        assert decoded_token["sub"] == email
+        assert decoded_token["sub"] == user_id
         assert decoded_token["type"] == "access"
 
     @pytest.mark.anyio
-    async def test_create_confirmation_token(self) -> None:
-        email = "test@test.net"
-        token = create_confirmation_token(email)
+    async def test_create_confirmation_token(self, user_id: str) -> None:
+        token = create_confirmation_token(user_id)
         decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        assert decoded_token["sub"] == email
+        assert decoded_token["sub"] == user_id
         assert decoded_token["type"] == "confirmation"
 
-    def test_get_subject_access_token(self) -> None:
-        email = "test@test.net"
-        token = create_access_token(email)
-        assert email == get_subject(token, typ="access")
+    def test_get_subject_access_token(self, user_id: str) -> None:
+        token = create_access_token(user_id)
+        assert get_subject(token, typ="access") == user_id
 
-    def test_get_subject_confirmation_token(self) -> None:
-        email = "test@test.net"
-        token = create_confirmation_token(email)
-        assert email == get_subject(token, typ="confirmation")
+    def test_get_subject_confirmation_token(self, user_id: str) -> None:
+        token = create_confirmation_token(user_id)
+        assert get_subject(token, typ="confirmation") == user_id
 
     def test_get_subject_invalid(self) -> None:
         token = "invalid"
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")
 
-    def test_get_subject_wrong_type(self) -> None:
-        email = "test@test.net"
-        token = create_confirmation_token(email)
+    def test_get_subject_wrong_type(self, user_id: str) -> None:
+        token = create_confirmation_token(user_id)
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")
 
-    def test_get_subject_expired_token(self) -> None:
-        email = "test@test.net"
-        token = _create_jwt_token({"type": "access", "sub": email}, timedelta(-1))
+    def test_get_subject_expired_token(self, user_id: str) -> None:
+        token = create_access_token(user_id, expires_delta=timedelta(-1))
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")
 
@@ -83,18 +73,17 @@ class TestUnitAuth:
     @pytest.mark.anyio
     async def test_login(
         self,
-        mocker: MockerFixture,
         async_client: AsyncClient,
+        mocker: MockerFixture,
         credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        user_from_db: dict[str, Any],
     ) -> None:
-        # mocking - returns user from db with hashed password
+        # mock
         mocker.patch.object(
-            UsersTable,
-            "select_by_email",
-            new=AsyncMock(return_value=registered_user),
+            UsersTable, "select_by_email", new=AsyncMock(return_value=user_from_db)
         )
 
+        # login
         data = {
             "username": credentials["email"],
             "password": credentials["password"],  # plain password
@@ -103,4 +92,29 @@ class TestUnitAuth:
         assert response.status_code == 200
 
         token = response.json()
-        assert_token(token)
+        assert Token.model_validate(token)
+
+    @pytest.mark.anyio
+    async def test_confirm(
+        self,
+        async_client: AsyncClient,
+        mocker: MockerFixture,
+        confirmation_token: str,
+    ) -> None:
+        # confirm
+        response = await async_client.get(f"/confirm/{confirmation_token}")
+        assert response.status_code == 200
+
+    @pytest.mark.anyio
+    async def test_confirm_expired_token(
+        self, async_client: AsyncClient, expired_confirmation_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
+        assert response.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_confirm_access_token(
+        self, async_client: AsyncClient, access_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{access_token}")
+        assert response.status_code == 401

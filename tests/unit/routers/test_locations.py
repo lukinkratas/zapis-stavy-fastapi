@@ -1,4 +1,5 @@
-from typing import Any
+import uuid
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
 import pytest
@@ -6,28 +7,35 @@ from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.models.locations import LocationsTable
-from tests.assertions import assert_location
-
-from ..utils import location_factory
+from api.schemas.locations import LocationResponseJson
 
 
 class TestUnitLocation:
     """Unit tests for locations."""
+
+    @pytest.fixture
+    def location_id(self) -> str:
+        return str(uuid.uuid4())
 
     @pytest.mark.anyio
     async def test_create_and_delete_location(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        registered_user: dict[str, Any],
+        user_id: str,
         access_token: str,
+        location_id: str,
     ) -> None:
         location_payload = {"name": "new"}
+        location_from_db = location_payload | {
+            "id": location_id,
+            "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "user_id": user_id,
+        }
 
-        # mocking
-        new_location = location_factory(location_payload, registered_user["id"])
+        # mock
         mocker.patch.object(
-            LocationsTable, "insert", new=AsyncMock(return_value=new_location)
+            LocationsTable, "insert", new=AsyncMock(return_value=location_from_db)
         )
 
         # create location
@@ -39,7 +47,7 @@ class TestUnitLocation:
         assert response.status_code == 201
 
         new_location = response.json()
-        assert_location(new_location)
+        assert LocationResponseJson.model_validate(new_location)
 
         # delete created location
         mocker.patch.object(LocationsTable, "delete", new=AsyncMock(return_value=None))
@@ -54,25 +62,29 @@ class TestUnitLocation:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        created_location: dict[str, Any],
+        user_id: str,
         access_token: str,
+        location_id: str,
     ) -> None:
-        updated_location_payload = {"name": "update"}
+        update_payload = {"name": "update"}
+        location_from_db = updated_payload | {
+            "id": str(uuid.uuid4()),
+            "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "user_id": str(uuid.uuid4()),
+        }
 
-        # mocking
-        updated_location = created_location | updated_location_payload
+        # mock
         mocker.patch.object(
-            LocationsTable, "update", new=AsyncMock(return_value=updated_location)
+            LocationsTable, "update", new=AsyncMock(return_value=location_from_db)
         )
 
         # update location
-        mid = created_location["id"]
         response = await async_client.put(
-            f"/location/{mid}",
-            json=updated_location_payload,
+            f"/location/{location_id}",
+            json=updated_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
         updated_location = response.json()
-        assert_location(updated_location)
+        assert LocationResponseJson.model_validate(updated_location)

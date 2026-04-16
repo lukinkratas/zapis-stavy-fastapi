@@ -6,20 +6,18 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.db import get_conn_info
+from api.models.users import users_table
 from api.routers.auth import (
     authenticate_user,
     credentials_exception,
     get_current_user,
 )
-from tests.assertions import assert_token, assert_user
+from api.schemas.auth import Token
+from api.schemas.users import UserResponseJson
 
 
 class TestIntegrationAuth:
     """Integration tests for auth."""
-
-    def assert_invalid_token(self, token: dict[str, Any]) -> None:
-        assert credentials_exception.detail in token["detail"]
-        assert "access_token" not in token.keys()
 
     @pytest.fixture
     async def conn(self) -> AsyncGenerator[AsyncConnection, None]:
@@ -32,37 +30,32 @@ class TestIntegrationAuth:
         self,
         conn: AsyncConnection,
         credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        user_from_db: dict[str, Any],
     ) -> None:
         # requires user to be already registered
         user = await authenticate_user(conn, **credentials)
-        assert_user(user)
+        assert UserResponseJson.model_validate(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_authenticate_user_not_registered_email(
-        self,
-        conn: AsyncConnection,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-        not_registered_email: str,
+        self, conn: AsyncConnection
     ) -> None:
         # requires user to be already registered
         with pytest.raises(HTTPException):
-            await authenticate_user(conn, not_registered_email, credentials["password"])
+            await authenticate_user(conn, "not@registered.net", "password")
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_authenticate_user_invalid_password(
         self,
         conn: AsyncConnection,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-        invalid_password: str,
+        email: str,
+        user_from_db: dict[str, Any],
     ) -> None:
         # requires user to be already registered
         with pytest.raises(HTTPException):
-            await authenticate_user(conn, credentials["email"], invalid_password)
+            await authenticate_user(conn, email, "invalid")
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -71,16 +64,16 @@ class TestIntegrationAuth:
     ) -> None:
         # requires user to be registered
         user = await get_current_user(conn, access_token)
-        assert_user(user)
+        assert UserResponseJson.model_validate(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_current_user_not_registered_email_token(
-        self, conn: AsyncConnection, not_registered_email_token: str
+        self, conn: AsyncConnection, not_registered_access_token: str
     ) -> None:
         # requires user to be registered
         with pytest.raises(HTTPException):
-            await get_current_user(conn, not_registered_email_token)
+            await get_current_user(conn, not_registered_access_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -105,13 +98,14 @@ class TestIntegrationAuth:
     async def test_login(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        email: str,
+        password: str,
+        user_from_db: dict[str, Any],
     ) -> None:
         # requires user to be registered
         data = {
-            "username": registered_user["email"],
-            "password": credentials["password"],  # plain password
+            "username": email,
+            "password": password,  # plain password
         }
         response = await async_client.post(
             "/token",
@@ -121,20 +115,21 @@ class TestIntegrationAuth:
         assert response.status_code == 200
 
         token = response.json()
-        assert_token(token)
+        assert Token.model_validate(token)
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_login_invalid_password(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
-        invalid_password: str,
+        email: str,
+        password: str,
+        user_from_db: dict[str, Any],
     ) -> None:
         # requires user to be registered
         data = {
-            "username": registered_user["email"],
-            "password": invalid_password,  # plain password
+            "username": email,
+            "password": "invalid",  # plain password
         }
         response = await async_client.post(
             "/token",
@@ -144,21 +139,19 @@ class TestIntegrationAuth:
         assert response.status_code == 401
 
         token = response.json()
-        self.assert_invalid_token(token)
+        assert credentials_exception.detail in token["detail"]
+        assert "access_token" not in token.keys()
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_login_not_registered(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-        not_registered_email: str,
     ) -> None:
         # requires user to be registered
         data = {
-            "username": not_registered_email,
-            "password": credentials["password"],  # plain password
+            "username": "not@registered.net",
+            "password": "password",  # plain password
         }
         response = await async_client.post(
             "/token",
@@ -168,4 +161,35 @@ class TestIntegrationAuth:
         assert response.status_code == 401
 
         token = response.json()
-        self.assert_invalid_token(token)
+        assert credentials_exception.detail in token["detail"]
+        assert "access_token" not in token.keys()
+
+    @pytest.mark.anyio
+    async def test_confirm(
+        self,
+        async_client: AsyncClient,
+        user_from_db: dict[str, Any],
+        user_id: str,
+        confirmation_token: str,
+        conn: AsyncConnection,
+    ) -> None:
+        # confirm
+        assert user_from_db["confirmed"] is False
+        response = await async_client.get(f"/confirm/{confirmation_token}")
+        assert response.status_code == 200
+        user = await users_table.select_by_id(conn, user_id)
+        assert user["confirmed"] is True
+
+    @pytest.mark.anyio
+    async def test_confirm_expired_token(
+        self, async_client: AsyncClient, expired_confirmation_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
+        assert response.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_confirm_access_token(
+        self, async_client: AsyncClient, access_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{access_token}")
+        assert response.status_code == 401

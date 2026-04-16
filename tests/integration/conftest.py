@@ -49,27 +49,22 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def random_uuid() -> str:
-    return "9f9e8dbc-b2e8-4797-ab97-f0bb08385112"
+def email() -> str:
+    return "test@test.net"
 
 
 @pytest.fixture
-def credentials() -> dict[str, str]:
-    return {"email": "test@test.net", "password": "pswd1234"}
+def password() -> str:
+    return "password"
 
 
 @pytest.fixture
-def not_registered_email() -> str:
-    return "not.registered@test.net"
+def credentials(email: str, password: str) -> dict[str, str]:
+    return {"email": email, "password": password}
 
 
 @pytest.fixture
-def invalid_password() -> str:
-    return "invalid"
-
-
-@pytest.fixture
-async def registered_user(
+async def user_from_db(
     async_client: AsyncClient, credentials: dict[str, str]
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post("/register", json=credentials)
@@ -82,33 +77,47 @@ async def registered_user(
 
 
 @pytest.fixture
-def access_token(async_client: AsyncClient, registered_user: dict[str, str]) -> str:
-    return create_access_token(registered_user["id"])
+def user_id(user_from_db: dict[str, str]) -> str:
+    return user_from_db["id"]
 
 
 @pytest.fixture
-def not_registered_email_token(not_registered_email: str) -> str:
+def access_token(async_client: AsyncClient, user_id: str) -> str:
+    return create_access_token(user_id)
+
+
+@pytest.fixture
+def expired_access_token(user_id: str) -> str:
+    return create_access_token(user_id, expires_delta=timedelta(-1))
+
+
+@pytest.fixture
+def not_registered_access_token() -> str:
     return create_access_token(uuid.uuid4())
 
 
 @pytest.fixture
-def expired_access_token(registered_user: dict[str, str]) -> str:
-    return create_access_token(uuid.uuid4(), timedelta(-1))
+def confirmation_token(user_id: str) -> str:
+    return create_confirmation_token(user_id)
 
 
 @pytest.fixture
-def confirmation_token(registered_user: dict[str, str]) -> str:
-    return create_confirmation_token(registered_user["id"])
+def expired_confirmation_token(user_id: str) -> str:
+    return create_confirmation_token(user_id, expires_delta=timedelta(-1))
 
 
 @pytest.fixture
-async def created_location(
-    async_client: AsyncClient, access_token: str
+def location_payload() -> dict[str, str]:
+    return {"name": "test"}
+
+
+@pytest.fixture
+async def location_from_db(
+    async_client: AsyncClient, access_token: str, location_payload: dict[str, str]
 ) -> AsyncGenerator[dict[str, Any], None]:
-    request_body = {"name": "test"}
     response = await async_client.post(
         "/location",
-        json=request_body,
+        json=location_payload,
         headers={"Authorization": f"Bearer {access_token}"},
     )
     created_location = response.json()
@@ -117,3 +126,8 @@ async def created_location(
 
     mid = created_location["id"]
     await async_client.delete(f"/location/{mid}")
+
+
+@pytest.fixture
+def location_id(location_from_db: dict[str, str]) -> str:
+    return location_from_db["id"]

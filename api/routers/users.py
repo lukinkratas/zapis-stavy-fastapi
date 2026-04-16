@@ -53,7 +53,9 @@ async def register_user(
         "detail": "User registered. Please confirm your email.",
         "user": registered_user,
         "confirmation_url": str(
-            request.url_for("confirm", token=create_confirmation_token(registered_user["id"]))
+            request.url_for(
+                "confirm", token=create_confirmation_token(registered_user["id"])
+            )
         ),
     }
 
