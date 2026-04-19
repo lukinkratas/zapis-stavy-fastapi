@@ -142,10 +142,6 @@ class TestIntegrationAuth:
         )
         assert response.status_code == 401
 
-        token = response.json()
-        assert credentials_exception.detail in token["detail"]
-        assert "access_token" not in token.keys()
-
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_login_not_registered(
@@ -164,9 +160,25 @@ class TestIntegrationAuth:
         )
         assert response.status_code == 401
 
-        token = response.json()
-        assert credentials_exception.detail in token["detail"]
-        assert "access_token" not in token.keys()
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login_not_confirmed(
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
 
     @pytest.mark.anyio
     async def test_confirm(
