@@ -32,7 +32,7 @@ test-int:
 	uv run --dev pytest tests/integration -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch
 
 test-cov:
-	uv run --dev pytest tests/ -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-fail-under=95 --cov-report=html:htmlcov
+	uv run --dev pytest -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-fail-under=95 --cov-report=html:htmlcov
 
 clean-up:
 	rm -rvf .coverage htmlcov api.log*

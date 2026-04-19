@@ -81,11 +81,15 @@ async def authenticate_user(
     """
     user = await users_table.select_by_email(conn, email)
 
-    if user is None:
+    if user is None or not verify_password(password, user["password"]):
         raise credentials_exception
 
-    if not verify_password(password, user["password"]):
-        raise credentials_exception
+    if user["confirmed"] is not True:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not confirmed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     return user
 

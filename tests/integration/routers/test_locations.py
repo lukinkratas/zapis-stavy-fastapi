@@ -55,7 +55,7 @@ class TestIntegrationLocation:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_not_registered_email_token(
+    async def test_create_location_not_registered_access_token(
         self,
         async_client: AsyncClient,
         not_registered_access_token: str,

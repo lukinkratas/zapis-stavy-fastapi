@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock
@@ -25,42 +26,50 @@ class TestUnitAuth:
     """Unit tests for auth."""
 
     @pytest.mark.anyio
-    async def test_verify_password(self, password: str, hashed_password: str) -> None:
-        verify_password(password, hashed_password)
+    async def test_verify_password(
+        self, credentials: dict[str, str], user_from_db: dict[str, Any]
+    ) -> None:
+        verify_password(credentials["password"], user_from_db["password"])
 
     @pytest.mark.anyio
-    async def test_create_access_token(self, user_id: str) -> None:
+    async def test_create_access_token(self) -> None:
+        user_id = uuid.uuid4()
         token = create_access_token(user_id)
         decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        assert decoded_token["sub"] == user_id
+        assert decoded_token["sub"] == str(user_id)
         assert decoded_token["type"] == "access"
 
     @pytest.mark.anyio
-    async def test_create_confirmation_token(self, user_id: str) -> None:
+    async def test_create_confirmation_token(self) -> None:
+        user_id = uuid.uuid4()
         token = create_confirmation_token(user_id)
         decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        assert decoded_token["sub"] == user_id
+        assert decoded_token["sub"] == str(user_id)
         assert decoded_token["type"] == "confirmation"
 
-    def test_get_subject_access_token(self, user_id: str) -> None:
+    def test_get_subject_access_token(self) -> None:
+        user_id = uuid.uuid4()
         token = create_access_token(user_id)
-        assert get_subject(token, typ="access") == user_id
+        assert get_subject(token, typ="access") == str(user_id)
 
-    def test_get_subject_confirmation_token(self, user_id: str) -> None:
+    def test_get_subject_confirmation_token(self) -> None:
+        user_id = uuid.uuid4()
         token = create_confirmation_token(user_id)
-        assert get_subject(token, typ="confirmation") == user_id
+        assert get_subject(token, typ="confirmation") == str(user_id)
 
     def test_get_subject_invalid(self) -> None:
         token = "invalid"
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")
 
-    def test_get_subject_wrong_type(self, user_id: str) -> None:
+    def test_get_subject_wrong_type(self) -> None:
+        user_id = uuid.uuid4()
         token = create_confirmation_token(user_id)
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")
 
-    def test_get_subject_expired_token(self, user_id: str) -> None:
+    def test_get_subject_expired_token(self) -> None:
+        user_id = uuid.uuid4()
         token = create_access_token(user_id, expires_delta=timedelta(-1))
         with pytest.raises(HTTPException):
             get_subject(token, typ="access")

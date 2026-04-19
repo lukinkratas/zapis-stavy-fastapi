@@ -15,22 +15,21 @@ class TestUnitLocation:
 
     @pytest.fixture
     def location_id(self) -> str:
-        return str(uuid.uuid4())
+        return str()
 
     @pytest.mark.anyio
     async def test_create_and_delete_location(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        user_id: str,
         access_token: str,
-        location_id: str,
     ) -> None:
+        location_id = str(uuid.uuid4())
         location_payload = {"name": "new"}
         location_from_db = location_payload | {
             "id": location_id,
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "user_id": user_id,
+            "user_id": str(uuid.uuid4()),
         }
 
         # mock
@@ -51,9 +50,8 @@ class TestUnitLocation:
 
         # delete created location
         mocker.patch.object(LocationsTable, "delete", new=AsyncMock(return_value=None))
-        mid = new_location["id"]
         response = await async_client.delete(
-            f"/location/{mid}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{location_id}", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 204
 
@@ -62,13 +60,12 @@ class TestUnitLocation:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        user_id: str,
         access_token: str,
-        location_id: str,
     ) -> None:
+        location_id = str(uuid.uuid4())
         update_payload = {"name": "update"}
-        location_from_db = updated_payload | {
-            "id": str(uuid.uuid4()),
+        location_from_db = update_payload | {
+            "id": location_id,
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "user_id": str(uuid.uuid4()),
         }
@@ -81,7 +78,7 @@ class TestUnitLocation:
         # update location
         response = await async_client.put(
             f"/location/{location_id}",
-            json=updated_payload,
+            json=update_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

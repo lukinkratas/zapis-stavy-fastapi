@@ -6,9 +6,12 @@ from typing import Any, AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from psycopg import AsyncConnection
 from testcontainers.postgres import PostgresContainer
 
+from api.db import get_conn_info
 from api.main import app
+from api.models.users import users_table
 from api.routers.auth import (
     create_access_token,
     create_confirmation_token,
@@ -49,46 +52,39 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def email() -> str:
-    return "test@test.net"
+async def conn() -> AsyncGenerator[AsyncConnection, None]:
+    async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
+        yield conn
 
 
 @pytest.fixture
-def password() -> str:
-    return "password"
+def credentials() -> dict[str, str]:
+    return {"email": "test@test.net", "password": "password"}
 
 
 @pytest.fixture
-def credentials(email: str, password: str) -> dict[str, str]:
-    return {"email": email, "password": password}
-
-
-@pytest.fixture
-async def user_from_db(
+async def registered_user(
     async_client: AsyncClient, credentials: dict[str, str]
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post("/register", json=credentials)
+    assert response.status_code == 201
     registered_user = response.json()["user"]
 
     yield registered_user
 
     uid = registered_user["id"]
-    await async_client.delete(f"/user/{uid}")
+    response = await async_client.delete(f"/user/{uid}")
+    assert response.status_code == 204
 
 
 @pytest.fixture
-def user_id(user_from_db: dict[str, str]) -> str:
-    return user_from_db["id"]
+def access_token(async_client: AsyncClient, registered_user: dict[str, str]) -> str:
+    return create_access_token(registered_user["id"])
 
 
 @pytest.fixture
-def access_token(async_client: AsyncClient, user_id: str) -> str:
-    return create_access_token(user_id)
-
-
-@pytest.fixture
-def expired_access_token(user_id: str) -> str:
-    return create_access_token(user_id, expires_delta=timedelta(-1))
+def expired_access_token(registered_user: dict[str, str]) -> str:
+    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
 
 
 @pytest.fixture
@@ -97,13 +93,25 @@ def not_registered_access_token() -> str:
 
 
 @pytest.fixture
-def confirmation_token(user_id: str) -> str:
-    return create_confirmation_token(user_id)
+def confirmation_token(registered_user: dict[str, str]) -> str:
+    return create_confirmation_token(registered_user["id"])
 
 
 @pytest.fixture
-def expired_confirmation_token(user_id: str) -> str:
-    return create_confirmation_token(user_id, expires_delta=timedelta(-1))
+def expired_confirmation_token(registered_user: dict[str, str]) -> str:
+    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
+
+
+@pytest.fixture
+async def confirmed_user(
+    async_client: AsyncClient,
+    registered_user: dict[str, Any],
+    confirmation_token: str,
+    conn: AsyncConnection,
+) -> dict[str, Any]:
+    response = await async_client.get(f"/confirm/{confirmation_token}")
+    assert response.status_code == 200
+    return await users_table.select_by_id(conn, registered_user["id"])
 
 
 @pytest.fixture

@@ -36,7 +36,7 @@ class TestIntegrationUser:
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
-        user_from_db: dict[str, Any],
+        registered_user: dict[str, Any],
     ) -> None:
         # requires user to be already registered
         response = await async_client.post("/register", json=credentials)
@@ -53,10 +53,11 @@ class TestIntegrationUser:
     async def test_update_user(
         self,
         async_client: AsyncClient,
-        user_id: str,
+        registered_user: dict[str, Any],
     ) -> None:
         update_body = {"email": "update@test.net", "password": "update"}
-        response = await async_client.put(f"/user/{user_id}", json=update_body)
+        uid = registered_user["id"]
+        response = await async_client.put(f"/user/{uid}", json=update_body)
         assert response.status_code == 200
 
         updated_user = response.json()
