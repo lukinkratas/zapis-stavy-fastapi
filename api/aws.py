@@ -1,15 +1,21 @@
 import logging
+import os
 from functools import lru_cache
 from typing import Any, Callable
 
 from boto3 import Session
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 
 from .utils import log_func
 
 logger = logging.getLogger(__name__)
-session = Session()
+load_dotenv(override=True)
+session = Session(
+    aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+    aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+)
 
 
 @lru_cache
