@@ -1,6 +1,4 @@
 import os
-import uuid
-from datetime import timedelta
 from pathlib import Path
 from typing import Any, AsyncGenerator
 
@@ -13,7 +11,7 @@ from testcontainers.postgres import PostgresContainer
 from api.db import get_conn_info
 from api.main import app
 from api.models.users import users_table
-from api.routers.auth import create_access_token, create_confirmation_token
+from api.routers.auth import create_access_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -79,34 +77,17 @@ async def registered_user(
     registered_user = response.json()["user"]
     yield registered_user
 
-    uid = registered_user["id"]
-    response = await async_client.delete(f"/user/{uid}")
+    user_id = registered_user["id"]
+    access_token = create_access_token(user_id)
+    response = await async_client.delete(
+        f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+    )
     assert response.status_code == 204
 
 
 @pytest.fixture
-def access_token(async_client: AsyncClient, registered_user: dict[str, str]) -> str:
-    return create_access_token(registered_user["id"])
-
-
-@pytest.fixture
-def expired_access_token(registered_user: dict[str, str]) -> str:
-    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
-
-
-@pytest.fixture
-def not_registered_access_token() -> str:
-    return create_access_token(uuid.uuid4())
-
-
-@pytest.fixture
-def confirmation_token(registered_user: dict[str, str]) -> str:
-    return create_confirmation_token(registered_user["id"])
-
-
-@pytest.fixture
-def expired_confirmation_token(registered_user: dict[str, str]) -> str:
-    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
+def user_id(registered_user: dict[str, Any]) -> str:
+    return registered_user["id"]
 
 
 @pytest.fixture

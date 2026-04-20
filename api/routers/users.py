@@ -15,7 +15,7 @@ from ..schemas.users import (
     UserUpdateRequestBody,
 )
 from ..utils import log_async_func
-from .auth import create_confirmation_token, get_password_hash
+from .auth import create_confirmation_token, get_current_user, get_password_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -71,7 +71,6 @@ async def register_user(
     Raises:
         HTTPException: if user cannot be inserted in the database
     """
-    # TODO: fixme
     data = user.model_dump()
     data["password"] = get_password_hash(user.password)
 
@@ -97,13 +96,16 @@ async def register_user(
 @router.delete("/user/{id}", status_code=204)
 @log_async_func(logger.info)
 async def delete_user(
-    id: uuid.UUID, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
+    id: uuid.UUID,
+    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> None:
     """Delete a user from the database.
 
     Args:
         id: uuid of user
         conn: database connection
+        current_user: current authorized user
 
     Returns: None
 
@@ -119,6 +121,7 @@ async def update_user(
     id: uuid.UUID,
     user: UserUpdateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> dict[str, Any]:
     """Update a meter in the database.
 
@@ -126,6 +129,7 @@ async def update_user(
         id: uuid of meter
         user: user update request payload from client
         conn: database connection
+        current_user: current authorized user
 
     Returns: meter dict
 

@@ -95,7 +95,11 @@ class TestEndToEnd:
         access_token = response.json()["access_token"]
 
         # update user
-        response = await async_client.put(f"/user/{user_id}", json=update_user_payload)
+        response = await async_client.put(
+            f"/user/{user_id}",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
         assert response.status_code == 200
 
         # create location
@@ -125,5 +129,7 @@ class TestEndToEnd:
         assert response.status_code == 204
 
         # delete registered user
-        response = await async_client.delete(f"/user/{user_id}")
+        response = await async_client.delete(
+            f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+        )
         assert response.status_code == 204

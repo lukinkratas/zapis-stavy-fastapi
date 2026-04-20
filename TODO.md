@@ -1,17 +1,21 @@
 - [x] add e2e testing
-- [ ] review e2e postman collection
-- [ ] user endpoints with access token
-- [ ] login and register - same form
-- [ ] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user
-- [ ] register endpoint user field returns password bug
+- [x] review e2e postman collection
+- [x] user endpoints with access token
+- [x] login and register - same form -> Nope
+- [ ] DEL/PUT endpoints - user_id from JWT token, not in endpoint name
+- [ ] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user -> allow to login and resend conformation token
 - [ ] refactor tests
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail
 - [ ] api version in the name
 - [ ] detail -> message
+- [ ] register endpoint user field returns password bug
+- [ ] remove confirmation url from register response json
 - [ ] sqlalchemy orm?
 - [ ] upload pic + ORM
 - [ ] LLM advisory + langfuse observability
+- [ ] review unit tests and review all test cases coverage
+- [ ] review int tests and review all test cases coverage
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests
@@ -20,10 +24,6 @@
   1.2 DELETE endpoints return 204 even when resource doesn't exist (api/routers/users.py, api/routers/meters.py)
   DELETE /user/{id} and DELETE /meter/{id} return 204 regardless of whether the row existed. This silently swallows
   client errors (wrong ID, double-delete). Consider returning 404 when rowcount == 0.
-
-  1.3 User endpoints lack authorization (api/routers/users.py)
-  DELETE /user/{id} and PUT /user/{id} have no auth dependency. Any unauthenticated caller can delete or update any
-  user by guessing/enumerating UUIDs. These must require get_current_user and verify the caller owns the resource.
 
   1.4 Password returned in user responses (api/schemas/users.py)
   UserResponseJson includes the password (hashed) field. Even hashed, exposing password hashes to API consumers is a

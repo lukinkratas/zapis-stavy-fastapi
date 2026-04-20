@@ -34,6 +34,7 @@ class TestUnitUser:
         credentials: dict[str, str],
         user_from_db: dict[str, Any],
         mock_send_email: MockerFixture,
+        access_token: str,
     ) -> None:
         # mock
         mocker.patch.object(
@@ -51,7 +52,9 @@ class TestUnitUser:
         # delete registered user
         mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
         uid = registered_user["id"]
-        response = await async_client.delete(f"/user/{uid}")
+        response = await async_client.delete(
+            f"/user/{uid}", headers={"Authorization": f"Bearer {access_token}"}
+        )
         assert response.status_code == 204
 
     @pytest.mark.parametrize(
@@ -76,6 +79,7 @@ class TestUnitUser:
         mocker: MockerFixture,
         async_client: AsyncClient,
         update_user_payload: dict[str, str],
+        access_token: str,
     ) -> None:
         user_from_db = {
             "email": update_user_payload["email"],
@@ -91,7 +95,9 @@ class TestUnitUser:
 
         # update user
         response = await async_client.put(
-            f"/user/{uuid.uuid4()}", json=update_user_payload
+            f"/user/{uuid.uuid4()}",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 

@@ -5,7 +5,7 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.routers.auth import verify_password
+from api.routers.auth import create_access_token, verify_password
 from api.schemas.users import UserResponseJson
 
 
@@ -31,8 +31,11 @@ class TestIntegrationUser:
         assert verify_password(credentials["password"], registered_user["password"])
 
         # delete registered user
-        uid = registered_user["id"]
-        response = await async_client.delete(f"/user/{uid}")
+        user_id = registered_user["id"]
+        access_token = create_access_token(user_id)
+        response = await async_client.delete(
+            f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+        )
         assert response.status_code == 204
 
     @pytest.mark.integration
@@ -49,8 +52,12 @@ class TestIntegrationUser:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_non_registered_user(self, async_client: AsyncClient) -> None:
-        response = await async_client.delete(f"/user/{uuid.uuid4()}")
+    async def test_delete_non_registered_user(
+        self, async_client: AsyncClient, access_token: str
+    ) -> None:
+        response = await async_client.delete(
+            f"/user/{uuid.uuid4()}", headers={"Authorization": f"Bearer {access_token}"}
+        )
         assert response.status_code == 204
 
     @pytest.mark.integration
@@ -60,9 +67,14 @@ class TestIntegrationUser:
         async_client: AsyncClient,
         registered_user: dict[str, Any],
         update_user_payload: dict[str, str],
+        access_token: str,
     ) -> None:
         uid = registered_user["id"]
-        response = await async_client.put(f"/user/{uid}", json=update_user_payload)
+        response = await async_client.put(
+            f"/user/{uid}",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
         assert response.status_code == 200
 
         updated_user = response.json()
@@ -74,9 +86,14 @@ class TestIntegrationUser:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_non_registered_user(
-        self, async_client: AsyncClient, update_user_payload: dict[str, str]
+        self,
+        async_client: AsyncClient,
+        update_user_payload: dict[str, str],
+        access_token: str,
     ) -> None:
         response = await async_client.put(
-            f"/user/{uuid.uuid4()}", json=update_user_payload
+            f"/user/{uuid.uuid4()}",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404

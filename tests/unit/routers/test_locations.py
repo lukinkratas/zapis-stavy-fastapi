@@ -22,8 +22,8 @@ class TestUnitLocation:
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        access_token: str,
         location_payload: dict[str, str],
+        access_token: str,
     ) -> None:
         location_id = str(uuid.uuid4())
         location_from_db = location_payload | {

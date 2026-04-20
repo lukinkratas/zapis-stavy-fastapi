@@ -15,8 +15,8 @@ class TestIntegrationLocation:
     async def test_create_and_delete_location(
         self,
         async_client: AsyncClient,
-        access_token: str,
         location_payload: dict[str, str],
+        access_token: str,
     ) -> None:
         # create location
         response = await async_client.post(
