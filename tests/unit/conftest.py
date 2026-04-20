@@ -46,11 +46,6 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def credentials() -> dict[str, str]:
-    return {"email": "test@test.net", "password": "password"}
-
-
-@pytest.fixture
 def user_id() -> str:
     return str(uuid.uuid4())
 

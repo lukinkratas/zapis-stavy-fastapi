@@ -75,11 +75,11 @@ class TestUnitUser:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
+        update_user_payload: dict[str, str],
     ) -> None:
-        update_payload = {"email": "test@test.net", "password": "update"}
         user_from_db = {
-            "email": update_payload["email"],
-            "password": get_password_hash(update_payload["password"]),
+            "email": update_user_payload["email"],
+            "password": get_password_hash(update_user_payload["password"]),
             "id": str(uuid.uuid4()),
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         }
@@ -90,7 +90,9 @@ class TestUnitUser:
         )
 
         # update user
-        response = await async_client.put(f"/user/{uuid.uuid4()}", json=update_payload)
+        response = await async_client.put(
+            f"/user/{uuid.uuid4()}", json=update_user_payload
+        )
         assert response.status_code == 200
 
         updated_user = response.json()

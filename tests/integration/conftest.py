@@ -13,10 +13,7 @@ from testcontainers.postgres import PostgresContainer
 from api.db import get_conn_info
 from api.main import app
 from api.models.users import users_table
-from api.routers.auth import (
-    create_access_token,
-    create_confirmation_token,
-)
+from api.routers.auth import create_access_token, create_confirmation_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -56,11 +53,6 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
     async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
         yield conn
-
-
-@pytest.fixture
-def credentials() -> dict[str, str]:
-    return {"email": "test@test.net", "password": "password"}
 
 
 @pytest.fixture
@@ -127,11 +119,6 @@ async def confirmed_user(
     response = await async_client.get(f"/confirm/{confirmation_token}")
     assert response.status_code == 200
     return await users_table.select_by_id(db_conn, registered_user["id"])
-
-
-@pytest.fixture
-def location_payload() -> dict[str, str]:
-    return {"name": "test"}
 
 
 @pytest.fixture

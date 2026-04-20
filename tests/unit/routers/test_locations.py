@@ -23,9 +23,9 @@ class TestUnitLocation:
         async_client: AsyncClient,
         mocker: MockerFixture,
         access_token: str,
+        location_payload: dict[str, str],
     ) -> None:
         location_id = str(uuid.uuid4())
-        location_payload = {"name": "new"}
         location_from_db = location_payload | {
             "id": location_id,
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
@@ -62,10 +62,10 @@ class TestUnitLocation:
         mocker: MockerFixture,
         async_client: AsyncClient,
         access_token: str,
+        update_location_payload: dict[str, str],
     ) -> None:
         location_id = str(uuid.uuid4())
-        update_payload = {"name": "update"}
-        location_from_db = update_payload | {
+        location_from_db = update_location_payload | {
             "id": location_id,
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "user_id": str(uuid.uuid4()),
@@ -79,7 +79,7 @@ class TestUnitLocation:
         # update location
         response = await async_client.put(
             f"/location/{location_id}",
-            json=update_payload,
+            json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

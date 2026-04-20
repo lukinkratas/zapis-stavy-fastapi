@@ -1,13 +1,17 @@
-- [ ] register endpoint user field returns password bug
-- [ ] add e2e testing
+- [x] add e2e testing
 - [ ] review e2e postman collection
-- [ ] login and register - same form
 - [ ] user endpoints with access token
+- [ ] login and register - same form
+- [ ] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user
+- [ ] register endpoint user field returns password bug
 - [ ] refactor tests
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail
 - [ ] api version in the name
 - [ ] detail -> message
+- [ ] sqlalchemy orm?
+- [ ] upload pic + ORM
+- [ ] LLM advisory + langfuse observability
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests

@@ -59,21 +59,24 @@ class TestIntegrationUser:
         self,
         async_client: AsyncClient,
         registered_user: dict[str, Any],
+        update_user_payload: dict[str, str],
     ) -> None:
-        update_body = {"email": "update@test.net", "password": "update"}
         uid = registered_user["id"]
-        response = await async_client.put(f"/user/{uid}", json=update_body)
+        response = await async_client.put(f"/user/{uid}", json=update_user_payload)
         assert response.status_code == 200
 
         updated_user = response.json()
         assert UserResponseJson.model_validate(updated_user)
-        assert updated_user["email"] == update_body["email"]
+        assert updated_user["email"] == update_user_payload["email"]
         # TODO: fetch the password from db (not to be displayed in UserResponseJson)
-        # assert verify_password(update_body["password"], updated_user.password)
+        # assert verify_password(update_user_payload["password"], updated_user.password)
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_non_registered_user(self, async_client: AsyncClient) -> None:
-        update_body = {"email": "update@test.net", "password": "update"}
-        response = await async_client.put(f"/user/{uuid.uuid4()}", json=update_body)
+    async def test_update_non_registered_user(
+        self, async_client: AsyncClient, update_user_payload: dict[str, str]
+    ) -> None:
+        response = await async_client.put(
+            f"/user/{uuid.uuid4()}", json=update_user_payload
+        )
         assert response.status_code == 404

@@ -103,11 +103,11 @@ class TestIntegrationLocation:
         async_client: AsyncClient,
         access_token: str,
         location_id: str,
+        update_location_payload: dict[str, str],
     ) -> None:
-        update_payload = {"name": "update"}
         response = await async_client.put(
             f"/location/{location_id}",
-            json=update_payload,
+            json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -121,11 +121,11 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         access_token: str,
+        update_location_payload: dict[str, str],
     ) -> None:
-        update_payload = {"name": "update"}
         response = await async_client.put(
             f"/location/{uuid.uuid4()}",
-            json=update_payload,
+            json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
