@@ -53,7 +53,7 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-async def conn() -> AsyncGenerator[AsyncConnection, None]:
+async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
     async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
         yield conn
 
@@ -122,11 +122,11 @@ async def confirmed_user(
     async_client: AsyncClient,
     registered_user: dict[str, Any],
     confirmation_token: str,
-    conn: AsyncConnection,
+    db_conn: AsyncConnection,
 ) -> dict[str, Any]:
     response = await async_client.get(f"/confirm/{confirmation_token}")
     assert response.status_code == 200
-    return await users_table.select_by_id(conn, registered_user["id"])
+    return await users_table.select_by_id(db_conn, registered_user["id"])
 
 
 @pytest.fixture

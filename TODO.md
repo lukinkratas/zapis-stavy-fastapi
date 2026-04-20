@@ -5,6 +5,9 @@
 - [ ] user endpoints with access token
 - [ ] refactor tests
 - [ ] Dockerfile
+- [ ] AWS logs service like logtail
+- [ ] api version in the name
+- [ ] detail -> message
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests

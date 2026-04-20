@@ -52,3 +52,9 @@ async def http_exception_handle_logging(
     """Log error prior to every raise of HTTP exception."""
     logger.error(f"HTTPException: {exc.status_code} {exc.detail}")
     return await http_exception_handler(request, exc)
+
+
+@app.get("/")
+def healthcheck():
+    """Check the server is up and running."""
+    return {"message": "Server is running."}
