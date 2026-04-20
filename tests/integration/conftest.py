@@ -7,6 +7,7 @@ from typing import Any, AsyncGenerator
 import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
+from pytest_mock import MockerFixture
 from testcontainers.postgres import PostgresContainer
 
 from api.db import get_conn_info
@@ -63,13 +64,27 @@ def credentials() -> dict[str, str]:
 
 
 @pytest.fixture
+def mock_send_email(mocker: MockerFixture):
+    return mocker.patch(
+        "api.routers.users.ses_send_email",
+        return_value={
+            "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee-000000",
+            "ResponseMetadata": {},
+        },
+    )
+
+
+@pytest.fixture
 async def registered_user(
-    async_client: AsyncClient, credentials: dict[str, str]
+    async_client: AsyncClient,
+    credentials: dict[str, str],
+    mock_send_email: MockerFixture,
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post("/register", json=credentials)
     assert response.status_code == 201
-    registered_user = response.json()["user"]
+    mock_send_email.assert_called_once()
 
+    registered_user = response.json()["user"]
     yield registered_user
 
     uid = registered_user["id"]

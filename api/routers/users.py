@@ -2,10 +2,11 @@ import logging
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
+from ..aws import ses_send_email
 from ..db import connect_to_db
 from ..models.users import users_table
 from ..schemas.users import (
@@ -20,12 +21,42 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _send_confirmation_email(email: str, confirmation_url: str) -> None:
+    """Send email via AWS SES."""
+    message = {
+        "Subject": {
+            "Data": "[Zapis Stavy] Successfully registered - Please confirm your email",
+            "Charset": "UTF-8",
+        },
+        "Body": {
+            "Html": {
+                "Data": (
+                    "<html>"
+                    "<body>"
+                    "<p>You were successfully registered into Zapis Stavy app.</p>"
+                    "<p></p>"
+                    "<p>"
+                    f"Please "
+                    f"<a href='{confirmation_url}'>confirm your email here</a>"
+                    "."
+                    "</p>"
+                    "</body>"
+                    "</html>"
+                ),
+                "Charset": "UTF-8",
+            }
+        },
+    }
+    ses_send_email(email, message)
+
+
 @router.post("/register", status_code=201)
 @log_async_func(logger.info)
 async def register_user(
     request: Request,
     user: UserCreateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    background_tasks: BackgroundTasks,
 ) -> dict[str, Any]:
     """Add new user into the database.
 
@@ -33,6 +64,7 @@ async def register_user(
         request: FastAPI request object (used for accessing headers, client info, etc.).
         user: user create request payload from client
         conn: database connection
+        background_tasks: FastAPI's background que for tasks
 
     Returns: user dict
 
@@ -49,14 +81,16 @@ async def register_user(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="User already exists.")
 
+    confirmation_url = request.url_for(
+        "confirm", token=create_confirmation_token(registered_user["id"])
+    )
+    background_tasks.add_task(
+        _send_confirmation_email, registered_user["email"], confirmation_url
+    )
     return {
         "detail": "User registered. Please confirm your email.",
         "user": registered_user,
-        "confirmation_url": str(
-            request.url_for(
-                "confirm", token=create_confirmation_token(registered_user["id"])
-            )
-        ),
+        "confirmation_url": str(confirmation_url),  # TODO: remove
     }
 
 

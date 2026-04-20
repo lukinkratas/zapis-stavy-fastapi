@@ -51,7 +51,8 @@ class TestUnitLocation:
         # delete created location
         mocker.patch.object(LocationsTable, "delete", new=AsyncMock(return_value=None))
         response = await async_client.delete(
-            f"/location/{location_id}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 204
 

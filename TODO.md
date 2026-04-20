@@ -1,9 +1,10 @@
 - [ ] register endpoint user field returns password bug
 - [ ] add e2e testing
-- [ ] e2e postman collection
+- [ ] review e2e postman collection
 - [ ] login and register - same form
 - [ ] user endpoints with access token
 - [ ] refactor tests
+- [ ] Dockerfile
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests

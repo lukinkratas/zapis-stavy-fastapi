@@ -8,7 +8,6 @@ from psycopg import AsyncConnection
 from api.models.users import users_table
 from api.routers.auth import (
     authenticate_user,
-    credentials_exception,
     get_current_user,
 )
 from api.schemas.auth import Token

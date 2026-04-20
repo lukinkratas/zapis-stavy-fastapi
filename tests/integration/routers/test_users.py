@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 from httpx import AsyncClient
+from pytest_mock import MockerFixture
 
 from api.routers.auth import verify_password
 from api.schemas.users import UserResponseJson
@@ -14,11 +15,15 @@ class TestIntegrationUser:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_register_and_delete_user(
-        self, async_client: AsyncClient, credentials: dict[str, str]
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        mock_send_email: MockerFixture,
     ) -> None:
         # register user
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
+        mock_send_email.assert_called_once()
 
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)

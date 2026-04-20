@@ -15,6 +15,17 @@ from api.schemas.users import UserResponseJson
 class TestUnitUser:
     """Integration tests for users."""
 
+    @pytest.fixture
+    def mock_send_email(self, mocker: MockerFixture) -> MockerFixture:
+        """Prevent real SES calls in all integration tests."""
+        return mocker.patch(
+            "api.routers.users.ses_send_email",
+            return_value={
+                "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee",
+                "ResponseMetadata": {},
+            },
+        )
+
     @pytest.mark.anyio
     async def test_register_and_delete_user(
         self,
@@ -22,6 +33,7 @@ class TestUnitUser:
         mocker: MockerFixture,
         credentials: dict[str, str],
         user_from_db: dict[str, Any],
+        mock_send_email: MockerFixture,
     ) -> None:
         # mock
         mocker.patch.object(
@@ -31,6 +43,7 @@ class TestUnitUser:
         # register user
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
+        mock_send_email.assert_called_once()
 
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)
