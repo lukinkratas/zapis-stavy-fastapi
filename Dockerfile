@@ -1,14 +1,16 @@
 FROM python:3.11.0
 
-# set the working directory
-WORKDIR /api
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /bin/
 
-# install dependencies
-# COPY ./requirements.txt /api
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-# copy the scripts to the folder
+# Copy the project into the image
 COPY . /api
 
+# Disable development dependencies
+ENV UV_NO_DEV=1
+
+# Sync the project into a new environment, asserting the lockfile is up to date
+WORKDIR /api
+RUN uv sync --locked
+
 # start the server
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]

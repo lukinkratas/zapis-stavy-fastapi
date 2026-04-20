@@ -1,8 +1,20 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:14
     restart: on-failure
-    container_name: zapis-stavy-postgres
+    container_name: db
     env_file:
       - .env
     environment:
