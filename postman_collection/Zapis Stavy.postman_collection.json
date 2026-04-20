@@ -1,373 +1,294 @@
 {
-	"info": {
-		"_postman_id": "cc3230d1-f87e-4fa0-995f-78295b85cede",
-		"name": "Zapis Stavy",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "47894645",
-		"_collection_link": "https://lukin-kratas-s-team.postman.co/workspace/Team-Workspace~e65703fb-893e-45f5-8259-68ab8b0697f4/collection/47894645-cc3230d1-f87e-4fa0-995f-78295b85cede?action=share&source=collection_link&creator=47894645"
-	},
-	"item": [
-		{
-			"name": "create meter",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZWZhdWx0QGVtYWlsLm5ldCIsImV4cCI6MTc2ODMzNzY1MX0.yY8y-w_6mgQFpu2u451tQNl9OVmfogaTHMLeB4Kux3A",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"test\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "delete meter",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter/acf4660f-5e6b-464c-aa55-91ced73340f6",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter",
-						"acf4660f-5e6b-464c-aa55-91ced73340f6"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "update meter",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"default\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter",
-						"5ad4f210-cdfb-4196-82f7-af6afda013ea"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "list readings on meter",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea/reading",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter",
-						"5ad4f210-cdfb-4196-82f7-af6afda013ea",
-						"reading"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get meter with readings",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/meter/5ad4f210-cdfb-4196-82f7-af6afda013ea",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"meter",
-						"5ad4f210-cdfb-4196-82f7-af6afda013ea"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create reading",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"value\": 99.0,\n  \"meter_id\": \"5ad4f210-cdfb-4196-82f7-af6afda013ea\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/reading",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"reading"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "delete reading",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/reading/id",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"reading",
-						"id"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "update reading",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"value\": 99.0\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/reading/id",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"reading",
-						"id"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "register user",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"email\": \"root@zapisstavi.cz\",\n  \"password\": \"xxx111\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/register",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"register"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "delete user",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "http://127.0.0.1:8000/user/14f318d6-2efd-4ae6-8c2e-e7625eb8c127",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"user",
-						"14f318d6-2efd-4ae6-8c2e-e7625eb8c127"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "token",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "username",
-							"value": "default@email.net",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "xxx111",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://127.0.0.1:8000/token",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8000",
-					"path": [
-						"token"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "cc3230d1-f87e-4fa0-995f-78295b85cede",
+    "name": "Zapis Stavy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47894645",
+    "_collection_link": "https://go.postman.co/collection/47894645-cc3230d1-f87e-4fa0-995f-78295b85cede?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "register user",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/register",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "confirm",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"root@zapisstavi.cz\",\n  \"password\": \"xxx111\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2ODAxNzc1fQ.iSZ1fshXXvdgMzAxjc5G8PehtEf09Qda7tAA0fyAKcQ",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "confirm",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2ODAxNzc1fQ.iSZ1fshXXvdgMzAxjc5G8PehtEf09Qda7tAA0fyAKcQ"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "username",
+              "value": "lukin.kratas@seznam.cz",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "xxx111",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/token",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update user",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111xxx\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/user/b4b08e75-729b-4e79-a682-f992a84b7c9d",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "user",
+            "b4b08e75-729b-4e79-a682-f992a84b7c9d"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create location",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/location",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "location"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update location",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"default\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/location/ff68f396-d3f7-49c4-8d56-973018b4b839",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "location",
+            "ff68f396-d3f7-49c4-8d56-973018b4b839"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete location",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8080/location/ff68f396-d3f7-49c4-8d56-973018b4b839",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "location",
+            "ff68f396-d3f7-49c4-8d56-973018b4b839"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete user",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8080/user/504fe055-147e-4f5b-8927-91bbf3172a9a",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8080",
+          "path": [
+            "user",
+            "504fe055-147e-4f5b-8927-91bbf3172a9a"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }

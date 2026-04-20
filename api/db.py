@@ -17,7 +17,7 @@ def get_conn_info() -> str:
         dbname=os.environ["DB_NAME"],
         user=os.environ["DB_USERNAME"],
         password=os.environ["DB_PASSWORD"],
-        host=os.getenv("DB_HOST", "localhost"),
+        host=os.getenv("DB_HOST", "postgres"),
         port=os.getenv("DB_PORT", 5432),
     )
 
