@@ -55,6 +55,6 @@ async def http_exception_handle_logging(
 
 
 @app.get("/")
-def healthcheck():
+def healthcheck() -> dict[str, str]:
     """Check the server is up and running."""
     return {"message": "Server is running."}

@@ -56,7 +56,7 @@ async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
 
 
 @pytest.fixture
-def mock_send_email(mocker: MockerFixture):
+def mock_send_email(mocker: MockerFixture) -> MockerFixture:
     return mocker.patch(
         "api.routers.users.ses_send_email",
         return_value={

@@ -1,37 +1,17 @@
-import uuid
-from typing import Any, AsyncGenerator
+import os
+from pathlib import Path
+from typing import AsyncGenerator
 
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from pytest_mock import MockerFixture
+from testcontainers.postgres import PostgresContainer
 
-from api.routers.auth import verify_password
-from api.schemas.users import UserResponseJson
+from api.main import app
 from api.routers.auth import create_confirmation_token
-from pathlib import Path
-from api.main import app
-from testcontainers.postgres import PostgresContainer
-import os
-from httpx import ASGITransport, AsyncClient
-
-import os
-import uuid
-from datetime import timedelta
-from pathlib import Path
-from typing import Any, AsyncGenerator
-
-import pytest
-from httpx import ASGITransport, AsyncClient
-from psycopg import AsyncConnection
-from pytest_mock import MockerFixture
-from testcontainers.postgres import PostgresContainer
-
-from api.db import get_conn_info
-from api.main import app
-from api.models.users import users_table
-from api.routers.auth import create_access_token, create_confirmation_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
+
 
 class TestEndToEnd:
     """End to end test."""
@@ -40,7 +20,6 @@ class TestEndToEnd:
     def anyio_backend(self) -> str:
         return "asyncio"
 
-
     @pytest.fixture(scope="session")
     async def async_client(self) -> AsyncGenerator[AsyncClient, None]:
         app.state.limiter.enabled = False
@@ -48,7 +27,8 @@ class TestEndToEnd:
         with (
             PostgresContainer("postgres:14")
             .with_volume_mapping(
-                str(ROOT / "scripts/init-db.sh"), "/docker-entrypoint-initdb.d/init-db.sh"
+                str(ROOT / "scripts/init-db.sh"),
+                "/docker-entrypoint-initdb.d/init-db.sh",
             )
             .with_volume_mapping(
                 str(ROOT / "sql/"), "/docker-entrypoint-initdb.d/sql/"
@@ -67,11 +47,11 @@ class TestEndToEnd:
                     yield async_client
 
     @pytest.fixture
-    def mock_send_email(self, mocker: MockerFixture):
+    def mock_send_email(self, mocker: MockerFixture) -> MockerFixture:
         return mocker.patch(
             "api.routers.users.ses_send_email",
             return_value={
-                "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee-000000",
+                "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee",
                 "ResponseMetadata": {},
             },
         )
@@ -139,7 +119,8 @@ class TestEndToEnd:
 
         # delete created location
         response = await async_client.delete(
-            f"/location/{location_id}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 204
 
