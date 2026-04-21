@@ -73,6 +73,7 @@ async def registered_user(
     )
     assert response.status_code == 200
 
+
 @pytest.fixture
 async def confirmed_user(
     async_client: AsyncClient,

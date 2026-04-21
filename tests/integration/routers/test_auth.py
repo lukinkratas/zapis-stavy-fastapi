@@ -187,7 +187,6 @@ class TestIntegrationAuth:
         )
         assert response.status_code == 401
 
-
     @pytest.mark.anyio
     async def test_confirm(
         self,

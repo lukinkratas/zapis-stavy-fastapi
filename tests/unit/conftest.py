@@ -51,6 +51,7 @@ def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
         "confirmed": False,
     }
 
+
 @pytest.fixture
 def confirmed_user(registered_user: dict[str, Any]) -> dict[str, Any]:
     confirmed_user = registered_user.copy()

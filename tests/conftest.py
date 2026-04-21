@@ -1,11 +1,12 @@
-from pytest_mock import MockerFixture
 import uuid
 from datetime import timedelta
 from typing import Any
 
 import pytest
+from pytest_mock import MockerFixture
 
 from api.routers.auth import create_access_token, create_confirmation_token
+
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MockerFixture:
@@ -16,6 +17,7 @@ def mock_send_email(mocker: MockerFixture) -> MockerFixture:
             "ResponseMetadata": {},
         },
     )
+
 
 @pytest.fixture
 def credentials() -> dict[str, str]:
@@ -36,9 +38,11 @@ def location_payload() -> dict[str, str]:
 def update_location_payload() -> dict[str, str]:
     return {"name": "test"}
 
+
 @pytest.fixture
 def user_id(confirmed_user: dict[str, Any]) -> str:
     return confirmed_user["id"]
+
 
 @pytest.fixture
 async def access_token(user_id: str) -> str:

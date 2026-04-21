@@ -101,7 +101,9 @@ async def update_location(
         HTTPException: if location cannot be updated in the database
     """
     data = location.model_dump()
-    updated_location = await locations_table.update(conn, id, current_confirmed_user["id"], data)
+    updated_location = await locations_table.update(
+        conn, id, current_confirmed_user["id"], data
+    )
 
     if updated_location is None:
         raise HTTPException(status_code=404, detail="Location not found")

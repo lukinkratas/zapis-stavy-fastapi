@@ -1,6 +1,6 @@
 import uuid
 from datetime import timedelta
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 from unittest.mock import AsyncMock
 
 import jwt
@@ -55,7 +55,9 @@ class TestUnitAuth:
         ],
     )
     def test_get_subject_access_token(
-        self, typ: str, create_token_func: Callable[[uuid.UUID, timedelta], str]
+        self,
+        typ: Literal["access", "confirmation"],
+        create_token_func: Callable[[uuid.UUID, timedelta], str],
     ) -> None:
         user_id = uuid.uuid4()
         token = create_token_func(user_id)

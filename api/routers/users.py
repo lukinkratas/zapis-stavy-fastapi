@@ -79,8 +79,10 @@ async def register_user(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="User already exists.")
 
-    confirmation_url = request.url_for(
-        "confirm", token=create_confirmation_token(registered_user["id"])
+    confirmation_url = str(
+        request.url_for(
+            "confirm", token=create_confirmation_token(registered_user["id"])
+        )
     )
     background_tasks.add_task(
         _send_confirmation_email, registered_user["email"], confirmation_url
@@ -88,7 +90,7 @@ async def register_user(
     return {
         "detail": "User registered. Please confirm your email.",
         "user": registered_user,
-        "confirmation_url": str(confirmation_url),  # TODO: remove
+        "confirmation_url": confirmation_url,  # TODO: remove
     }
 
 

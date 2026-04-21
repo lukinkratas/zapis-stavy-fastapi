@@ -1,15 +1,15 @@
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock
 from typing import Any
+from unittest.mock import AsyncMock
 
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.models.locations import LocationsTable
-from api.schemas.locations import LocationResponseJson
 from api.models.users import UsersTable
+from api.schemas.locations import LocationResponseJson
 
 
 class TestUnitLocation:
