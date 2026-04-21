@@ -6,9 +6,11 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
+from pytest_mock import MockerFixture
 
 from api.db import connect_to_db
 from api.main import app
+from api.models.users import UsersTable
 from api.routers.auth import get_password_hash
 
 
@@ -42,7 +44,9 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
+def registered_user_json(
+    mocker: MockerFixture, credentials: dict[str, str]
+) -> dict[str, Any]:
     return {
         "email": credentials["email"],
         "password": get_password_hash(credentials["password"]),
@@ -53,7 +57,22 @@ def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
 
 
 @pytest.fixture
-def confirmed_user(registered_user: dict[str, Any]) -> dict[str, Any]:
-    confirmed_user = registered_user.copy()
-    confirmed_user["confirmed"] = True
-    return confirmed_user
+def registered_user(
+    mocker: MockerFixture, registered_user_json: dict[str, Any]
+) -> dict[str, Any]:
+    mocker.patch.object(UsersTable, "select_by_id", return_value=registered_user_json)
+    mocker.patch.object(
+        UsersTable, "select_by_email", return_value=registered_user_json
+    )
+    return registered_user_json
+
+
+@pytest.fixture
+def confirmed_user(
+    mocker: MockerFixture, registered_user: dict[str, Any]
+) -> MockerFixture:
+    confirmed_user_json = registered_user.copy()
+    confirmed_user_json["confirmed"] = True
+    mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_json)
+    mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_json)
+    return confirmed_user_json

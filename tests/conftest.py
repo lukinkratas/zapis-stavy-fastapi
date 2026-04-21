@@ -36,12 +36,12 @@ def location_payload() -> dict[str, str]:
 
 @pytest.fixture
 def update_location_payload() -> dict[str, str]:
-    return {"name": "test"}
+    return {"name": "update"}
 
 
 @pytest.fixture
-def user_id(confirmed_user: dict[str, Any]) -> str:
-    return confirmed_user["id"]
+def user_id(registered_user: dict[str, Any]) -> str:
+    return registered_user["id"]
 
 
 @pytest.fixture

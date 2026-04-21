@@ -1,7 +1,6 @@
 import uuid
 from datetime import timedelta
 from typing import Any, Callable, Literal
-from unittest.mock import AsyncMock
 
 import jwt
 import pytest
@@ -9,7 +8,6 @@ from fastapi import HTTPException
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.models.users import UsersTable
 from api.routers.auth import (
     ALGORITHM,
     SECRET_KEY,
@@ -93,13 +91,6 @@ class TestUnitAuth:
         credentials: dict[str, str],
         registered_user: dict[str, Any],
     ) -> None:
-        # mock
-        mocker.patch.object(
-            UsersTable,
-            "select_by_email",
-            new=AsyncMock(return_value=registered_user),
-        )
-
         # login
         data = {
             "username": credentials["email"],

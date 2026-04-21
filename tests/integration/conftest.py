@@ -84,8 +84,11 @@ async def confirmed_user(
 
 
 @pytest.fixture
-async def location_from_db(
-    async_client: AsyncClient, access_token: str, location_payload: dict[str, str]
+async def created_location(
+    async_client: AsyncClient,
+    location_payload: dict[str, str],
+    access_token: str,
+    confirmed_user: dict[str, Any],
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post(
         "/location",
@@ -101,5 +104,5 @@ async def location_from_db(
 
 
 @pytest.fixture
-def location_id(location_from_db: dict[str, str]) -> str:
-    return location_from_db["id"]
+def location_id(created_location: dict[str, str]) -> str:
+    return created_location["id"]

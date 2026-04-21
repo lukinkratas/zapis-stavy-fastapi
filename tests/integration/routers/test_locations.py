@@ -17,6 +17,7 @@ class TestIntegrationLocation:
         async_client: AsyncClient,
         location_payload: dict[str, str],
         access_token: str,
+        confirmed_user: dict[str, Any],
     ) -> None:
         # create location
         response = await async_client.post(
@@ -30,9 +31,10 @@ class TestIntegrationLocation:
         assert LocationResponseJson.model_validate(new_location)
 
         # delete created location
-        lid = new_location["id"]
+        location_id = new_location["id"]
         response = await async_client.delete(
-            f"/location/{lid}", headers={"Authorization": f"Bearer {access_token}"}
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
@@ -41,9 +43,10 @@ class TestIntegrationLocation:
     async def test_create_existing_location(
         self,
         async_client: AsyncClient,
-        access_token: str,
         location_payload: dict[str, str],
-        location_from_db: dict[str, Any],
+        created_location: dict[str, Any],
+        access_token: str,
+        confirmed_user: dict[str, Any],
     ) -> None:
         # requires location to be already created
         response = await async_client.post(
@@ -89,6 +92,7 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         access_token: str,
+        confirmed_user: dict[str, Any],
     ) -> None:
         response = await async_client.delete(
             f"/location/{uuid.uuid4()}",
@@ -102,9 +106,11 @@ class TestIntegrationLocation:
         self,
         async_client: AsyncClient,
         access_token: str,
-        location_id: str,
         update_location_payload: dict[str, str],
+        created_location: dict[str, Any],
+        confirmed_user: dict[str, Any],
     ) -> None:
+        location_id = created_location["id"]
         response = await async_client.put(
             f"/location/{location_id}",
             json=update_location_payload,
@@ -122,9 +128,11 @@ class TestIntegrationLocation:
         async_client: AsyncClient,
         access_token: str,
         update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
     ) -> None:
+        location_id = str(uuid.uuid4())
         response = await async_client.put(
-            f"/location/{uuid.uuid4()}",
+            f"/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )

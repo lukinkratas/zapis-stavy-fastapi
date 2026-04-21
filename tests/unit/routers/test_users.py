@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import AsyncMock
 
 import pytest
 from httpx import AsyncClient
@@ -16,19 +15,16 @@ class TestUnitUser:
     """Integration tests for users."""
 
     @pytest.mark.anyio
-    async def test_register_and_delete_user(
+    async def test_register_user(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
         credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        registered_user_json: dict[str, Any],
         mock_send_email: MockerFixture,
-        access_token: str,
     ) -> None:
         # mock
-        mocker.patch.object(
-            UsersTable, "insert", new=AsyncMock(return_value=registered_user)
-        )
+        mocker.patch.object(UsersTable, "insert", return_value=registered_user_json)
 
         # register user
         response = await async_client.post("/register", json=credentials)
@@ -38,13 +34,16 @@ class TestUnitUser:
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)
 
+    @pytest.mark.anyio
+    async def test_delete_user(
+        self,
+        async_client: AsyncClient,
+        mocker: MockerFixture,
+        registered_user: dict[str, Any],
+        access_token: str,
+    ) -> None:
         # mock
-        mocker.patch.object(
-            UsersTable,
-            "select_by_id",
-            new=AsyncMock(return_value=registered_user),
-        )
-        mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
+        mocker.patch.object(UsersTable, "delete", return_value=None)
 
         # delete registered user
         response = await async_client.delete(
@@ -88,14 +87,7 @@ class TestUnitUser:
         }
 
         # mock
-        mocker.patch.object(
-            UsersTable,
-            "select_by_id",
-            new=AsyncMock(return_value=registered_user),
-        )
-        mocker.patch.object(
-            UsersTable, "update", new=AsyncMock(return_value=updated_user_from_db)
-        )
+        mocker.patch.object(UsersTable, "update", return_value=updated_user_from_db)
 
         # update user
         response = await async_client.put(
