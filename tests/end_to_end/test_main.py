@@ -96,7 +96,7 @@ class TestEndToEnd:
 
         # update user
         response = await async_client.put(
-            f"/user/{user_id}",
+            "/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -126,10 +126,10 @@ class TestEndToEnd:
             f"/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
         # delete registered user
         response = await async_client.delete(
-            f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+            "/user", headers={"Authorization": f"Bearer {access_token}"}
         )
-        assert response.status_code == 204
+        assert response.status_code == 200

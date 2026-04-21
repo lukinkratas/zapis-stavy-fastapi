@@ -47,5 +47,5 @@ async def expired_confirmation_token(user_id: str) -> str:
 
 
 @pytest.fixture
-def not_registered_access_token() -> str:
+def random_id_access_token() -> str:
     return create_access_token(str(uuid.uuid4()))

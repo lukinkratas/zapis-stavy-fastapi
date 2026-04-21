@@ -54,7 +54,7 @@ class TestUnitLocation:
             f"/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     @pytest.mark.anyio
     async def test_update_location(

@@ -32,13 +32,13 @@ class TestUnitUser:
         async_client: AsyncClient,
         mocker: MockerFixture,
         credentials: dict[str, str],
-        user_from_db: dict[str, Any],
+        registered_user_from_db: dict[str, Any],
         mock_send_email: MockerFixture,
         access_token: str,
     ) -> None:
         # mock
         mocker.patch.object(
-            UsersTable, "insert", new=AsyncMock(return_value=user_from_db)
+            UsersTable, "insert", new=AsyncMock(return_value=registered_user_from_db)
         )
 
         # register user
@@ -49,13 +49,19 @@ class TestUnitUser:
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)
 
-        # delete registered user
-        mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
-        uid = registered_user["id"]
-        response = await async_client.delete(
-            f"/user/{uid}", headers={"Authorization": f"Bearer {access_token}"}
+        # mock
+        mocker.patch.object(
+            UsersTable,
+            "select_by_id",
+            new=AsyncMock(return_value=registered_user_from_db),
         )
-        assert response.status_code == 204
+        mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
+
+        # delete registered user
+        response = await async_client.delete(
+            "/user", headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert response.status_code == 200
 
     @pytest.mark.parametrize(
         "credentials",
@@ -78,10 +84,11 @@ class TestUnitUser:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
+        registered_user_from_db: dict[str, Any],
         update_user_payload: dict[str, str],
         access_token: str,
     ) -> None:
-        user_from_db = {
+        updated_user_from_db = {
             "email": update_user_payload["email"],
             "password": get_password_hash(update_user_payload["password"]),
             "id": str(uuid.uuid4()),
@@ -90,12 +97,17 @@ class TestUnitUser:
 
         # mock
         mocker.patch.object(
-            UsersTable, "update", new=AsyncMock(return_value=user_from_db)
+            UsersTable,
+            "select_by_id",
+            new=AsyncMock(return_value=registered_user_from_db),
+        )
+        mocker.patch.object(
+            UsersTable, "update", new=AsyncMock(return_value=updated_user_from_db)
         )
 
         # update user
         response = await async_client.put(
-            f"/user/{uuid.uuid4()}",
+            "/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )

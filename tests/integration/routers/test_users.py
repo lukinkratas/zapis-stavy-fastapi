@@ -1,4 +1,3 @@
-import uuid
 from typing import Any
 
 import pytest
@@ -31,16 +30,15 @@ class TestIntegrationUser:
         assert verify_password(credentials["password"], registered_user["password"])
 
         # delete registered user
-        user_id = registered_user["id"]
-        access_token = create_access_token(user_id)
+        access_token = create_access_token(registered_user["id"])
         response = await async_client.delete(
-            f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+            "/user", headers={"Authorization": f"Bearer {access_token}"}
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_register_registered_user(
+    async def test_register_already_registered_user(
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
@@ -52,13 +50,13 @@ class TestIntegrationUser:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_non_registered_user(
-        self, async_client: AsyncClient, access_token: str
+    async def test_delete_user_random_id_access_token(
+        self, async_client: AsyncClient, random_id_access_token: str
     ) -> None:
         response = await async_client.delete(
-            f"/user/{uuid.uuid4()}", headers={"Authorization": f"Bearer {access_token}"}
+            "/user", headers={"Authorization": f"Bearer {random_id_access_token}"}
         )
-        assert response.status_code == 204
+        assert response.status_code == 401
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -69,9 +67,8 @@ class TestIntegrationUser:
         update_user_payload: dict[str, str],
         access_token: str,
     ) -> None:
-        uid = registered_user["id"]
         response = await async_client.put(
-            f"/user/{uid}",
+            "/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -85,15 +82,15 @@ class TestIntegrationUser:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_non_registered_user(
+    async def test_update_user_random_id_access_token(
         self,
         async_client: AsyncClient,
         update_user_payload: dict[str, str],
-        access_token: str,
+        random_id_access_token: str,
     ) -> None:
         response = await async_client.put(
-            f"/user/{uuid.uuid4()}",
+            "/user",
             json=update_user_payload,
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={"Authorization": f"Bearer {random_id_access_token}"},
         )
-        assert response.status_code == 404
+        assert response.status_code == 401

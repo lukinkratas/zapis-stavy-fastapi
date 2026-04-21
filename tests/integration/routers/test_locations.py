@@ -34,7 +34,7 @@ class TestIntegrationLocation:
         response = await async_client.delete(
             f"/location/{lid}", headers={"Authorization": f"Bearer {access_token}"}
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -55,16 +55,16 @@ class TestIntegrationLocation:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_not_registered_access_token(
+    async def test_create_location_random_id_access_token(
         self,
         async_client: AsyncClient,
-        not_registered_access_token: str,
+        random_id_access_token: str,
         location_payload: dict[str, str],
     ) -> None:
         response = await async_client.post(
             "/location",
             json=location_payload,
-            headers={"Authorization": f"Bearer {not_registered_access_token}"},
+            headers={"Authorization": f"Bearer {random_id_access_token}"},
         )
         assert response.status_code == 401
 
@@ -94,7 +94,7 @@ class TestIntegrationLocation:
             f"/location/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
 
     @pytest.mark.integration
     @pytest.mark.anyio

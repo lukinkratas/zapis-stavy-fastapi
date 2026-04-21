@@ -27,9 +27,9 @@ class TestUnitAuth:
 
     @pytest.mark.anyio
     async def test_verify_password(
-        self, credentials: dict[str, str], user_from_db: dict[str, Any]
+        self, credentials: dict[str, str], registered_user_from_db: dict[str, Any]
     ) -> None:
-        verify_password(credentials["password"], user_from_db["password"])
+        verify_password(credentials["password"], registered_user_from_db["password"])
 
     @pytest.mark.anyio
     async def test_create_access_token(self) -> None:
@@ -85,11 +85,13 @@ class TestUnitAuth:
         async_client: AsyncClient,
         mocker: MockerFixture,
         credentials: dict[str, str],
-        user_from_db: dict[str, Any],
+        registered_user_from_db: dict[str, Any],
     ) -> None:
         # mock
         mocker.patch.object(
-            UsersTable, "select_by_email", new=AsyncMock(return_value=user_from_db)
+            UsersTable,
+            "select_by_email",
+            new=AsyncMock(return_value=registered_user_from_db),
         )
 
         # login

@@ -42,7 +42,7 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def user_from_db(credentials: dict[str, str]) -> dict[str, Any]:
+def registered_user_from_db(credentials: dict[str, str]) -> dict[str, Any]:
     return {
         "email": credentials["email"],
         "password": get_password_hash(credentials["password"]),
@@ -53,5 +53,5 @@ def user_from_db(credentials: dict[str, str]) -> dict[str, Any]:
 
 
 @pytest.fixture
-def user_id(user_from_db: dict[str, Any]) -> str:
-    return user_from_db["id"]
+def user_id(registered_user_from_db: dict[str, Any]) -> str:
+    return registered_user_from_db["id"]

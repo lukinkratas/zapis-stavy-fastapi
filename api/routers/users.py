@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
@@ -93,17 +92,15 @@ async def register_user(
     }
 
 
-@router.delete("/user/{id}", status_code=204)
+@router.delete("/user", status_code=200)
 @log_async_func(logger.info)
 async def delete_user(
-    id: uuid.UUID,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> None:
     """Delete a user from the database.
 
     Args:
-        id: uuid of user
         conn: database connection
         current_user: current authorized user
 
@@ -112,13 +109,12 @@ async def delete_user(
     Raises:
         HTTPException: if user cannot be deleted from the database
     """
-    await users_table.delete(conn, id)
+    await users_table.delete(conn, current_user["id"])
 
 
-@router.put("/user/{id}", response_model=UserResponseJson)
+@router.put("/user", response_model=UserResponseJson)
 @log_async_func(logger.info)
 async def update_user(
-    id: uuid.UUID,
     user: UserUpdateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
@@ -126,7 +122,6 @@ async def update_user(
     """Update a meter in the database.
 
     Args:
-        id: uuid of meter
         user: user update request payload from client
         conn: database connection
         current_user: current authorized user
@@ -140,7 +135,7 @@ async def update_user(
     if data.get("password") is not None:
         data["password"] = get_password_hash(user.password)  # type: ignore[arg-type]
 
-    updated_user = await users_table.update(conn, id, data)
+    updated_user = await users_table.update(conn, current_user["id"], data)
 
     if updated_user is None:
         raise HTTPException(status_code=404, detail="User not found.")

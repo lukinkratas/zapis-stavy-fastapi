@@ -51,7 +51,7 @@ async def create_location(
     return created_location
 
 
-@router.delete("/{id}", status_code=204)
+@router.delete("/{id}", status_code=200)
 @log_async_func(logger.info)
 async def delete_location(
     id: uuid.UUID,

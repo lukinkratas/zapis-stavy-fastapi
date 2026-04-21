@@ -73,12 +73,12 @@ class TestIntegrationAuth:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_get_current_user_not_registered_access_token(
-        self, db_conn: AsyncConnection, not_registered_access_token: str
+    async def test_get_current_user_random_id_access_token(
+        self, db_conn: AsyncConnection, random_id_access_token: str
     ) -> None:
         # requires user to be registered
         with pytest.raises(HTTPException):
-            await get_current_user(db_conn, not_registered_access_token)
+            await get_current_user(db_conn, random_id_access_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio

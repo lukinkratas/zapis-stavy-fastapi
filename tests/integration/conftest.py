@@ -80,9 +80,9 @@ async def registered_user(
     user_id = registered_user["id"]
     access_token = create_access_token(user_id)
     response = await async_client.delete(
-        f"/user/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+        "/user", headers={"Authorization": f"Bearer {access_token}"}
     )
-    assert response.status_code == 204
+    assert response.status_code == 200
 
 
 @pytest.fixture
