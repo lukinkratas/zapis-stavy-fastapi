@@ -3,7 +3,8 @@
 - [x] user endpoints with access token
 - [x] login and register - same form -> Nope
 - [x] DEL/PUT endpoints - user_id from JWT token, not in endpoint name
-- [ ] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user -> allow to login and resend confirmation token
+- [x] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user -> allow to login and resend confirmation token
+- [ ] split create and delete tests in unit tests
 - [ ] refactor tests
 - [ ] tests for deleteing, updating different user data
 - [ ] tests update - every token dependent endpoint test with valid, expired, random_id_token

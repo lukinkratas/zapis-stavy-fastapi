@@ -84,13 +84,6 @@ async def authenticate_user(
     if user is None or not verify_password(password, user["password"]):
         raise credentials_exception
 
-    if user["confirmed"] is not True:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not confirmed",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     return user
 
 
@@ -189,6 +182,31 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+@log_async_func(logger.info)
+async def get_current_confirmed_user(
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+) -> dict[str, Any]:
+    """Get current user from token.
+
+    Args:
+        current_user: current authorized user
+
+    Returns: user dict
+
+
+    Raises:
+        HTTPException: if user is not confirmed.
+    """
+    if current_user["confirmed"] is not True:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not confirmed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return current_user
 
 
 @router.post("/token", response_model=Token)

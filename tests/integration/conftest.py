@@ -54,17 +54,6 @@ async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
 
 
 @pytest.fixture
-def mock_send_email(mocker: MockerFixture) -> MockerFixture:
-    return mocker.patch(
-        "api.routers.users.ses_send_email",
-        return_value={
-            "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee-000000",
-            "ResponseMetadata": {},
-        },
-    )
-
-
-@pytest.fixture
 async def registered_user(
     async_client: AsyncClient,
     credentials: dict[str, str],
@@ -84,22 +73,13 @@ async def registered_user(
     )
     assert response.status_code == 200
 
-
-@pytest.fixture
-def user_id(registered_user: dict[str, Any]) -> str:
-    return registered_user["id"]
-
-
 @pytest.fixture
 async def confirmed_user(
     async_client: AsyncClient,
     registered_user: dict[str, Any],
-    confirmation_token: str,
     db_conn: AsyncConnection,
 ) -> dict[str, Any]:
-    response = await async_client.get(f"/confirm/{confirmation_token}")
-    assert response.status_code == 200
-    return await users_table.select_by_id(db_conn, registered_user["id"])
+    return await users_table.update(db_conn, registered_user["id"], {"confirmed": True})
 
 
 @pytest.fixture
@@ -115,8 +95,8 @@ async def location_from_db(
 
     yield created_location
 
-    mid = created_location["id"]
-    await async_client.delete(f"/location/{mid}")
+    location_id = created_location["id"]
+    await async_client.delete(f"/location/{location_id}")
 
 
 @pytest.fixture

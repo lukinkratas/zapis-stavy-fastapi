@@ -15,30 +15,19 @@ from api.schemas.users import UserResponseJson
 class TestUnitUser:
     """Integration tests for users."""
 
-    @pytest.fixture
-    def mock_send_email(self, mocker: MockerFixture) -> MockerFixture:
-        """Prevent real SES calls in all integration tests."""
-        return mocker.patch(
-            "api.routers.users.ses_send_email",
-            return_value={
-                "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee",
-                "ResponseMetadata": {},
-            },
-        )
-
     @pytest.mark.anyio
     async def test_register_and_delete_user(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
         credentials: dict[str, str],
-        registered_user_from_db: dict[str, Any],
+        registered_user: dict[str, Any],
         mock_send_email: MockerFixture,
         access_token: str,
     ) -> None:
         # mock
         mocker.patch.object(
-            UsersTable, "insert", new=AsyncMock(return_value=registered_user_from_db)
+            UsersTable, "insert", new=AsyncMock(return_value=registered_user)
         )
 
         # register user
@@ -53,7 +42,7 @@ class TestUnitUser:
         mocker.patch.object(
             UsersTable,
             "select_by_id",
-            new=AsyncMock(return_value=registered_user_from_db),
+            new=AsyncMock(return_value=registered_user),
         )
         mocker.patch.object(UsersTable, "delete", new=AsyncMock(return_value=None))
 
@@ -66,9 +55,12 @@ class TestUnitUser:
     @pytest.mark.parametrize(
         "credentials",
         [
-            {"email": "test@test.net"},
-            {"password": "password"},
-            {"username": "test@test.net", "password": "password"},
+            pytest.param({"email": "test@test.net"}, id="missing password"),
+            pytest.param({"password": "password"}, id="missing email"),
+            pytest.param(
+                {"username": "test@test.net", "password": "password"},
+                id="username instead of email",
+            ),
         ],
     )
     @pytest.mark.anyio
@@ -84,7 +76,7 @@ class TestUnitUser:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        registered_user_from_db: dict[str, Any],
+        registered_user: dict[str, Any],
         update_user_payload: dict[str, str],
         access_token: str,
     ) -> None:
@@ -99,7 +91,7 @@ class TestUnitUser:
         mocker.patch.object(
             UsersTable,
             "select_by_id",
-            new=AsyncMock(return_value=registered_user_from_db),
+            new=AsyncMock(return_value=registered_user),
         )
         mocker.patch.object(
             UsersTable, "update", new=AsyncMock(return_value=updated_user_from_db)

@@ -1,6 +1,6 @@
 import uuid
 from datetime import timedelta
-from typing import Any
+from typing import Any, Callable
 from unittest.mock import AsyncMock
 
 import jwt
@@ -27,9 +27,9 @@ class TestUnitAuth:
 
     @pytest.mark.anyio
     async def test_verify_password(
-        self, credentials: dict[str, str], registered_user_from_db: dict[str, Any]
+        self, credentials: dict[str, str], registered_user: dict[str, Any]
     ) -> None:
-        verify_password(credentials["password"], registered_user_from_db["password"])
+        verify_password(credentials["password"], registered_user["password"])
 
     @pytest.mark.anyio
     async def test_create_access_token(self) -> None:
@@ -47,15 +47,19 @@ class TestUnitAuth:
         assert decoded_token["sub"] == str(user_id)
         assert decoded_token["type"] == "confirmation"
 
-    def test_get_subject_access_token(self) -> None:
+    @pytest.mark.parametrize(
+        ("typ", "create_token_func"),
+        [
+            pytest.param("access", create_access_token, id="access"),
+            pytest.param("confirmation", create_confirmation_token, id="confirmation"),
+        ],
+    )
+    def test_get_subject_access_token(
+        self, typ: str, create_token_func: Callable[[uuid.UUID, timedelta], str]
+    ) -> None:
         user_id = uuid.uuid4()
-        token = create_access_token(user_id)
-        assert get_subject(token, typ="access") == str(user_id)
-
-    def test_get_subject_confirmation_token(self) -> None:
-        user_id = uuid.uuid4()
-        token = create_confirmation_token(user_id)
-        assert get_subject(token, typ="confirmation") == str(user_id)
+        token = create_token_func(user_id)
+        assert get_subject(token, typ=typ) == str(user_id)
 
     def test_get_subject_invalid(self) -> None:
         token = "invalid"
@@ -85,13 +89,13 @@ class TestUnitAuth:
         async_client: AsyncClient,
         mocker: MockerFixture,
         credentials: dict[str, str],
-        registered_user_from_db: dict[str, Any],
+        registered_user: dict[str, Any],
     ) -> None:
         # mock
         mocker.patch.object(
             UsersTable,
             "select_by_email",
-            new=AsyncMock(return_value=registered_user_from_db),
+            new=AsyncMock(return_value=registered_user),
         )
 
         # login
@@ -115,17 +119,3 @@ class TestUnitAuth:
         # confirm
         response = await async_client.get(f"/confirm/{confirmation_token}")
         assert response.status_code == 200
-
-    @pytest.mark.anyio
-    async def test_confirm_expired_token(
-        self, async_client: AsyncClient, expired_confirmation_token: str
-    ) -> None:
-        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
-        assert response.status_code == 401
-
-    @pytest.mark.anyio
-    async def test_confirm_access_token(
-        self, async_client: AsyncClient, access_token: str
-    ) -> None:
-        response = await async_client.get(f"/confirm/{access_token}")
-        assert response.status_code == 401

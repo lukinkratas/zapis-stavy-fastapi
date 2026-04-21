@@ -42,16 +42,17 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def registered_user_from_db(credentials: dict[str, str]) -> dict[str, Any]:
+def registered_user(credentials: dict[str, str]) -> dict[str, Any]:
     return {
         "email": credentials["email"],
         "password": get_password_hash(credentials["password"]),
         "id": str(uuid.uuid4()),
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        "confirmed": True,
+        "confirmed": False,
     }
 
-
 @pytest.fixture
-def user_id(registered_user_from_db: dict[str, Any]) -> str:
-    return registered_user_from_db["id"]
+def confirmed_user(registered_user: dict[str, Any]) -> dict[str, Any]:
+    confirmed_user = registered_user.copy()
+    confirmed_user["confirmed"] = True
+    return confirmed_user

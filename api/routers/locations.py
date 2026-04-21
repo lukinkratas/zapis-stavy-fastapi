@@ -14,7 +14,7 @@ from ..schemas.locations import (
     LocationUpdateRequestBody,
 )
 from ..utils import log_async_func
-from .auth import get_current_user
+from .auth import get_current_confirmed_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/location")
@@ -25,14 +25,16 @@ router = APIRouter(prefix="/location")
 async def create_location(
     location: LocationCreateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_confirmed_user: Annotated[
+        dict[str, Any], Depends(get_current_confirmed_user)
+    ],
 ) -> dict[str, Any] | None:
     """Add new location into the database.
 
     Args:
         location: location create request payload from client
         conn: database connection
-        current_user: current authorized user
+        current_confirmed_user: current authorized and confirmed user
 
     Returns: location dict
 
@@ -40,7 +42,7 @@ async def create_location(
         HTTPException: if location cannot be inserted in the database
     """
     data = location.model_dump()
-    data["user_id"] = current_user["id"]
+    data["user_id"] = current_confirmed_user["id"]
 
     try:
         created_location = await locations_table.insert(conn, data)
@@ -56,21 +58,23 @@ async def create_location(
 async def delete_location(
     id: uuid.UUID,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_confirmed_user: Annotated[
+        dict[str, Any], Depends(get_current_confirmed_user)
+    ],
 ) -> None:
     """Delete a location from the database.
 
     Args:
         id: uuid of location
         conn: database connection
-        current_user: current authorized user
+        current_confirmed_user: current authorized and confirmed user
 
     Returns: None
 
     Raises:
         HTTPException: if location cannot be deleted from the database
     """
-    await locations_table.delete(conn, id, current_user["id"])
+    await locations_table.delete(conn, id, current_confirmed_user["id"])
 
 
 @router.put("/{id}", response_model=LocationResponseJson)
@@ -79,7 +83,9 @@ async def update_location(
     id: uuid.UUID,
     location: LocationUpdateRequestBody,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_confirmed_user: Annotated[
+        dict[str, Any], Depends(get_current_confirmed_user)
+    ],
 ) -> dict[str, Any]:
     """Update a location in the database.
 
@@ -87,7 +93,7 @@ async def update_location(
         id: uuid of location
         location: location update request payload from client
         conn: database connection
-        current_user: current authorized user
+        current_confirmed_user: current authorized and confirmed user
 
     Returns: location dict
 
@@ -95,7 +101,7 @@ async def update_location(
         HTTPException: if location cannot be updated in the database
     """
     data = location.model_dump()
-    updated_location = await locations_table.update(conn, id, current_user["id"], data)
+    updated_location = await locations_table.update(conn, id, current_confirmed_user["id"], data)
 
     if updated_location is None:
         raise HTTPException(status_code=404, detail="Location not found")

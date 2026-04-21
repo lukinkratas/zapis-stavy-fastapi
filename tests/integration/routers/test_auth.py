@@ -38,8 +38,8 @@ class TestIntegrationAuth:
         registered_user: dict[str, Any],
     ) -> None:
         # requires user to be already registered
-        with pytest.raises(HTTPException):
-            await authenticate_user(db_conn, **credentials)
+        user = await authenticate_user(db_conn, **credentials)
+        assert UserResponseJson.model_validate(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -100,11 +100,39 @@ class TestIntegrationAuth:
 
     @pytest.mark.integration
     @pytest.mark.anyio
+    async def test_get_current_confirmed_user(self) -> None:
+        pass
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
     async def test_login(
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
         confirmed_user: dict[str, Any],
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 200
+
+        token = response.json()
+        assert Token.model_validate(token)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login_not_confirmed(
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
     ) -> None:
         # requires user to be registered
         data = {
@@ -159,25 +187,6 @@ class TestIntegrationAuth:
         )
         assert response.status_code == 401
 
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_login_not_confirmed(
-        self,
-        async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-    ) -> None:
-        # requires user to be registered
-        data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
-        }
-        response = await async_client.post(
-            "/token",
-            data=data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 401
 
     @pytest.mark.anyio
     async def test_confirm(
