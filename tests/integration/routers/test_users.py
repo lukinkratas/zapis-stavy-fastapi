@@ -19,6 +19,7 @@ class TestCreateAndDelete:
         credentials: dict[str, str],
         mock_send_email: MagicMock,
     ) -> None:
+        """Testing expected case."""
         # register user
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 201
@@ -36,6 +37,9 @@ class TestCreateAndDelete:
         )
         assert response.status_code == 200
 
+class TestCreate:
+    """Integration tests for create user endpoints."""
+
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_register_already_registered_user(
@@ -44,20 +48,45 @@ class TestCreateAndDelete:
         credentials: dict[str, str],
         registered_user: dict[str, Any],
     ) -> None:
-        # requires user to be already registered
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 409
 
+class TestDelete:
+    """Integration tests for delete user endpoints."""
+
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_user_random_id_access_token(
-        self, async_client: AsyncClient, random_id_access_token: str
+    # async def test_delete_non_existing_user(
+    async def test_delete_user_other_user_access_token(
+        self, async_client: AsyncClient, other_user_access_token: str,
     ) -> None:
+        """Testing access token with different encoded sub."""
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {random_id_access_token}"}
+            "/user", headers={"Authorization": f"Bearer {other_user_access_token}"}
         )
         assert response.status_code == 401
 
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_delete_user_expired_access_token(
+        self, async_client: AsyncClient, registered_user: dict[str, Any], expired_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded exp."""
+        response = await async_client.delete(
+            "/user", headers={"Authorization": f"Bearer {expired_access_token}"}
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_delete_user_confirmation_token(
+        self, async_client: AsyncClient, registered_user: dict[str, Any], confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        response = await async_client.delete(
+            "/user", headers={"Authorization": f"Bearer {confirmation_token}"}
+        )
+        assert response.status_code == 401
 
 class TestUpdate:
     """Integration tests for update user endpoint."""
@@ -67,10 +96,10 @@ class TestUpdate:
     async def test_update_user(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
         update_user_payload: dict[str, str],
-        access_token: str,
+        registered_user: dict[str, Any], access_token: str,
     ) -> None:
+        """Testing expected case."""
         response = await async_client.put(
             "/user",
             json=update_user_payload,
@@ -86,15 +115,49 @@ class TestUpdate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_user_random_id_access_token(
+    # async def test_update_non_existing_user(
+    async def test_update_user_other_user_access_token(
         self,
         async_client: AsyncClient,
         update_user_payload: dict[str, str],
-        random_id_access_token: str,
+        other_user_access_token: str,
     ) -> None:
+        """Testing access token with different encoded sub."""
         response = await async_client.put(
             "/user",
             json=update_user_payload,
-            headers={"Authorization": f"Bearer {random_id_access_token}"},
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_user_expired_access_token(
+        self,
+        async_client: AsyncClient,
+        update_user_payload: dict[str, str],
+        registered_user: dict[str, Any], expired_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded exp."""
+        response = await async_client.put(
+            "/user",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {expired_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_user_confirmation_token(
+        self,
+        async_client: AsyncClient,
+        update_user_payload: dict[str, str],
+        registered_user: dict[str, Any], confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        response = await async_client.put(
+            "/user",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401

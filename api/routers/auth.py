@@ -133,7 +133,7 @@ def create_confirmation_token(
     )
 
 
-def get_subject(token: str, typ: Literal["access", "confirmation"]) -> str:
+def get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
     """Get subject from JWT token.
 
     Args:
@@ -173,7 +173,7 @@ async def get_current_user(
     Raises:
         HTTPException: if user is not found in the database.
     """
-    user_id = get_subject(token, typ="access")
+    user_id = get_sub(token, typ="access")
     user = await users_table.select_by_id(conn, user_id)
     if user is None:
         raise HTTPException(
@@ -243,7 +243,7 @@ async def confirm(
 
     Returns: dict with detail message
     """
-    user_id = get_subject(token, typ="confirmation")
+    user_id = get_sub(token, typ="confirmation")
     # check user exists
     user = await users_table.select_by_id(conn, user_id)
     if user is None:

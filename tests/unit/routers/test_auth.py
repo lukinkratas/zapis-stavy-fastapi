@@ -14,7 +14,7 @@ from api.routers.auth import (
     _create_jwt_token,
     create_access_token,
     create_confirmation_token,
-    get_subject,
+    get_sub,
     verify_password,
 )
 from api.schemas.auth import Token
@@ -52,36 +52,36 @@ class TestUnitAuth:
             pytest.param("confirmation", create_confirmation_token, id="confirmation"),
         ],
     )
-    def test_get_subject_access_token(
+    def test_get_sub(
         self,
         typ: Literal["access", "confirmation"],
         create_token_func: Callable[[uuid.UUID], str],
     ) -> None:
         user_id = uuid.uuid4()
         token = create_token_func(user_id)
-        assert get_subject(token, typ=typ) == str(user_id)
+        assert get_sub(token, typ=typ) == str(user_id)
 
-    def test_get_subject_invalid(self) -> None:
+    def test_get_sub_invalid(self) -> None:
         token = "invalid"
         with pytest.raises(HTTPException):
-            get_subject(token, typ="access")
+            get_sub(token, typ="access")
 
-    def test_get_subject_wrong_type(self) -> None:
+    def test_get_sub_wrong_type(self) -> None:
         user_id = uuid.uuid4()
         token = create_confirmation_token(user_id)
         with pytest.raises(HTTPException):
-            get_subject(token, typ="access")
+            get_sub(token, typ="access")
 
-    def test_get_subject_expired_token(self) -> None:
+    def test_get_sub_expired_token(self) -> None:
         user_id = uuid.uuid4()
         token = create_access_token(user_id, expires_delta=timedelta(-1))
         with pytest.raises(HTTPException):
-            get_subject(token, typ="access")
+            get_sub(token, typ="access")
 
-    def test_get_subject_missing_sub(self) -> None:
+    def test_get_sub_missing_sub(self) -> None:
         token = _create_jwt_token({"type": "access"}, timedelta(minutes=15))
         with pytest.raises(HTTPException):
-            get_subject(token, typ="access")
+            get_sub(token, typ="access")
 
     @pytest.mark.anyio
     async def test_login(

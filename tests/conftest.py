@@ -22,49 +22,51 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def credentials() -> dict[str, str]:
+    """Used in unit and integration user/register and auth/login tests."""
     return {"email": "test@test.net", "password": "password"}
 
 
 @pytest.fixture
 def update_user_payload() -> dict[str, str]:
+    """Used in unit and integration user/update tests."""
     return {"email": "update@test.net", "password": "update"}
 
 
 @pytest.fixture
 def location_payload() -> dict[str, str]:
+    """Used in unit and integration location/create tests."""
     return {"name": "test"}
 
 
 @pytest.fixture
 def update_location_payload() -> dict[str, str]:
+    """Used in unit and integration location/update tests."""
     return {"name": "update"}
 
-
 @pytest.fixture
-def user_id(registered_user: dict[str, Any]) -> str:
-    return registered_user["id"]
-
-
-@pytest.fixture
-async def access_token(user_id: str) -> str:
-    return create_access_token(user_id)
+async def access_token(registered_user: dict[str, Any]) -> str:
+    return create_access_token(registered_user["id"])
 
 
 @pytest.fixture
-async def confirmation_token(user_id: str) -> str:
-    return create_confirmation_token(user_id)
+async def confirmation_token(registered_user: dict[str, Any]) -> str:
+    return create_confirmation_token(registered_user["id"])
 
 
 @pytest.fixture
-async def expired_access_token(user_id: str) -> str:
-    return create_access_token(user_id, expires_delta=timedelta(-1))
+async def expired_access_token(registered_user: dict[str, Any]) -> str:
+    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
 
 
 @pytest.fixture
-async def expired_confirmation_token(user_id: str) -> str:
-    return create_confirmation_token(user_id, expires_delta=timedelta(-1))
+async def expired_confirmation_token(registered_user: dict[str, Any]) -> str:
+    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
 
 
 @pytest.fixture
-def random_id_access_token() -> str:
+def other_user_access_token() -> str:
     return create_access_token(str(uuid.uuid4()))
+
+@pytest.fixture
+async def other_user_confirmation_token() -> str:
+    return create_confirmation_token(str(uuid.uuid4()))

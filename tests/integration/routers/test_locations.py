@@ -16,9 +16,10 @@ class TestCreateAndDelete:
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
-        access_token: str,
         confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
+        """Testing expected case."""
         # create location
         response = await async_client.post(
             "/location",
@@ -38,17 +39,19 @@ class TestCreateAndDelete:
         )
         assert response.status_code == 200
 
+class TestCreate:
+    """Integration tests for create location endpoints."""
+
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_existing_location(
+    async def test_create_already_created_location(
         self,
         async_client: AsyncClient,
-        location_payload: dict[str, str],
         created_location: dict[str, Any],
-        access_token: str,
+        location_payload: dict[str, str],
         confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
-        # requires location to be already created
         response = await async_client.post(
             "/location",
             json=location_payload,
@@ -58,27 +61,30 @@ class TestCreateAndDelete:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_random_id_access_token(
+    async def test_create_location_other_user_access_token(
         self,
         async_client: AsyncClient,
-        random_id_access_token: str,
         location_payload: dict[str, str],
+        other_user_access_token: str,
     ) -> None:
+        """Testing access token with different encoded sub."""
         response = await async_client.post(
             "/location",
             json=location_payload,
-            headers={"Authorization": f"Bearer {random_id_access_token}"},
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 401
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_expired_token(
+    async def test_create_location_expired_access_token(
         self,
         async_client: AsyncClient,
-        expired_access_token: str,
         location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        expired_access_token: str,
     ) -> None:
+        """Testing access token with different encoded exp."""
         response = await async_client.post(
             "/location",
             json=location_payload,
@@ -88,18 +94,89 @@ class TestCreateAndDelete:
 
     @pytest.mark.integration
     @pytest.mark.anyio
+    async def test_create_location_confirmation_token(
+        self,
+        async_client: AsyncClient,
+        location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        response = await async_client.post(
+            "/location",
+            json=location_payload,
+            headers={"Authorization": f"Bearer {confirmation_token}"},
+        )
+        assert response.status_code == 401
+
+class TestDelete:
+    """Integration tests for delete location endpoints."""
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
     async def test_delete_non_existing_location(
         self,
         async_client: AsyncClient,
-        access_token: str,
         confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
+        location_id = uuid.uuid4()
         response = await async_client.delete(
-            f"/location/{uuid.uuid4()}",
+            f"/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_delete_location_other_user_access_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        other_user_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded sub."""
+        location_id = created_location["id"]
+        response = await async_client.delete(
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_delete_location_expired_access_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        confirmed_user: dict[str, Any],
+        expired_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded exp."""
+        location_id = created_location["id"]
+        response = await async_client.delete(
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {expired_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_delete_location_confirmation_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        confirmed_user: dict[str, Any],
+        confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        location_id = created_location["id"]
+        response = await async_client.delete(
+            f"/location/{location_id}",
+            headers={"Authorization": f"Bearer {confirmation_token}"},
+        )
+        assert response.status_code == 401
 
 class TestUpdate:
     """Integration tests for update location endpoint."""
@@ -109,11 +186,12 @@ class TestUpdate:
     async def test_update_location(
         self,
         async_client: AsyncClient,
-        access_token: str,
-        update_location_payload: dict[str, str],
         created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
         confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
+        """Testing expected case."""
         location_id = created_location["id"]
         response = await async_client.put(
             f"/location/{location_id}",
@@ -127,12 +205,68 @@ class TestUpdate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
+    async def test_update_location_other_user_access_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
+        other_user_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded sub."""
+        location_id = created_location["id"]
+        response = await async_client.put(
+            f"/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_location_expired_access_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        expired_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded exp."""
+        location_id = created_location["id"]
+        response = await async_client.put(
+            f"/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {expired_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_location_confirmation_token(
+        self,
+        async_client: AsyncClient,
+        created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        location_id = created_location["id"]
+        response = await async_client.put(
+            f"/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {confirmation_token}"},
+        )
+        assert response.status_code == 401
+        
+    @pytest.mark.integration
+    @pytest.mark.anyio
     async def test_update_non_existing_location(
         self,
         async_client: AsyncClient,
-        access_token: str,
         update_location_payload: dict[str, str],
         confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
         location_id = str(uuid.uuid4())
         response = await async_client.put(
