@@ -18,8 +18,8 @@ class TestUnitLocation:
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        confirmed_user: dict[str, Any],
         location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
         access_token: str,
     ) -> None:
         location_id = str(uuid.uuid4())
@@ -68,9 +68,9 @@ class TestUnitLocation:
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
+        update_location_payload: dict[str, str],
         confirmed_user: dict[str, Any],
         access_token: str,
-        update_location_payload: dict[str, str],
     ) -> None:
         location_id = str(uuid.uuid4())
         location_from_db = update_location_payload | {

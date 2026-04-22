@@ -6,11 +6,11 @@
 - [x] confirmed only in authorize, or in get_current_user as is in fast api docs? -> get_current_user + get_current_confirmed_user -> allow to login and resend confirmation token
 - [x] split create and delete tests in unit tests
 - [x] refactor int tests
-- [ ] refactor unit tests
-- [ ] tests for deleteing, updating foregin user data
-- [ ] tests update - every token dependent endpoint test with valid, expired, random_id_token
+- [x] refactor unit tests
+- [x] tests update - every token dependent endpoint test with valid, expired, random_id_token
+- [ ] tests for deleteing, updating non existing and foregin user data
 - [ ] tests update - every user dependent endpoint test with confirmed and not confirmed user
-- [ ] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
+- [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
 - [ ] other_user_access_token -> test other_user registered
 - [ ] review coverage
 - [ ] Dockerfile

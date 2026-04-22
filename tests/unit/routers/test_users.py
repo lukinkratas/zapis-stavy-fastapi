@@ -35,23 +35,6 @@ class TestUnitUser:
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)
 
-    @pytest.mark.anyio
-    async def test_delete_user(
-        self,
-        async_client: AsyncClient,
-        mocker: MockerFixture,
-        registered_user: dict[str, Any],
-        access_token: str,
-    ) -> None:
-        # mock
-        mocker.patch.object(UsersTable, "delete", return_value=None)
-
-        # delete registered user
-        response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {access_token}"}
-        )
-        assert response.status_code == 200
-
     @pytest.mark.parametrize(
         "credentials",
         [
@@ -71,13 +54,31 @@ class TestUnitUser:
         response = await async_client.post("/register", json=credentials)
         assert response.status_code == 422
 
+
+    @pytest.mark.anyio
+    async def test_delete_user(
+        self,
+        async_client: AsyncClient,
+        mocker: MockerFixture,
+        registered_user: dict[str, Any],
+        access_token: str,
+    ) -> None:
+        # mock
+        mocker.patch.object(UsersTable, "delete", return_value=None)
+
+        # delete registered user
+        response = await async_client.delete(
+            "/user", headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert response.status_code == 200
+
     @pytest.mark.anyio
     async def test_update_user(
         self,
         mocker: MockerFixture,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
         update_user_payload: dict[str, str],
+        registered_user: dict[str, Any],
         access_token: str,
     ) -> None:
         updated_user_from_db = {

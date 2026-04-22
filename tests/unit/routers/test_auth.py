@@ -23,6 +23,36 @@ from api.schemas.auth import Token
 class TestUnitAuth:
     """Unit tests for auth."""
 
+
+    @pytest.mark.anyio
+    async def test_login(
+        self,
+        async_client: AsyncClient,
+        mocker: MockerFixture,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+    ) -> None:
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],  # plain password
+        }
+        response = await async_client.post("/token", data=data)
+        assert response.status_code == 200
+
+        token = response.json()
+        assert Token.model_validate(token)
+
+    @pytest.mark.anyio
+    async def test_confirm(
+        self,
+        async_client: AsyncClient,
+        mocker: MockerFixture,
+        registered_user: dict[str, Any],
+        confirmation_token: str,
+    ) -> None:
+        response = await async_client.get(f"/confirm/{confirmation_token}")
+        assert response.status_code == 200
+
     @pytest.mark.anyio
     async def test_verify_password(
         self, credentials: dict[str, str], registered_user: dict[str, Any]
@@ -82,33 +112,3 @@ class TestUnitAuth:
         token = _create_jwt_token({"type": "access"}, timedelta(minutes=15))
         with pytest.raises(HTTPException):
             get_sub(token, typ="access")
-
-    @pytest.mark.anyio
-    async def test_login(
-        self,
-        async_client: AsyncClient,
-        mocker: MockerFixture,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-    ) -> None:
-        # login
-        data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
-        }
-        response = await async_client.post("/token", data=data)
-        assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
-
-    @pytest.mark.anyio
-    async def test_confirm(
-        self,
-        async_client: AsyncClient,
-        mocker: MockerFixture,
-        confirmation_token: str,
-    ) -> None:
-        # confirm
-        response = await async_client.get(f"/confirm/{confirmation_token}")
-        assert response.status_code == 200

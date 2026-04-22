@@ -203,6 +203,24 @@ class TestUpdate:
         updated_location = response.json()
         assert LocationResponseJson.model_validate(updated_location)
 
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_update_non_existing_location(
+        self,
+        async_client: AsyncClient,
+        update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        access_token: str,
+    ) -> None:
+        location_id = str(uuid.uuid4())
+        response = await async_client.put(
+            f"/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 404
+
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_location_other_user_access_token(
@@ -258,20 +276,3 @@ class TestUpdate:
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
-        
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_update_non_existing_location(
-        self,
-        async_client: AsyncClient,
-        update_location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
-        access_token: str,
-    ) -> None:
-        location_id = str(uuid.uuid4())
-        response = await async_client.put(
-            f"/location/{location_id}",
-            json=update_location_payload,
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        assert response.status_code == 404

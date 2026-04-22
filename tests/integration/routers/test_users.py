@@ -42,7 +42,7 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_register_already_registered_user(
+    async def test_register_user_already_registered(
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
