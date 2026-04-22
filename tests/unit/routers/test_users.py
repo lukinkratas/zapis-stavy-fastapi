@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from httpx import AsyncClient
@@ -21,7 +22,7 @@ class TestUnitUser:
         mocker: MockerFixture,
         credentials: dict[str, str],
         registered_user_json: dict[str, Any],
-        mock_send_email: MockerFixture,
+        mock_send_email: MagicMock,
     ) -> None:
         # mock
         mocker.patch.object(UsersTable, "insert", return_value=registered_user_json)

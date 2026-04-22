@@ -55,7 +55,7 @@ class TestUnitAuth:
     def test_get_subject_access_token(
         self,
         typ: Literal["access", "confirmation"],
-        create_token_func: Callable[[uuid.UUID, timedelta], str],
+        create_token_func: Callable[[uuid.UUID], str],
     ) -> None:
         user_id = uuid.uuid4()
         token = create_token_func(user_id)

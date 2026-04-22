@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -9,7 +10,7 @@ from api.routers.auth import create_access_token, create_confirmation_token
 
 
 @pytest.fixture
-def mock_send_email(mocker: MockerFixture) -> MockerFixture:
+def mock_send_email(mocker: MockerFixture) -> MagicMock:
     return mocker.patch(
         "api.routers.users.ses_send_email",
         return_value={

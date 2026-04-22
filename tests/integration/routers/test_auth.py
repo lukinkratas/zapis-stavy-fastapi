@@ -14,8 +14,129 @@ from api.schemas.auth import Token
 from api.schemas.users import UserResponseJson
 
 
-class TestIntegrationAuth:
-    """Integration tests for auth."""
+class TestLogin:
+    """Integration tests for login endpoint."""
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login(
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        confirmed_user: dict[str, Any],
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 200
+
+        token = response.json()
+        assert Token.model_validate(token)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login_not_confirmed(
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        registered_user: dict[str, Any],
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": credentials["password"],  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 200
+
+        token = response.json()
+        assert Token.model_validate(token)
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login_invalid_password(
+        self,
+        async_client: AsyncClient,
+        credentials: dict[str, str],
+        confirmed_user: dict[str, Any],
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": credentials["email"],
+            "password": "invalid",  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_login_not_registered(
+        self,
+        async_client: AsyncClient,
+    ) -> None:
+        # requires user to be registered
+        data = {
+            "username": "not@registered.net",
+            "password": "password",  # plain password
+        }
+        response = await async_client.post(
+            "/token",
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
+
+
+class TestConfirm:
+    """Integration tests for confirm endpoint."""
+
+    @pytest.mark.anyio
+    async def test_confirm(
+        self,
+        async_client: AsyncClient,
+        registered_user: dict[str, Any],
+        confirmation_token: str,
+        db_conn: AsyncConnection,
+    ) -> None:
+        # confirm
+        assert registered_user["confirmed"] is False
+        response = await async_client.get(f"/confirm/{confirmation_token}")
+        assert response.status_code == 200
+        user = await users_table.select_by_id(db_conn, registered_user["id"])
+        assert user["confirmed"] is True
+
+    @pytest.mark.anyio
+    async def test_confirm_expired_token(
+        self, async_client: AsyncClient, expired_confirmation_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
+        assert response.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_confirm_access_token(
+        self, async_client: AsyncClient, access_token: str
+    ) -> None:
+        response = await async_client.get(f"/confirm/{access_token}")
+        assert response.status_code == 401
+
+
+class TestOther:
+    """Integration tests for other auth helper and private functions."""
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -102,116 +223,3 @@ class TestIntegrationAuth:
     @pytest.mark.anyio
     async def test_get_current_confirmed_user(self) -> None:
         pass
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_login(
-        self,
-        async_client: AsyncClient,
-        credentials: dict[str, str],
-        confirmed_user: dict[str, Any],
-    ) -> None:
-        # requires user to be registered
-        data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
-        }
-        response = await async_client.post(
-            "/token",
-            data=data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_login_not_confirmed(
-        self,
-        async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
-    ) -> None:
-        # requires user to be registered
-        data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
-        }
-        response = await async_client.post(
-            "/token",
-            data=data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_login_invalid_password(
-        self,
-        async_client: AsyncClient,
-        credentials: dict[str, str],
-        confirmed_user: dict[str, Any],
-    ) -> None:
-        # requires user to be registered
-        data = {
-            "username": credentials["email"],
-            "password": "invalid",  # plain password
-        }
-        response = await async_client.post(
-            "/token",
-            data=data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 401
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_login_not_registered(
-        self,
-        async_client: AsyncClient,
-    ) -> None:
-        # requires user to be registered
-        data = {
-            "username": "not@registered.net",
-            "password": "password",  # plain password
-        }
-        response = await async_client.post(
-            "/token",
-            data=data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 401
-
-    @pytest.mark.anyio
-    async def test_confirm(
-        self,
-        async_client: AsyncClient,
-        registered_user: dict[str, Any],
-        confirmation_token: str,
-        db_conn: AsyncConnection,
-    ) -> None:
-        # confirm
-        assert registered_user["confirmed"] is False
-        response = await async_client.get(f"/confirm/{confirmation_token}")
-        assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, registered_user["id"])
-        assert user["confirmed"] is True
-
-    @pytest.mark.anyio
-    async def test_confirm_expired_token(
-        self, async_client: AsyncClient, expired_confirmation_token: str
-    ) -> None:
-        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
-        assert response.status_code == 401
-
-    @pytest.mark.anyio
-    async def test_confirm_access_token(
-        self, async_client: AsyncClient, access_token: str
-    ) -> None:
-        response = await async_client.get(f"/confirm/{access_token}")
-        assert response.status_code == 401

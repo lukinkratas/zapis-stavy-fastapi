@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
 from typing import Any, AsyncGenerator
+from unittest.mock import MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
-from pytest_mock import MockerFixture
 from testcontainers.postgres import PostgresContainer
 
 from api.db import get_conn_info
@@ -57,7 +57,7 @@ async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
 async def registered_user(
     async_client: AsyncClient,
     credentials: dict[str, str],
-    mock_send_email: MockerFixture,
+    mock_send_email: MagicMock,
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post("/register", json=credentials)
     assert response.status_code == 201

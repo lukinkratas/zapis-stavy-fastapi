@@ -7,8 +7,8 @@ from httpx import AsyncClient
 from api.schemas.locations import LocationResponseJson
 
 
-class TestIntegrationLocation:
-    """Integration tests for locations."""
+class TestCreateAndDelete:
+    """Integration tests for create and delete location endpoints."""
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -99,6 +99,10 @@ class TestIntegrationLocation:
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
+
+
+class TestUpdate:
+    """Integration tests for update location endpoint."""
 
     @pytest.mark.integration
     @pytest.mark.anyio

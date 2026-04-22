@@ -79,6 +79,9 @@ async def register_user(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="User already exists.")
 
+    if registered_user is None:
+        raise HTTPException(status_code=500, detail="User registration failed.")
+
     confirmation_url = str(
         request.url_for(
             "confirm", token=create_confirmation_token(registered_user["id"])

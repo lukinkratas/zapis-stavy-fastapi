@@ -70,7 +70,7 @@ def registered_user(
 @pytest.fixture
 def confirmed_user(
     mocker: MockerFixture, registered_user: dict[str, Any]
-) -> MockerFixture:
+) -> dict[str, Any]:
     confirmed_user_json = registered_user.copy()
     confirmed_user_json["confirmed"] = True
     mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_json)

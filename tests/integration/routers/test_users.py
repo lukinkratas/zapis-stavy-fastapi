@@ -1,15 +1,15 @@
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from httpx import AsyncClient
-from pytest_mock import MockerFixture
 
 from api.routers.auth import create_access_token, verify_password
 from api.schemas.users import UserResponseJson
 
 
-class TestIntegrationUser:
-    """Integration tests for users."""
+class TestCreateAndDelete:
+    """Integration tests for create and delete user endpoints."""
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -17,7 +17,7 @@ class TestIntegrationUser:
         self,
         async_client: AsyncClient,
         credentials: dict[str, str],
-        mock_send_email: MockerFixture,
+        mock_send_email: MagicMock,
     ) -> None:
         # register user
         response = await async_client.post("/register", json=credentials)
@@ -57,6 +57,10 @@ class TestIntegrationUser:
             "/user", headers={"Authorization": f"Bearer {random_id_access_token}"}
         )
         assert response.status_code == 401
+
+
+class TestUpdate:
+    """Integration tests for update user endpoint."""
 
     @pytest.mark.integration
     @pytest.mark.anyio
