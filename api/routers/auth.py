@@ -211,7 +211,7 @@ async def get_current_confirmed_user(
 
 @router.post("/token", response_model=Token)
 @log_async_func(logger.info)
-async def login(
+async def login_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> Token:
@@ -232,7 +232,7 @@ async def login(
 
 @router.get("/confirm/{token}")
 @log_async_func(logger.info)
-async def confirm(
+async def confirm_user(
     token: str, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
 ) -> dict[str, Any]:
     """Update user to confirmed = True based on email from token.

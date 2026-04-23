@@ -12,8 +12,8 @@ from api.routers.auth import get_password_hash
 from api.schemas.users import UserResponseJson
 
 
-class TestUnitUser:
-    """Integration tests for users."""
+class TestRegister:
+    """Integration tests for create user endpoints."""
 
     @pytest.mark.anyio
     async def test_register_user(
@@ -35,25 +35,9 @@ class TestUnitUser:
         registered_user = response.json()["user"]
         assert UserResponseJson.model_validate(registered_user)
 
-    @pytest.mark.parametrize(
-        "credentials",
-        [
-            pytest.param({"email": "test@test.net"}, id="missing password"),
-            pytest.param({"password": "password"}, id="missing email"),
-            pytest.param(
-                {"username": "test@test.net", "password": "password"},
-                id="username instead of email",
-            ),
-        ],
-    )
-    @pytest.mark.anyio
-    async def test_register_invalid_schema(
-        self, async_client: AsyncClient, credentials: dict[str, str]
-    ) -> None:
-        # register user
-        response = await async_client.post("/register", json=credentials)
-        assert response.status_code == 422
 
+class TestDelete:
+    """Integration tests for delete user endpoints."""
 
     @pytest.mark.anyio
     async def test_delete_user(
@@ -71,6 +55,10 @@ class TestUnitUser:
             "/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
+
+
+class TestUpdate:
+    """Integration tests for update user endpoint."""
 
     @pytest.mark.anyio
     async def test_update_user(

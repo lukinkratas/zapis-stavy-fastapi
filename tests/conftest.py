@@ -43,6 +43,7 @@ def update_location_payload() -> dict[str, str]:
     """Used in unit and integration location/update tests."""
     return {"name": "update"}
 
+
 @pytest.fixture
 async def access_token(registered_user: dict[str, Any]) -> str:
     return create_access_token(registered_user["id"])
@@ -66,6 +67,7 @@ async def expired_confirmation_token(registered_user: dict[str, Any]) -> str:
 @pytest.fixture
 def other_user_access_token() -> str:
     return create_access_token(str(uuid.uuid4()))
+
 
 @pytest.fixture
 async def other_user_confirmation_token() -> str:

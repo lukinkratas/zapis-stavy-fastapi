@@ -84,7 +84,7 @@ async def register_user(
 
     confirmation_url = str(
         request.url_for(
-            "confirm", token=create_confirmation_token(registered_user["id"])
+            "confirm_user", token=create_confirmation_token(registered_user["id"])
         )
     )
     background_tasks.add_task(

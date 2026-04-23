@@ -8,10 +8,11 @@
 - [x] refactor int tests
 - [x] refactor unit tests
 - [x] tests update - every token dependent endpoint test with valid, expired, random_id_token
-- [ ] tests for deleteing, updating non existing and foregin user data
-- [ ] tests update - every user dependent endpoint test with confirmed and not confirmed user
+- [x] tests for deleteing, updating non existing and foregin user data
+- [x] tests update - every user dependent endpoint test with confirmed and not confirmed user
+- [ ] test pydantic validations
 - [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
-- [ ] other_user_access_token -> test other_user registered
+- [ ] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
 - [ ] review coverage
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail

@@ -20,12 +20,11 @@ from api.routers.auth import (
 from api.schemas.auth import Token
 
 
-class TestUnitAuth:
-    """Unit tests for auth."""
-
+class TestLogin:
+    """Integration tests for login endpoint."""
 
     @pytest.mark.anyio
-    async def test_login(
+    async def test_login_registered_user(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
@@ -42,8 +41,12 @@ class TestUnitAuth:
         token = response.json()
         assert Token.model_validate(token)
 
+
+class TestConfirm:
+    """Integration tests for confirm endpoint."""
+
     @pytest.mark.anyio
-    async def test_confirm(
+    async def test_confirm_registered_user(
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
@@ -52,6 +55,10 @@ class TestUnitAuth:
     ) -> None:
         response = await async_client.get(f"/confirm/{confirmation_token}")
         assert response.status_code == 200
+
+
+class TestOther:
+    """Integration tests for other auth helper and private functions."""
 
     @pytest.mark.anyio
     async def test_verify_password(

@@ -39,6 +39,7 @@ class TestCreateAndDelete:
         )
         assert response.status_code == 200
 
+
 class TestCreate:
     """Integration tests for create location endpoints."""
 
@@ -59,9 +60,26 @@ class TestCreate:
         )
         assert response.status_code == 409
 
+
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_other_user_access_token(
+    async def test_create_location_by_registered_user(
+        self,
+        async_client: AsyncClient,
+        location_payload: dict[str, str],
+        registered_user: dict[str, Any],
+        access_token: str,
+    ) -> None:
+        response = await async_client.post(
+            "/location",
+            json=location_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.anyio
+    async def test_create_location_with_other_user_access_token(
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
@@ -77,7 +95,7 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_expired_access_token(
+    async def test_create_location_with_expired_access_token(
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
@@ -94,7 +112,7 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_create_location_confirmation_token(
+    async def test_create_location_with_confirmation_token(
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
@@ -108,6 +126,7 @@ class TestCreate:
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
+
 
 class TestDelete:
     """Integration tests for delete location endpoints."""
@@ -127,9 +146,13 @@ class TestDelete:
         )
         assert response.status_code == 200
 
+
+    # async def test_delete_location_by_registered_user() makes no sense
+    # (In order to delete a location, one has to be created first [by confirmed user])
+
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_location_other_user_access_token(
+    async def test_delete_location_with_other_user_access_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
@@ -143,10 +166,9 @@ class TestDelete:
         )
         assert response.status_code == 401
 
-
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_location_expired_access_token(
+    async def test_delete_location_with_expired_access_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
@@ -163,7 +185,7 @@ class TestDelete:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_delete_location_confirmation_token(
+    async def test_delete_location_with_confirmation_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
@@ -177,6 +199,7 @@ class TestDelete:
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
+
 
 class TestUpdate:
     """Integration tests for update location endpoint."""
@@ -203,7 +226,6 @@ class TestUpdate:
         updated_location = response.json()
         assert LocationResponseJson.model_validate(updated_location)
 
-
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_update_non_existing_location(
@@ -221,9 +243,13 @@ class TestUpdate:
         )
         assert response.status_code == 404
 
+
+    # async def test_update_location_by_registered_user() makes no sense
+    # (In order to update a location, one has to be created first [by confirmed user])
+
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_location_other_user_access_token(
+    async def test_update_location_with_other_user_access_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
@@ -241,7 +267,7 @@ class TestUpdate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_location_expired_access_token(
+    async def test_update_location_with_expired_access_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
@@ -260,7 +286,7 @@ class TestUpdate:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_update_location_confirmation_token(
+    async def test_update_location_with_confirmation_token(
         self,
         async_client: AsyncClient,
         created_location: dict[str, Any],
