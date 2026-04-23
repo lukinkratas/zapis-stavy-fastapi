@@ -26,10 +26,19 @@ def credentials() -> dict[str, str]:
     return {"email": "test@test.net", "password": "password"}
 
 
-@pytest.fixture
-def update_user_payload() -> dict[str, str]:
+@pytest.fixture(
+    params=[
+        pytest.param(
+            {"email": "update@test.net", "password": "update"},
+            id="email and password update",
+        ),
+        pytest.param({"email": "update@test.net"}, id="email only"),
+        pytest.param({"password": "update"}, id="password only"),
+    ]
+)
+def update_user_payload(request) -> dict[str, str]:
     """Used in unit and integration user/update tests."""
-    return {"email": "update@test.net", "password": "update"}
+    return request.param
 
 
 @pytest.fixture

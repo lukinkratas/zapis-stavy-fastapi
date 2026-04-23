@@ -70,8 +70,10 @@ class TestUpdate:
         access_token: str,
     ) -> None:
         updated_user_from_db = {
-            "email": update_user_payload["email"],
-            "password": get_password_hash(update_user_payload["password"]),
+            "email": update_user_payload.get("email") or registered_user["email"],
+            "password": get_password_hash(update_user_payload["password"])
+            if update_user_payload.get("password") is not None
+            else registered_user["password"],
             "id": str(uuid.uuid4()),
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         }

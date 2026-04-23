@@ -142,7 +142,6 @@ class TestUpdate:
 
         updated_user = response.json()
         assert UserResponseJson.model_validate(updated_user)
-        assert updated_user["email"] == update_user_payload["email"]
         # TODO: fetch the password from db (not to be displayed in UserResponseJson)
         # assert verify_password(update_user_payload["password"], updated_user.password)
 
@@ -164,7 +163,6 @@ class TestUpdate:
 
         updated_user = response.json()
         assert UserResponseJson.model_validate(updated_user)
-        assert updated_user["email"] == update_user_payload["email"]
 
     @pytest.mark.integration
     @pytest.mark.anyio

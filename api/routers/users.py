@@ -136,7 +136,8 @@ async def update_user(
     Raises:
         HTTPException: if user cannot be updated in the database
     """
-    data = user.model_dump()
+    data = user.model_dump(include=user.model_fields_set)
+    
     if data.get("password") is not None:
         data["password"] = get_password_hash(user.password)  # type: ignore[arg-type]
 

@@ -60,7 +60,6 @@ class TestCreate:
         )
         assert response.status_code == 409
 
-
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_create_location_by_registered_user(
@@ -145,7 +144,6 @@ class TestDelete:
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
-
 
     # async def test_delete_location_by_registered_user() makes no sense
     # (In order to delete a location, one has to be created first [by confirmed user])
@@ -242,7 +240,6 @@ class TestUpdate:
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
-
 
     # async def test_update_location_by_registered_user() makes no sense
     # (In order to update a location, one has to be created first [by confirmed user])

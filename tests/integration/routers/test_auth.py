@@ -41,7 +41,6 @@ class TestLogin:
         token = response.json()
         assert Token.model_validate(token)
 
-
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_login_confirmed_user(
