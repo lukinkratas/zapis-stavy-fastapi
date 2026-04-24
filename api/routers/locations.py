@@ -100,7 +100,7 @@ async def update_location(
     Raises:
         HTTPException: if location cannot be updated in the database
     """
-    data = location.model_dump(include=location.model_fields_set)
+    data = location.model_dump(exclude_unset=True)
 
     updated_location = await locations_table.update(
         conn, id, current_confirmed_user["id"], data
