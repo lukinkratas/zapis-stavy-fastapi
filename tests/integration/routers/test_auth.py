@@ -149,7 +149,9 @@ class TestConfirm:
         self, async_client: AsyncClient, not_registered_user_access_token: str
     ) -> None:
         """Testing access token with different encoded sub, that is not registered."""
-        response = await async_client.get(f"/confirm/{not_registered_user_access_token}")
+        response = await async_client.get(
+            f"/confirm/{not_registered_user_access_token}"
+        )
         assert response.status_code == 401
 
     @pytest.mark.anyio

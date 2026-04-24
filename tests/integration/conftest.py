@@ -146,6 +146,7 @@ def other_user_access_token(other_confirmed_user: dict[str, Any]) -> str:
 async def other_user_confirmation_token(other_confirmed_user: dict[str, Any]) -> str:
     return create_confirmation_token(other_confirmed_user["id"])
 
+
 @pytest.fixture
 def not_registered_user_access_token() -> str:
     return create_access_token(str(uuid.uuid4()))

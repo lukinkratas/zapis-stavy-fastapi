@@ -1,12 +1,12 @@
 import uuid
 from typing import Any
-from psycopg import AsyncConnection
 
 import pytest
 from httpx import AsyncClient
+from psycopg import AsyncConnection
 
-from api.schemas.locations import LocationResponseJson
 from api.models.locations import locations_table
+from api.schemas.locations import LocationResponseJson
 
 
 class TestCreateAndDelete:
@@ -46,6 +46,7 @@ class TestCreateAndDelete:
         assert response.status_code == 200
         location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
         assert location_from_db is not None, "Location does not exist in db."
+
 
 class TestCreate:
     """Integration tests for create location endpoints."""
@@ -288,7 +289,6 @@ class TestUpdate:
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 404, "Location updated by other user."
-
 
     @pytest.mark.integration
     @pytest.mark.anyio

@@ -64,4 +64,5 @@ class UsersTable(BaseTable):
 
             return await cur.fetchone()
 
+
 users_table = UsersTable()
