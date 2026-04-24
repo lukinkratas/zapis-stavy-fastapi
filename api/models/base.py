@@ -16,6 +16,7 @@ class BaseTable:
     def __init__(self, table: str):
         self.table = table
 
+    @log_async_func(logger.debug)
     async def insert(
         self, conn: AsyncConnection, data: dict[str, Any]
     ) -> dict[str, Any] | None:
@@ -74,3 +75,18 @@ class BaseTable:
                 logger.debug(f"SQL query: {format_sql_query(query)}")
                 await cur.execute(query, data | {"id": id, "user_id": user_id})
                 return await cur.fetchone()
+
+    @log_async_func(logger.debug)
+    async def select_by_id(
+        self, conn: AsyncConnection, id: uuid.UUID
+    ) -> dict[str, Any] | None:
+        """Select user record by id from db."""
+        async with conn.cursor(row_factory=dict_row) as cur:
+            query = sql.SQL("""
+                SELECT * FROM {table}
+                WHERE id = %(id)s;
+            """).format(table=sql.Identifier(self.table))
+            logger.debug(f"SQL query: {format_sql_query(query)}")
+            await cur.execute(query, {"id": id})
+
+            return await cur.fetchone()

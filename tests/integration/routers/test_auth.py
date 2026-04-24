@@ -113,11 +113,13 @@ class TestConfirm:
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        assert registered_user["confirmed"] is False
+        assert registered_user["confirmed"] is False, "User already confirmed."
+
         response = await async_client.get(f"/confirm/{confirmation_token}")
+
         assert response.status_code == 200
         user = await users_table.select_by_id(db_conn, registered_user["id"])
-        assert user["confirmed"] is True
+        assert user["confirmed"] is True, "User not confirmed."
 
     @pytest.mark.anyio
     async def test_confirm_confirmed_user(
@@ -129,9 +131,10 @@ class TestConfirm:
     ) -> None:
         """Testing expected case."""
         response = await async_client.get(f"/confirm/{confirmation_token}")
+
         assert response.status_code == 200
         user = await users_table.select_by_id(db_conn, confirmed_user["id"])
-        assert user["confirmed"] is True
+        assert user["confirmed"] is True, "User not confirmed."
 
     @pytest.mark.anyio
     async def test_confirm_user_with_other_user_access_token(
@@ -139,6 +142,14 @@ class TestConfirm:
     ) -> None:
         """Testing access token with different encoded sub."""
         response = await async_client.get(f"/confirm/{other_user_access_token}")
+        assert response.status_code == 401
+
+    @pytest.mark.anyio
+    async def test_confirm_user_with_not_registered_user_access_token(
+        self, async_client: AsyncClient, not_registered_user_access_token: str
+    ) -> None:
+        """Testing access token with different encoded sub, that is not registered."""
+        response = await async_client.get(f"/confirm/{not_registered_user_access_token}")
         assert response.status_code == 401
 
     @pytest.mark.anyio
@@ -212,12 +223,12 @@ class TestOther:
 
     @pytest.mark.integration
     @pytest.mark.anyio
-    async def test_get_current_user_with_other_user_access_token(
-        self, db_conn: AsyncConnection, other_user_access_token: str
+    async def test_get_current_user_with_not_registered_user_access_token(
+        self, db_conn: AsyncConnection, not_registered_user_access_token: str
     ) -> None:
-        """Testing access token with different encoded sub."""
+        """Testing access token with different encoded sub, that is not registered."""
         with pytest.raises(HTTPException):
-            await get_current_user(db_conn, other_user_access_token)
+            await get_current_user(db_conn, not_registered_user_access_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio

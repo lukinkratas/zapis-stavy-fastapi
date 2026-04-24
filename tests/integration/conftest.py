@@ -1,4 +1,6 @@
 import os
+import uuid
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, AsyncGenerator
 from unittest.mock import MagicMock
@@ -11,7 +13,7 @@ from testcontainers.postgres import PostgresContainer
 from api.db import get_conn_info
 from api.main import app
 from api.models.users import users_table
-from api.routers.auth import create_access_token
+from api.routers.auth import create_access_token, create_confirmation_token
 
 ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -59,19 +61,16 @@ async def registered_user(
     credentials: dict[str, str],
     mock_send_email: MagicMock,
 ) -> AsyncGenerator[dict[str, Any], None]:
+    mock_send_email.reset_mock()
     response = await async_client.post("/register", json=credentials)
-    assert response.status_code == 201
-    mock_send_email.assert_called_once()
 
     registered_user = response.json()["user"]
     yield registered_user
 
-    user_id = registered_user["id"]
-    access_token = create_access_token(user_id)
+    access_token = create_access_token(registered_user["id"])
     response = await async_client.delete(
         "/user", headers={"Authorization": f"Bearer {access_token}"}
     )
-    assert response.status_code == 200
 
 
 @pytest.fixture
@@ -106,3 +105,52 @@ async def created_location(
 @pytest.fixture
 def location_id(created_location: dict[str, str]) -> str:
     return created_location["id"]
+
+
+@pytest.fixture
+async def other_confirmed_user(
+    async_client: AsyncClient,
+    db_conn: AsyncConnection,
+    mock_send_email: MagicMock,
+) -> AsyncGenerator[dict[str, Any], None]:
+    mock_send_email.reset_mock()
+    other_creds = {"email": "other@test.net", "password": "password"}
+    response = await async_client.post("/register", json=other_creds)
+
+    other_user = response.json()["user"]
+    await users_table.update(db_conn, other_user["id"], {"confirmed": True})
+    yield other_user
+
+    access_token = create_access_token(other_user["id"])
+    response = await async_client.delete(
+        "/user", headers={"Authorization": f"Bearer {access_token}"}
+    )
+
+
+@pytest.fixture
+async def expired_access_token(registered_user: dict[str, Any]) -> str:
+    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
+
+
+@pytest.fixture
+async def expired_confirmation_token(registered_user: dict[str, Any]) -> str:
+    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
+
+
+@pytest.fixture
+def other_user_access_token(other_confirmed_user: dict[str, Any]) -> str:
+    return create_access_token(other_confirmed_user["id"])
+
+
+@pytest.fixture
+async def other_user_confirmation_token(other_confirmed_user: dict[str, Any]) -> str:
+    return create_confirmation_token(other_confirmed_user["id"])
+
+@pytest.fixture
+def not_registered_user_access_token() -> str:
+    return create_access_token(str(uuid.uuid4()))
+
+
+@pytest.fixture
+async def not_registered_user_confirmation_token() -> str:
+    return create_confirmation_token(str(uuid.uuid4()))

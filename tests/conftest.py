@@ -1,5 +1,3 @@
-import uuid
-from datetime import timedelta
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -36,7 +34,7 @@ def credentials() -> dict[str, str]:
         pytest.param({"password": "update"}, id="password only"),
     ]
 )
-def update_user_payload(request) -> dict[str, str]:
+def update_user_payload(request: pytest.FixtureRequest) -> dict[str, str]:
     """Used in unit and integration user/update tests."""
     return request.param
 
@@ -61,23 +59,3 @@ async def access_token(registered_user: dict[str, Any]) -> str:
 @pytest.fixture
 async def confirmation_token(registered_user: dict[str, Any]) -> str:
     return create_confirmation_token(registered_user["id"])
-
-
-@pytest.fixture
-async def expired_access_token(registered_user: dict[str, Any]) -> str:
-    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
-
-
-@pytest.fixture
-async def expired_confirmation_token(registered_user: dict[str, Any]) -> str:
-    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
-
-
-@pytest.fixture
-def other_user_access_token() -> str:
-    return create_access_token(str(uuid.uuid4()))
-
-
-@pytest.fixture
-async def other_user_confirmation_token() -> str:
-    return create_confirmation_token(str(uuid.uuid4()))

@@ -10,9 +10,10 @@
 - [x] tests update - every token dependent endpoint test with valid, expired, random_id_token
 - [x] tests for deleteing, updating non existing and foregin user data
 - [x] tests update - every user dependent endpoint test with confirmed and not confirmed user
-- [ ] test pydantic validations
+- [x] test pydantic validations
 - [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
-- [ ] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
+- [x] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
+- [ ] database / tables assertions
 - [ ] review coverage
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail

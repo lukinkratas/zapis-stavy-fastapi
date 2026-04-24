@@ -110,9 +110,6 @@ async def delete_user(
         current_user: current authorized user
 
     Returns: None
-
-    Raises:
-        HTTPException: if user cannot be deleted from the database
     """
     await users_table.delete(conn, current_user["id"])
 
@@ -137,7 +134,7 @@ async def update_user(
         HTTPException: if user cannot be updated in the database
     """
     data = user.model_dump(exclude_unset=True)
-    
+
     if data.get("password") is not None:
         data["password"] = get_password_hash(user.password)  # type: ignore[arg-type]
 
