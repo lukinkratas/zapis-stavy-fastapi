@@ -24,8 +24,6 @@
 - [ ] sqlalchemy orm?
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
-- [ ] review unit tests and review all test cases coverage
-- [ ] review int tests and review all test cases coverage
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests
