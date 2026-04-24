@@ -20,6 +20,7 @@ class TestCreateAndDelete:
         location_payload: dict[str, str],
         confirmed_user: dict[str, Any],
         access_token: str,
+        db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
         # create location
@@ -31,16 +32,20 @@ class TestCreateAndDelete:
         assert response.status_code == 201
 
         new_location = response.json()
+        new_location_id = new_location["id"]
         assert LocationResponseJson.model_validate(new_location)
+        assert new_location["name"] == location_payload["name"]
+        location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
+        assert location_from_db is None, "Location still exists in db."
 
         # delete created location
-        location_id = new_location["id"]
         response = await async_client.delete(
-            f"/location/{location_id}",
+            f"/location/{new_location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
-
+        location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
+        assert location_from_db is not None, "Location does not exist in db."
 
 class TestCreate:
     """Integration tests for create location endpoints."""
@@ -169,8 +174,8 @@ class TestDelete:
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 200
-        location = await locations_table.select_by_id(db_conn, location_id)
-        assert location is not None, "Location was deleted by other user."
+        location_from_db = await locations_table.select_by_id(db_conn, location_id)
+        assert location_from_db is not None, "Location was deleted by other user."
 
     @pytest.mark.integration
     @pytest.mark.anyio

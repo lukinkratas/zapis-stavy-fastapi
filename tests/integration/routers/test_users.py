@@ -32,8 +32,8 @@ class TestRegisterAndDelete:
         assert UserResponseJson.model_validate(registered_user)
         assert registered_user["email"] == credentials["email"]
         assert verify_password(credentials["password"], registered_user["password"])
-        user = await users_table.select_by_id(db_conn, registered_user["id"])
-        assert user is not None, "User does not exist in db."
+        user_from_db = await users_table.select_by_id(db_conn, registered_user["id"])
+        assert user_from_db is not None, "User does not exist in db."
 
         # delete registered user
         access_token = create_access_token(registered_user["id"])
@@ -41,8 +41,8 @@ class TestRegisterAndDelete:
             "/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, registered_user["id"])
-        assert user is None, "User still exists in db."
+        user_from_db = await users_table.select_by_id(db_conn, registered_user["id"])
+        assert user_from_db is None, "User still exists in db."
 
 class TestRegister:
     """Integration tests for create user endpoints."""

@@ -13,7 +13,7 @@
 - [x] test pydantic validations
 - [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
 - [x] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
-- [ ] database / tables assertions
+- [x] database / tables assertions
 - [ ] review coverage
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail
