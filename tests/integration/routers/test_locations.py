@@ -36,7 +36,7 @@ class TestCreateAndDelete:
         assert LocationResponseJson.model_validate(new_location)
         assert new_location["name"] == location_payload["name"]
         location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
-        assert location_from_db is None, "Location still exists in db."
+        assert location_from_db is not None, "Location does not exist in db."
 
         # delete created location
         response = await async_client.delete(
@@ -45,7 +45,7 @@ class TestCreateAndDelete:
         )
         assert response.status_code == 200
         location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
-        assert location_from_db is not None, "Location does not exist in db."
+        assert location_from_db is None, "Location still exists in db."
 
 
 class TestCreate:
