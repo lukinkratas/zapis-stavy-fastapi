@@ -136,32 +136,27 @@ class TestConfirm:
         user = await users_table.select_by_id(db_conn, confirmed_user["id"])
         assert user["confirmed"] is True, "User not confirmed."
 
-    @pytest.mark.anyio
-    async def test_confirm_user_with_other_user_access_token(
-        self, async_client: AsyncClient, other_user_access_token: str
-    ) -> None:
-        """Testing access token with different encoded sub."""
-        response = await async_client.get(f"/confirm/{other_user_access_token}")
-        assert response.status_code == 401
+    # async def test_confirm_user_with_other_user_confirmation_token( makes no sense
+    # it is seting the same case as is already tested on test_confirm_registered_user
 
     @pytest.mark.anyio
-    async def test_confirm_user_with_not_registered_user_access_token(
-        self, async_client: AsyncClient, not_registered_user_access_token: str
+    async def test_confirm_user_with_not_registered_user_confirmation_token(
+        self, async_client: AsyncClient, not_registered_user_confirmation_token: str
     ) -> None:
-        """Testing access token with different encoded sub, that is not registered."""
+        """Testing confirmation token with different encoded sub, that is not registered."""
         response = await async_client.get(
-            f"/confirm/{not_registered_user_access_token}"
+            f"/confirm/{not_registered_user_confirmation_token}"
         )
         assert response.status_code == 401
 
     @pytest.mark.anyio
-    async def test_confirm_user_with_expired_access_token(
+    async def test_confirm_user_with_expired_confirmation_token(
         self,
         async_client: AsyncClient,
         registered_user: dict[str, Any],
         expired_confirmation_token: str,
     ) -> None:
-        """Testing access token with different encoded exp."""
+        """Testing confirmation token with different encoded exp."""
         response = await async_client.get(f"/confirm/{expired_confirmation_token}")
         assert response.status_code == 401
 

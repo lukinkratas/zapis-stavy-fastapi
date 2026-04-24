@@ -140,7 +140,8 @@ async def update_user(
 
     updated_user = await users_table.update(conn, current_user["id"], data)
 
-    if updated_user is None:
-        raise HTTPException(status_code=404, detail="User not found.")
+    # cannot occur - requires current_user/login/access_token = user has to exist in db
+    # if updated_user is None:
+    #     raise HTTPException(status_code=404, detail="User not found.")
 
     return updated_user

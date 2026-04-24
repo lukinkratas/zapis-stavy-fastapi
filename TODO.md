@@ -14,15 +14,15 @@
 - [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
 - [x] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
 - [x] database / tables assertions
-- [ ] review coverage
+- [x] review coverage
 - [ ] Dockerfile
 - [ ] AWS logs service like logtail
 - [ ] api version in the name
-- [ ] detail -> message
+- [ ] detail -> message, credentials -> creds
 - [ ] register endpoint user field returns password bug
 - [ ] remove confirmation url from register response json
 - [ ] sqlalchemy orm?
-- [ ] upload pic + ORM
+- [ ] upload pic
 - [ ] LLM advisory + langfuse observability
 - [ ] review unit tests and review all test cases coverage
 - [ ] review int tests and review all test cases coverage
