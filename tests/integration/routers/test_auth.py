@@ -143,7 +143,7 @@ class TestConfirm:
     async def test_confirm_user_with_not_registered_user_confirmation_token(
         self, async_client: AsyncClient, not_registered_user_confirmation_token: str
     ) -> None:
-        """Testing confirmation token with different encoded sub, that is not registered."""
+        """Testing confirmation token with different encoded sub, not registered."""
         response = await async_client.get(
             f"/confirm/{not_registered_user_confirmation_token}"
         )

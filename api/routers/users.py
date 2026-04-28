@@ -138,10 +138,8 @@ async def update_user(
     if data.get("password") is not None:
         data["password"] = get_password_hash(user.password)  # type: ignore[arg-type]
 
-    updated_user = await users_table.update(conn, current_user["id"], data)
-
     # cannot occur - requires current_user/login/access_token = user has to exist in db
     # if updated_user is None:
     #     raise HTTPException(status_code=404, detail="User not found.")
 
-    return updated_user
+    return await users_table.update(conn, current_user["id"], data)
