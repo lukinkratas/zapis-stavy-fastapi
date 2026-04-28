@@ -79,8 +79,8 @@ def configure_logging() -> None:
                 "filename": str(LOG_DIR / "api.log"),
                 "formatter": "json",
                 "level": "DEBUG",
-                "maxBytes": 1024 * 1024,  # 1MB
-                "backupCount": 5,
+                "maxBytes": 10 * 1024 * 1024,  # 10MB
+                "backupCount": 10,
                 "encoding": "utf8",
                 "filters": ["correlation_id"],
             },
