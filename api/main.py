@@ -3,9 +3,8 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from asgi_correlation_id import CorrelationIdMiddleware
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
-from fastapi.responses import Response
 from psycopg_pool import AsyncConnectionPool
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -17,6 +16,7 @@ from .logging_config import configure_logging
 from .routers.auth import router as auth_router
 from .routers.locations import router as locations_router
 from .routers.users import router as users_router
+from .utils import log_async_func
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,8 @@ async def http_exception_handle_logging(
     return await http_exception_handler(request, exc)
 
 
-@app.get("/")
-def healthcheck() -> dict[str, str]:
+@app.get("/health")
+@log_async_func(logger.info)
+async def healthcheck() -> Response:
     """Check the server is up and running."""
-    return {"message": "Server is running."}
+    return Response("Server is running.")

@@ -3,18 +3,8 @@
 FastAPI + Postgres via Psycopg app.
 
 ```sh
-# run unit tests
-make test
-```
-
-```sh
-# run integration tests
-make test-int
-```
-
-```sh
-# deploy db
+# build
+make build
+# deploy
 docker compose up -d
-# deploy server
-make serve-dev
 ```

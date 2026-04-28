@@ -11,6 +11,7 @@ help:
 	@echo "  test-int         - Run ingtegration tests"
 	@echo "  test-cov         - Run all tests with html coverage"
 	@echo "  serve-dev        - Serve the application with reloading"
+	@echo "  build            - Build docker image"
 	@echo "  help             - Show this help message"
 
 fmt:
@@ -35,7 +36,10 @@ test-cov:
 	uv run --dev pytest -vv -p no:warnings --cov=api --cov-report=term-missing --cov-branch --cov-fail-under=95 --cov-report=html:htmlcov
 
 clean-up:
-	rm -rvf .coverage htmlcov api.log*
+	rm -rvf .coverage htmlcov logs/api.log*
 
 serve-dev:
 	uv run uvicorn api.main:app --reload
+
+build:
+	docker build . -t zapis-stavy-fastapi-api

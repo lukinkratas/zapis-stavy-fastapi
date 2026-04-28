@@ -15,12 +15,14 @@
 - [x] distinguish between other_user_access_token and not_registered_user_access_token -> test other_user registered
 - [x] database / tables assertions
 - [x] review coverage
-- [ ] Dockerfile
-- [ ] AWS logs service like logtail
+- [x] Dockerfile
+- [ ] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
+- [ ] fix GH actions
 - [ ] api version in the name
 - [ ] detail -> message, credentials -> creds
 - [ ] register endpoint user field returns password bug
 - [ ] remove confirmation url from register response json
+- [ ] CORS middleware?
 - [ ] sqlalchemy orm?
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
@@ -174,26 +176,17 @@ move invalid and expired token into unit tests?
 - [ ] respond with {entity, detail?}
 - [ ] get request refactor - move return and success msg from try block to end of func
 
-- [ ] add user auth
+- [x] add user auth
 - [ ] add api version into url
-- [ ] add health check
-- [ ] rate limiting
+- [x] add health check
+- [x] rate limiting
 - [ ] error handling
-- [ ] test coverage 95%+
+- [x] test coverage 95%+
 - [ ] add prometheus ?
-
-- [ ] pydantic-settings for .env - DB_URL/ROLLBACK settings for database https://fastapi.tiangolo.com/advanced/settings/
-- [x] lifespan docs https://fastapi.tiangolo.com/advanced/events/
-- [ ] async tests https://fastapi.tiangolo.com/advanced/async-tests/
-- [ ] sql dbs https://fastapi.tiangolo.com/tutorial/sql-databases/
-- [ ] sql dbs https://sqlmodel.tiangolo.com/tutorial/fastapi/response-model/
-- [ ] testing db https://sqlmodel.tiangolo.com/tutorial/fastapi/tests/#testing-database
 
 better stack / logtail cloud logging: https://betterstack.com/community/guides/logging/logging-with-fastapi/
 
 async SQLAlchemy x psycopg x asyncpg
-
-SQLAlchemy: https://www.youtube.com/watch?v=cmnPiUVlIsM
 
 asyncpg: https://magicstack.github.io/asyncpg/current/usage.html#
 asyncpg: https://github.com/jordic/fastapi_asyncpg
@@ -204,13 +197,22 @@ psycopg: https://blog.danielclayton.co.uk/posts/database-connections-with-fastap
 psycopg: https://spwoodcock.dev/blog/2024-10-fastapi-pydantic-psycopg/
 psycopg: https://medium.com/@benshearlaw/asynchronous-postgres-with-python-fastapi-and-psycopg-3-fafa5faa2c08
 
+SQLAlchemy: https://www.youtube.com/watch?v=cmnPiUVlIsM
+
 SQLAlchemy: https://dev.to/iambkpl/setup-fastapi-and-sqlalchemy-mysql-48m9
 SQLAlchemy: https://medium.com/@suganthi2496/fastapi-with-sqlalchemy-building-scalable-apis-with-a-database-backend-7ccc9aa659a1
-SQLAlchemy: https://testdriven.io/blog/fastapi-sqlmodel/
+https://youtu.be/XlnmN4BfCxw?si=tuJ2S9PpxMOhF-pM
+https://github.com/ArjanCodes/examples/tree/main/2023/fastapi-router
+https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
+https://github.com/techwithtim/FastAPIPhotoVideoSharing
+
+SQLModel: https://testdriven.io/blog/fastapi-sqlmodel/
 
 test sync x async performance
 
 https://www.youtube.com/watch?v=cmnPiUVlIsM
+
+Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-python-dockerfile/Dockerfile.10_final
 
 ## Decisions Log
 
@@ -251,3 +253,8 @@ https://www.youtube.com/watch?v=cmnPiUVlIsM
 
 ### Depends(db_connect) directly db_models methods args?
   E.g.: routes.py - get_meter_with_readings() - uses the same connection for both queries (Meters and Readings queries) -> One connection per one request is correct.
+
+### Dockerfile base image
+
+  1. alpine - tiny, reducing attack surface and pull times
+  2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)

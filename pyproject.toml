@@ -16,7 +16,7 @@ dependencies = [
     "python-json-logger>=4.0.0",
     "python-multipart>=0.0.21",
     "slowapi>=0.1.9",
-    "uvicorn[standard]>=0.38.0",
+    "uvicorn>=0.38.0",
 ]
 [dependency-groups]
 dev = [

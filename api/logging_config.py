@@ -1,5 +1,6 @@
 import os
 from logging.config import dictConfig
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -8,6 +9,7 @@ load_dotenv(override=True)
 ENV = os.getenv("ENV", "dev")
 LOGTAIL_TOKEN = os.getenv("LOGTAIL_TOKEN")
 LOGTAIL_HOST = os.getenv("LOGTAIL_HOST")
+LOG_DIR = Path("logs")
 
 
 def configure_logging() -> None:
@@ -74,7 +76,7 @@ def configure_logging() -> None:
             },
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "api.log",
+                "filename": str(LOG_DIR / "api.log"),
                 "formatter": "json",
                 "level": "DEBUG",
                 "maxBytes": 1024 * 1024,  # 1MB
