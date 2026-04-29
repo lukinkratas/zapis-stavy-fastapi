@@ -17,17 +17,15 @@
 - [x] review coverage
 - [x] Dockerfile
 - [x] register endpoint user field returns password bug
+- [x] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
 - [ ] fix GH actions
 - [ ] api version in the name
 - [ ] detail -> message, credentials -> creds
 - [ ] remove confirmation url from register response json
 - [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
 - [ ] CORS middleware?
-- [x] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
-  - https://maazbinmustaqeem.medium.com/how-to-upload-fastapi-logs-to-aws-cloudwatch-a-beginners-guide-66b9957078b9
-  - https://stackoverflow.com/questions/73633371/how-to-configure-fastapi-to-publish-logs-to-cloudwatch
-  - https://dev.to/aws-builders/observability-best-practices-when-running-fastapi-in-a-lambda-29h6
 - [ ] pydantic-settings?
+- [ ] prod: no file logging (diff between dev and prod)
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
 - [x] switch from meters to locations
