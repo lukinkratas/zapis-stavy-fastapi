@@ -71,8 +71,8 @@ def configure_logging() -> None:
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "filename": str(LOG_DIR / "api.log"),
-                "maxBytes": 10 * 1024 * 1024,  # 10MB
-                "backupCount": 10,
+                "maxBytes": 2 * 1024 * 1024,  # 2MB
+                "backupCount": 5,
                 "encoding": "utf8",
                 "level": "DEBUG",
                 "filters": ["correlation_id"],
