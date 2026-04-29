@@ -1,24 +1,18 @@
+import socket
 import os
 from logging.config import dictConfig
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .aws import get_logs_client
 load_dotenv(override=True)
 
 ENV = os.getenv("ENV", "dev")
-LOGTAIL_TOKEN = os.getenv("LOGTAIL_TOKEN")
-LOGTAIL_HOST = os.getenv("LOGTAIL_HOST")
 LOG_DIR = Path("logs")
-
 
 def configure_logging() -> None:
     """Configure logging."""
-    handlers = ["stdout", "rotating_file"]
-
-    if ENV == "prod" and LOGTAIL_TOKEN is not None and LOGTAIL_HOST is not None:
-        handlers.append("logtail")
-
     cfg = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -70,32 +64,34 @@ def configure_logging() -> None:
         "handlers": {
             "stdout": {
                 "class": "logging.StreamHandler",
-                "formatter": "simple",
                 "level": "DEBUG",
                 "filters": ["correlation_id"],
+                "formatter": "simple",
             },
             "rotating_file": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "filename": str(LOG_DIR / "api.log"),
-                "formatter": "json",
-                "level": "DEBUG",
                 "maxBytes": 10 * 1024 * 1024,  # 10MB
                 "backupCount": 10,
                 "encoding": "utf8",
+                "level": "DEBUG",
                 "filters": ["correlation_id"],
+                "formatter": "json",
             },
-            "logtail": {
-                "class": "logtail.LogtailHandler",
-                "formatter": "simple",
+            "watchtower": {
+                "class": "watchtower.CloudWatchLogHandler",
+                "boto3_client": get_logs_client(),
+                "log_group_name": "zapis-stavy",
+                "log_stream_name": f"{ENV}-{socket.gethostname()}",
+                "create_log_group": False, # terraform managed
                 "level": "INFO",
                 "filters": ["correlation_id"],
-                "source_token": LOGTAIL_TOKEN,
-                "host": LOGTAIL_HOST,
-            },
+                "formatter": "simple",
+            }
         },
         "loggers": {
             "api": {
-                "handlers": handlers,
+                "handlers": ["stdout", "rotating_file", "watchtower"],
                 "level": "DEBUG" if ENV == "dev" else "INFO",
                 "propagate": False,
             },

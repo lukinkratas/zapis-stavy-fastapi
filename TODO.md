@@ -16,17 +16,18 @@
 - [x] database / tables assertions
 - [x] review coverage
 - [x] Dockerfile
-- [ ] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
-  - https://maazbinmustaqeem.medium.com/how-to-upload-fastapi-logs-to-aws-cloudwatch-a-beginners-guide-66b9957078b9
-  - https://stackoverflow.com/questions/73633371/how-to-configure-fastapi-to-publish-logs-to-cloudwatch
-  - https://dev.to/aws-builders/observability-best-practices-when-running-fastapi-in-a-lambda-29h6
+- [x] register endpoint user field returns password bug
 - [ ] fix GH actions
 - [ ] api version in the name
 - [ ] detail -> message, credentials -> creds
-- [x] register endpoint user field returns password bug
 - [ ] remove confirmation url from register response json
+- [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
 - [ ] CORS middleware?
-- [ ] sqlalchemy orm?
+- [x] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
+  - https://maazbinmustaqeem.medium.com/how-to-upload-fastapi-logs-to-aws-cloudwatch-a-beginners-guide-66b9957078b9
+  - https://stackoverflow.com/questions/73633371/how-to-configure-fastapi-to-publish-logs-to-cloudwatch
+  - https://dev.to/aws-builders/observability-best-practices-when-running-fastapi-in-a-lambda-29h6
+- [ ] pydantic-settings?
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
 - [x] switch from meters to locations

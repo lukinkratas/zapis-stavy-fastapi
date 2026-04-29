@@ -7,5 +7,5 @@ __pycache__/
 .venv
 .coverage
 .env
-*logs/.log*
+logs/*.log
 .terraform
