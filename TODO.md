@@ -17,10 +17,13 @@
 - [x] review coverage
 - [x] Dockerfile
 - [ ] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
+  - https://maazbinmustaqeem.medium.com/how-to-upload-fastapi-logs-to-aws-cloudwatch-a-beginners-guide-66b9957078b9
+  - https://stackoverflow.com/questions/73633371/how-to-configure-fastapi-to-publish-logs-to-cloudwatch
+  - https://dev.to/aws-builders/observability-best-practices-when-running-fastapi-in-a-lambda-29h6
 - [ ] fix GH actions
 - [ ] api version in the name
 - [ ] detail -> message, credentials -> creds
-- [ ] register endpoint user field returns password bug
+- [x] register endpoint user field returns password bug
 - [ ] remove confirmation url from register response json
 - [ ] CORS middleware?
 - [ ] sqlalchemy orm?
@@ -34,19 +37,6 @@
   1.2 DELETE endpoints return 204 even when resource doesn't exist (api/routers/users.py, api/routers/meters.py)
   DELETE /user/{id} and DELETE /meter/{id} return 204 regardless of whether the row existed. This silently swallows
   client errors (wrong ID, double-delete). Consider returning 404 when rowcount == 0.
-
-  1.4 Password returned in user responses (api/schemas/users.py)
-  UserResponseJson includes the password (hashed) field. Even hashed, exposing password hashes to API consumers is a
-   security anti-pattern. Remove it from the response schema.
-
-  Significant Issues
-
-  1.5 Rate limit of 1 req/min is unusable (api/main.py)
-  default_limits=["1/minute"] will break any real client interaction. This seems like a dev leftover — should be
-  configurable per environment.
-
-  1.6 create_confirmation_token is unused
-  It's defined in api/auth.py but never called anywhere — dead code.
 
   ---
   2. Code Quality
