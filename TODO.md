@@ -1,3 +1,4 @@
+- [ ] phase 1 works locally
 - [x] add e2e testing
 - [x] review e2e postman collection
 - [x] user endpoints with access token
@@ -188,12 +189,14 @@ psycopg: https://medium.com/@benshearlaw/asynchronous-postgres-with-python-fasta
 
 SQLAlchemy: https://www.youtube.com/watch?v=cmnPiUVlIsM
 
-SQLAlchemy: https://dev.to/iambkpl/setup-fastapi-and-sqlalchemy-mysql-48m9
-SQLAlchemy: https://medium.com/@suganthi2496/fastapi-with-sqlalchemy-building-scalable-apis-with-a-database-backend-7ccc9aa659a1
-https://youtu.be/XlnmN4BfCxw?si=tuJ2S9PpxMOhF-pM
-https://github.com/ArjanCodes/examples/tree/main/2023/fastapi-router
-https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
-https://github.com/techwithtim/FastAPIPhotoVideoSharing
+SQLAlchemy sync: https://dev.to/iambkpl/setup-fastapi-and-sqlalchemy-mysql-48m9
+SQLAlchemy sync: https://medium.com/@suganthi2496/fastapi-with-sqlalchemy-building-scalable-apis-with-a-database-backend-7ccc9aa659a1
+
+SQLAlchemy sync: https://youtu.be/XlnmN4BfCxw?si=tuJ2S9PpxMOhF-pM
+SQLAlchemy sync: https://github.com/ArjanCodes/examples/tree/main/2023/fastapi-router
+
+SQLAlchemy async: https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
+SQLAlchemy async: https://github.com/techwithtim/FastAPIPhotoVideoSharing
 
 SQLModel: https://testdriven.io/blog/fastapi-sqlmodel/
 
