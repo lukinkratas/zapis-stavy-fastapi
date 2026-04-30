@@ -8,6 +8,38 @@
   },
   "item": [
     {
+      "name": "healthcheck",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/v1/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "v1",
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "register user",
       "request": {
         "method": "POST",
@@ -22,7 +54,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/register",
+          "raw": "http://127.0.0.1:8080/v1/register",
           "protocol": "http",
           "host": [
             "127",
@@ -32,6 +64,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "register"
           ]
         }
@@ -56,7 +89,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2ODAxNzc1fQ.iSZ1fshXXvdgMzAxjc5G8PehtEf09Qda7tAA0fyAKcQ",
+          "raw": "http://127.0.0.1:8080/v1/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiYjZiYTUyNzgtMzU3OS00ZTc3LWJhMzMtNWYxYTg4YjczMWM3IiwiZXhwIjoxNzc3NDAxNjE0fQ.jxf04q-BMFGrfdIjiu3K96W_tJa5APtqSQZF8kAdy38",
           "protocol": "http",
           "host": [
             "127",
@@ -66,8 +99,9 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "confirm",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2ODAxNzc1fQ.iSZ1fshXXvdgMzAxjc5G8PehtEf09Qda7tAA0fyAKcQ"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiYjZiYTUyNzgtMzU3OS00ZTc3LWJhMzMtNWYxYTg4YjczMWM3IiwiZXhwIjoxNzc3NDAxNjE0fQ.jxf04q-BMFGrfdIjiu3K96W_tJa5APtqSQZF8kAdy38"
           ]
         }
       },
@@ -94,7 +128,7 @@
           ]
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/token",
+          "raw": "http://127.0.0.1:8080/v1/token",
           "protocol": "http",
           "host": [
             "127",
@@ -104,6 +138,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "token"
           ]
         }
@@ -135,7 +170,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/user/b4b08e75-729b-4e79-a682-f992a84b7c9d",
+          "raw": "http://127.0.0.1:8080/v1/user/b4b08e75-729b-4e79-a682-f992a84b7c9d",
           "protocol": "http",
           "host": [
             "127",
@@ -145,6 +180,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "user",
             "b4b08e75-729b-4e79-a682-f992a84b7c9d"
           ]
@@ -160,7 +196,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYjZiYTUyNzgtMzU3OS00ZTc3LWJhMzMtNWYxYTg4YjczMWM3IiwiZXhwIjoxNzc3NDczNjUwfQ.j24S0wRrIu6G4DZ3yvZSVxvfITtzkinCsPyfXVJ0BWE",
               "type": "string"
             }
           ]
@@ -177,7 +213,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/location",
+          "raw": "http://127.0.0.1:8080/v1/location",
           "protocol": "http",
           "host": [
             "127",
@@ -187,6 +223,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "location"
           ]
         }
@@ -201,7 +238,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGQ2MGUwNjQtYjRiMS00ZTU5LTk0NjUtZTNiNTdhM2JmN2YyIiwiZXhwIjoxNzc3MjgxNDQ0fQ.ZTtMrZR9DrTmRAMji0YzOQU0_bHMRJD2D-WOW1UTJDI",
               "type": "string"
             }
           ]
@@ -218,7 +255,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/location/ff68f396-d3f7-49c4-8d56-973018b4b839",
+          "raw": "http://127.0.0.1:8080/v1/location/ff68f396-d3f7-49c4-8d56-973018b4b839",
           "protocol": "http",
           "host": [
             "127",
@@ -228,6 +265,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "location",
             "ff68f396-d3f7-49c4-8d56-973018b4b839"
           ]
@@ -243,7 +281,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiZGM2NWU5MjQtY2VmMy00ZWU1LTk0YTctNmE1ZmE0MjYxMjc1IiwiZXhwIjoxNzc2NzE2MzU2fQ.hTgTYJjEG5g7uZ220mxyzy7QGfdQ2tYL0WmuOvQlEfs",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYjZiYTUyNzgtMzU3OS00ZTc3LWJhMzMtNWYxYTg4YjczMWM3IiwiZXhwIjoxNzc3NDczNjUwfQ.j24S0wRrIu6G4DZ3yvZSVxvfITtzkinCsPyfXVJ0BWE",
               "type": "string"
             }
           ]
@@ -260,7 +298,7 @@
           }
         },
         "url": {
-          "raw": "http://127.0.0.1:8080/location/ff68f396-d3f7-49c4-8d56-973018b4b839",
+          "raw": "http://127.0.0.1:8080/v1/location/20310567-c9ee-454b-a6b8-277bfbbc7fd6",
           "protocol": "http",
           "host": [
             "127",
@@ -270,8 +308,9 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "location",
-            "ff68f396-d3f7-49c4-8d56-973018b4b839"
+            "20310567-c9ee-454b-a6b8-277bfbbc7fd6"
           ]
         }
       },
@@ -293,7 +332,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://127.0.0.1:8080/user/504fe055-147e-4f5b-8927-91bbf3172a9a",
+          "raw": "http://127.0.0.1:8080/v1/user/504fe055-147e-4f5b-8927-91bbf3172a9a",
           "protocol": "http",
           "host": [
             "127",
@@ -303,6 +342,7 @@
           ],
           "port": "8080",
           "path": [
+            "v1",
             "user",
             "504fe055-147e-4f5b-8927-91bbf3172a9a"
           ]
