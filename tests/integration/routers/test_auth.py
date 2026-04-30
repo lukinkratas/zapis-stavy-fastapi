@@ -32,7 +32,7 @@ class TestLogin:
             "password": credentials["password"],  # plain password
         }
         response = await async_client.post(
-            "/token",
+            "/v1/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -55,7 +55,7 @@ class TestLogin:
             "password": credentials["password"],  # plain password
         }
         response = await async_client.post(
-            "/token",
+            "/v1/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -77,7 +77,7 @@ class TestLogin:
             "password": "invalid",  # plain password
         }
         response = await async_client.post(
-            "/token",
+            "/v1/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -94,7 +94,7 @@ class TestLogin:
             "password": "password",  # plain password
         }
         response = await async_client.post(
-            "/token",
+            "/v1/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -115,7 +115,7 @@ class TestConfirm:
         """Testing expected case."""
         assert registered_user["confirmed"] is False, "User already confirmed."
 
-        response = await async_client.get(f"/confirm/{confirmation_token}")
+        response = await async_client.get(f"/v1/confirm/{confirmation_token}")
 
         assert response.status_code == 200
         user = await users_table.select_by_id(db_conn, registered_user["id"])
@@ -130,7 +130,7 @@ class TestConfirm:
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        response = await async_client.get(f"/confirm/{confirmation_token}")
+        response = await async_client.get(f"/v1/confirm/{confirmation_token}")
 
         assert response.status_code == 200
         user = await users_table.select_by_id(db_conn, confirmed_user["id"])
@@ -145,7 +145,7 @@ class TestConfirm:
     ) -> None:
         """Testing confirmation token with different encoded sub, not registered."""
         response = await async_client.get(
-            f"/confirm/{not_registered_user_confirmation_token}"
+            f"/v1/confirm/{not_registered_user_confirmation_token}"
         )
         assert response.status_code == 401
 
@@ -157,7 +157,7 @@ class TestConfirm:
         expired_confirmation_token: str,
     ) -> None:
         """Testing confirmation token with different encoded exp."""
-        response = await async_client.get(f"/confirm/{expired_confirmation_token}")
+        response = await async_client.get(f"/v1/confirm/{expired_confirmation_token}")
         assert response.status_code == 401
 
     @pytest.mark.anyio
@@ -168,7 +168,7 @@ class TestConfirm:
         access_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
-        response = await async_client.get(f"/confirm/{access_token}")
+        response = await async_client.get(f"/v1/confirm/{access_token}")
         assert response.status_code == 401
 
 

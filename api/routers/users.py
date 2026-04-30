@@ -17,7 +17,7 @@ from ..utils import log_async_func
 from .auth import create_confirmation_token, get_current_user, get_password_hash
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(prefix="/v1")
 
 
 def _send_confirmation_email(email: str, confirmation_url: str) -> None:

@@ -17,7 +17,7 @@ from ..utils import log_async_func
 from .auth import get_current_confirmed_user
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/location")
+router = APIRouter(prefix="/v1/location")
 
 
 @router.post("", status_code=201, response_model=LocationResponseJson)

@@ -19,7 +19,7 @@ from ..utils import log_async_func, log_func
 
 load_dotenv(override=True)
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(prefix="/v1")
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

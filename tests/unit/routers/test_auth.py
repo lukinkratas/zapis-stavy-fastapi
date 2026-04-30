@@ -35,7 +35,7 @@ class TestLogin:
             "username": credentials["email"],
             "password": credentials["password"],  # plain password
         }
-        response = await async_client.post("/token", data=data)
+        response = await async_client.post("/v1/token", data=data)
         assert response.status_code == 200
 
         token = response.json()
@@ -53,7 +53,7 @@ class TestConfirm:
         registered_user: dict[str, Any],
         confirmation_token: str,
     ) -> None:
-        response = await async_client.get(f"/confirm/{confirmation_token}")
+        response = await async_client.get(f"/v1/confirm/{confirmation_token}")
         assert response.status_code == 200
 
 

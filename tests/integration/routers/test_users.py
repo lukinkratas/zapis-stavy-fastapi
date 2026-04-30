@@ -24,7 +24,7 @@ class TestRegisterAndDelete:
     ) -> None:
         """Testing expected case."""
         # register user
-        response = await async_client.post("/register", json=credentials)
+        response = await async_client.post("/v1/register", json=credentials)
         assert response.status_code == 201
         mock_send_email.assert_called_once()
 
@@ -38,7 +38,7 @@ class TestRegisterAndDelete:
         # delete registered user
         access_token = create_access_token(registered_user["id"])
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
         user_from_db = await users_table.select_by_id(db_conn, registered_user["id"])
@@ -56,7 +56,7 @@ class TestRegister:
         credentials: dict[str, str],
         registered_user: dict[str, Any],
     ) -> None:
-        response = await async_client.post("/register", json=credentials)
+        response = await async_client.post("/v1/register", json=credentials)
         assert response.status_code == 409
 
     @pytest.mark.parametrize(
@@ -75,7 +75,7 @@ class TestRegister:
         self, async_client: AsyncClient, credentials: dict[str, str]
     ) -> None:
         # register user
-        response = await async_client.post("/register", json=credentials)
+        response = await async_client.post("/v1/register", json=credentials)
         assert response.status_code == 422
 
 
@@ -108,7 +108,7 @@ class TestDelete:
         )
 
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {other_user_access_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {other_user_access_token}"}
         )
         assert response.status_code == 200
 
@@ -133,7 +133,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded sub, that is not registered."""
         response = await async_client.delete(
-            "/user",
+            "/v1/user",
             headers={"Authorization": f"Bearer {not_registered_user_access_token}"},
         )
         assert response.status_code == 401
@@ -148,7 +148,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {expired_access_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {expired_access_token}"}
         )
         assert response.status_code == 401
 
@@ -162,7 +162,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {confirmation_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {confirmation_token}"}
         )
         assert response.status_code == 401
 
@@ -181,7 +181,7 @@ class TestUpdate:
     ) -> None:
         """Testing expected case."""
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -202,7 +202,7 @@ class TestUpdate:
         access_token: str,
     ) -> None:
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -224,7 +224,7 @@ class TestUpdate:
         """Testing access token with different encoded sub."""
         user_pre = await users_table.select_by_id(db_conn, registered_user["id"])
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
@@ -244,7 +244,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded sub, that is not registered."""
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {not_registered_user_access_token}"},
         )
@@ -261,7 +261,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -278,7 +278,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )

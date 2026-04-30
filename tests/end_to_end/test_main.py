@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 import os
 from pathlib import Path
 from typing import AsyncGenerator
@@ -46,16 +47,6 @@ class TestEndToEnd:
                 ) as async_client:
                     yield async_client
 
-    @pytest.fixture
-    def mock_send_email(self, mocker: MockerFixture) -> MockerFixture:
-        return mocker.patch(
-            "api.routers.users.ses_send_email",
-            return_value={
-                "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee",
-                "ResponseMetadata": {},
-            },
-        )
-
     @pytest.mark.end_to_end
     @pytest.mark.anyio
     async def test(
@@ -65,11 +56,11 @@ class TestEndToEnd:
         update_user_payload: dict[str, str],
         location_payload: dict[str, str],
         update_location_payload: dict[str, str],
-        mock_send_email: MockerFixture,
+        mock_send_email: MagicMock,
     ) -> None:
         # register user
         credentials = {"email": "test@test.net", "password": "password"}
-        response = await async_client.post("/register", json=credentials)
+        response = await async_client.post("/v1/register", json=credentials)
         assert response.status_code == 201
 
         registered_user = response.json()["user"]
@@ -77,7 +68,7 @@ class TestEndToEnd:
 
         # confirm user
         confirmation_token = create_confirmation_token(user_id)
-        response = await async_client.get(f"/confirm/{confirmation_token}")
+        response = await async_client.get(f"/v1/confirm/{confirmation_token}")
         assert response.status_code == 200
 
         # login / get access token
@@ -86,7 +77,7 @@ class TestEndToEnd:
             "password": credentials["password"],  # plain password
         }
         response = await async_client.post(
-            "/token",
+            "/v1/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -96,7 +87,7 @@ class TestEndToEnd:
 
         # update user
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -104,7 +95,7 @@ class TestEndToEnd:
 
         # create location
         response = await async_client.post(
-            "/location",
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -115,7 +106,7 @@ class TestEndToEnd:
 
         # update location
         response = await async_client.put(
-            f"/location/{location_id}",
+            f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -123,13 +114,13 @@ class TestEndToEnd:
 
         # delete created location
         response = await async_client.delete(
-            f"/location/{location_id}",
+            f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
         # delete registered user
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200

@@ -20,7 +20,6 @@ from .utils import log_async_func
 
 logger = logging.getLogger(__name__)
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Setup and teardown of the app."""
@@ -34,7 +33,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Teardown")
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Zapis Stavy FastAPI",
+    description="API for Zapis Stavy",
+    lifespan=lifespan,
+)
 app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["1/second"])
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 app.add_middleware(SlowAPIMiddleware)
@@ -54,7 +57,7 @@ async def http_exception_handle_logging(
     return await http_exception_handler(request, exc)
 
 
-@app.get("/health")
+@app.get("/v1/health")
 @log_async_func(logger.info)
 async def healthcheck() -> Response:
     """Check the server is up and running."""

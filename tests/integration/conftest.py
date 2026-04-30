@@ -62,14 +62,14 @@ async def registered_user(
     mock_send_email: MagicMock,
 ) -> AsyncGenerator[dict[str, Any], None]:
     mock_send_email.reset_mock()
-    response = await async_client.post("/register", json=credentials)
+    response = await async_client.post("/v1/register", json=credentials)
 
     registered_user = response.json()["user"]
     yield registered_user
 
     access_token = create_access_token(registered_user["id"])
     response = await async_client.delete(
-        "/user", headers={"Authorization": f"Bearer {access_token}"}
+        "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
     )
 
 
@@ -90,7 +90,7 @@ async def created_location(
     confirmed_user: dict[str, Any],
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post(
-        "/location",
+        "/v1/location",
         json=location_payload,
         headers={"Authorization": f"Bearer {access_token}"},
     )
@@ -99,7 +99,7 @@ async def created_location(
     yield created_location
 
     location_id = created_location["id"]
-    await async_client.delete(f"/location/{location_id}")
+    await async_client.delete(f"/v1/location/{location_id}")
 
 
 @pytest.fixture
@@ -115,7 +115,7 @@ async def other_confirmed_user(
 ) -> AsyncGenerator[dict[str, Any], None]:
     mock_send_email.reset_mock()
     other_creds = {"email": "other@test.net", "password": "password"}
-    response = await async_client.post("/register", json=other_creds)
+    response = await async_client.post("/v1/register", json=other_creds)
 
     other_user = response.json()["user"]
     await users_table.update(db_conn, other_user["id"], {"confirmed": True})
@@ -123,7 +123,7 @@ async def other_confirmed_user(
 
     access_token = create_access_token(other_user["id"])
     response = await async_client.delete(
-        "/user", headers={"Authorization": f"Bearer {access_token}"}
+        "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
     )
 
 

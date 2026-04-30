@@ -34,7 +34,7 @@ class TestUnitLocation:
 
         # create location
         response = await async_client.post(
-            "/location",
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -58,7 +58,7 @@ class TestUnitLocation:
 
         # delete created location
         response = await async_client.delete(
-            f"/location/{location_id}",
+            f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -84,7 +84,7 @@ class TestUnitLocation:
 
         # update location
         response = await async_client.put(
-            f"/location/{location_id}",
+            f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )

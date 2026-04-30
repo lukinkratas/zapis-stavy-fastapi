@@ -19,13 +19,14 @@
 - [x] Dockerfile
 - [x] register endpoint user field returns password bug
 - [x] remove logtail, add AWS logs like logtail (CloudWatch -> watchtower)
-- [ ] fix GH actions
-- [ ] api version in the name
-- [ ] detail -> message, credentials -> creds
-- [ ] remove confirmation url from register response json
+- [x] api version in the name
+- [ ] use detail everywhere possible, rename credentials to creds
 - [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
 - [ ] CORS middleware?
+- [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] pydantic-settings?
+- [ ] fix GH actions
+- [ ] prod: remove confirmation url from register response json
 - [ ] prod: no file logging (diff between dev and prod)
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability

@@ -28,7 +28,7 @@ class TestRegister:
         mocker.patch.object(UsersTable, "insert", return_value=registered_user_json)
 
         # register user
-        response = await async_client.post("/register", json=credentials)
+        response = await async_client.post("/v1/register", json=credentials)
         assert response.status_code == 201
         mock_send_email.assert_called_once()
 
@@ -52,7 +52,7 @@ class TestDelete:
 
         # delete registered user
         response = await async_client.delete(
-            "/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
 
@@ -83,7 +83,7 @@ class TestUpdate:
 
         # update user
         response = await async_client.put(
-            "/user",
+            "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
