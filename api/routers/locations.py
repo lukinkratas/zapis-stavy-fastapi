@@ -9,9 +9,9 @@ from psycopg.errors import UniqueViolation
 from ..db import connect_to_db
 from ..models.locations import locations_table
 from ..schemas.locations import (
-    LocationCreateRequestBody,
-    LocationResponseJson,
-    LocationUpdateRequestBody,
+    LocationCreateRequest,
+    LocationResponse,
+    LocationUpdateRequest,
 )
 from ..utils import log_async_func
 from .auth import get_current_confirmed_user
@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/location")
 
 
-@router.post("", status_code=201, response_model=LocationResponseJson)
+@router.post("", status_code=201, response_model=LocationResponse)
 @log_async_func(logger.info)
 async def create_location(
-    location: LocationCreateRequestBody,
+    location: LocationCreateRequest,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
@@ -77,11 +77,11 @@ async def delete_location(
     await locations_table.delete(conn, id, current_confirmed_user["id"])
 
 
-@router.put("/{id}", response_model=LocationResponseJson)
+@router.put("/{id}", response_model=LocationResponse)
 @log_async_func(logger.info)
 async def update_location(
     id: uuid.UUID,
-    location: LocationUpdateRequestBody,
+    location: LocationUpdateRequest,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)

@@ -4,19 +4,19 @@ import uuid
 from pydantic import BaseModel
 
 
-class LocationCreateRequestBody(BaseModel):
+class LocationCreateRequest(BaseModel):
     """Location create request body model for validation."""
 
     name: str
 
 
-class LocationUpdateRequestBody(BaseModel):
+class LocationUpdateRequest(BaseModel):
     """Location update request body model for validation."""
 
     name: str | None = None
 
 
-class LocationResponseJson(BaseModel):
+class LocationResponse(BaseModel):
     """Location response json model for validation."""
 
     id: uuid.UUID

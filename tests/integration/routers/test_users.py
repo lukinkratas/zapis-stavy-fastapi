@@ -7,7 +7,7 @@ from psycopg import AsyncConnection
 
 from api.models.users import users_table
 from api.routers.auth import create_access_token, verify_password
-from api.schemas.users import UserResponseJson
+from api.schemas.users import UserResponse
 
 
 class TestRegisterAndDelete:
@@ -29,7 +29,7 @@ class TestRegisterAndDelete:
         mock_send_email.assert_called_once()
 
         registered_user = response.json()["user"]
-        assert UserResponseJson.model_validate(registered_user)
+        assert UserResponse.model_validate(registered_user)
         assert registered_user["email"] == credentials["email"]
         assert verify_password(credentials["password"], registered_user["password"])
         user_from_db = await users_table.select_by_id(db_conn, registered_user["id"])
@@ -188,8 +188,8 @@ class TestUpdate:
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert UserResponseJson.model_validate(updated_user)
-        # TODO: fetch the password from db (not to be displayed in UserResponseJson)
+        assert UserResponse.model_validate(updated_user)
+        # TODO: fetch the password from db (not to be displayed in UserResponse)
         # assert verify_password(update_user_payload["password"], updated_user.password)
 
     @pytest.mark.integration
@@ -209,7 +209,7 @@ class TestUpdate:
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert UserResponseJson.model_validate(updated_user)
+        assert UserResponse.model_validate(updated_user)
 
     @pytest.mark.integration
     @pytest.mark.anyio

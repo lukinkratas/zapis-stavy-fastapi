@@ -17,7 +17,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -46,7 +46,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111\"\n}",
+          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"password\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -81,7 +81,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"root@zapisstavi.cz\",\n  \"password\": \"xxx111\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -122,7 +122,7 @@
             },
             {
               "key": "password",
-              "value": "xxx111",
+              "value": "password",
               "type": "text"
             }
           ]
@@ -162,7 +162,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"lukin.kratas@seznam.cz\",\n  \"password\": \"xxx111xxx\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"
@@ -247,7 +247,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"default\"\n}",
+          "raw": "{\n  \"name\": \"update\"\n}",
           "options": {
             "raw": {
               "language": "json"

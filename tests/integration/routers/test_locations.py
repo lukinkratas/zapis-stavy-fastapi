@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.models.locations import locations_table
-from api.schemas.locations import LocationResponseJson
+from api.schemas.locations import LocationResponse
 
 
 class TestCreateAndDelete:
@@ -33,7 +33,7 @@ class TestCreateAndDelete:
 
         new_location = response.json()
         new_location_id = new_location["id"]
-        assert LocationResponseJson.model_validate(new_location)
+        assert LocationResponse.model_validate(new_location)
         assert new_location["name"] == location_payload["name"]
         location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
         assert location_from_db is not None, "Location does not exist in db."
@@ -250,7 +250,7 @@ class TestUpdate:
         assert response.status_code == 200
 
         updated_location = response.json()
-        assert LocationResponseJson.model_validate(updated_location)
+        assert LocationResponse.model_validate(updated_location)
 
     @pytest.mark.integration
     @pytest.mark.anyio

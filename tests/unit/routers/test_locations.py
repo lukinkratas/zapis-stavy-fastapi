@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.models.locations import LocationsTable
-from api.schemas.locations import LocationResponseJson
+from api.schemas.locations import LocationResponse
 
 
 class TestUnitLocation:
@@ -41,7 +41,7 @@ class TestUnitLocation:
         assert response.status_code == 201
 
         new_location = response.json()
-        assert LocationResponseJson.model_validate(new_location)
+        assert LocationResponse.model_validate(new_location)
 
     @pytest.mark.anyio
     async def test_delete_location(
@@ -91,4 +91,4 @@ class TestUnitLocation:
         assert response.status_code == 200
 
         updated_location = response.json()
-        assert LocationResponseJson.model_validate(updated_location)
+        assert LocationResponse.model_validate(updated_location)

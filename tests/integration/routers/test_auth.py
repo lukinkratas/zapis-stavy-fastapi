@@ -12,7 +12,7 @@ from api.routers.auth import (
     get_current_user,
 )
 from api.schemas.auth import Token
-from api.schemas.users import UserResponseJson
+from api.schemas.users import UserResponse
 
 
 class TestLogin:
@@ -185,7 +185,7 @@ class TestOther:
     ) -> None:
         """Testing expected case."""
         user = await authenticate_user(db_conn, **credentials)
-        assert UserResponseJson.model_validate(user)
+        assert UserResponse.model_validate(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -216,7 +216,7 @@ class TestOther:
     ) -> None:
         """Testing expected case."""
         user = await get_current_user(db_conn, access_token)
-        assert UserResponseJson.model_validate(user)
+        assert UserResponse.model_validate(user)
 
     @pytest.mark.integration
     @pytest.mark.anyio

@@ -9,9 +9,9 @@ from ..aws import ses_send_email
 from ..db import connect_to_db
 from ..models.users import users_table
 from ..schemas.users import (
-    UserCreateRequestBody,
-    UserResponseJson,
-    UserUpdateRequestBody,
+    UserCreateRequest,
+    UserResponse,
+    UserUpdateRequest,
 )
 from ..utils import log_async_func
 from .auth import create_confirmation_token, get_current_user, get_password_hash
@@ -53,7 +53,7 @@ def _send_confirmation_email(email: str, confirmation_url: str) -> None:
 @log_async_func(logger.info)
 async def register_user(
     request: Request,
-    user: UserCreateRequestBody,
+    user: UserCreateRequest,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     background_tasks: BackgroundTasks,
 ) -> dict[str, Any]:
@@ -114,10 +114,10 @@ async def delete_user(
     await users_table.delete(conn, current_user["id"])
 
 
-@router.put("/user", response_model=UserResponseJson)
+@router.put("/user", response_model=UserResponse)
 @log_async_func(logger.info)
 async def update_user(
-    user: UserUpdateRequestBody,
+    user: UserUpdateRequest,
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> dict[str, Any]:

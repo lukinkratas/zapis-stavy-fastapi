@@ -4,21 +4,21 @@ import uuid
 from pydantic import BaseModel
 
 
-class UserCreateRequestBody(BaseModel):
+class UserCreateRequest(BaseModel):
     """User create response json model for validation."""
 
     email: str
     password: str
 
 
-class UserUpdateRequestBody(BaseModel):
+class UserUpdateRequest(BaseModel):
     """User update response json model for validation."""
 
     email: str | None = None
     password: str | None = None
 
 
-class UserResponseJson(BaseModel):
+class UserResponse(BaseModel):
     """User response json model for validation."""
 
     id: uuid.UUID

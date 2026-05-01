@@ -1,15 +1,17 @@
-import socket
 import os
+import socket
 from logging.config import dictConfig
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from .aws import get_logs_client
+
 load_dotenv(override=True)
 
 ENV = os.getenv("ENV", "dev")
 LOG_DIR = Path("logs")
+
 
 def configure_logging() -> None:
     """Configure logging."""
@@ -83,11 +85,11 @@ def configure_logging() -> None:
                 "boto3_client": get_logs_client(),
                 "log_group_name": "zapis-stavy",
                 "log_stream_name": f"{ENV}-{socket.gethostname()}",
-                "create_log_group": False, # terraform managed
+                "create_log_group": False,  # terraform managed
                 "level": "INFO",
                 "filters": ["correlation_id"],
                 "formatter": "simple",
-            }
+            },
         },
         "loggers": {
             "api": {

@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 
 from api.models.users import UsersTable
 from api.routers.auth import get_password_hash
-from api.schemas.users import UserResponseJson
+from api.schemas.users import UserResponse
 
 
 class TestRegister:
@@ -33,7 +33,7 @@ class TestRegister:
         mock_send_email.assert_called_once()
 
         registered_user = response.json()["user"]
-        assert UserResponseJson.model_validate(registered_user)
+        assert UserResponse.model_validate(registered_user)
 
 
 class TestDelete:
@@ -90,4 +90,4 @@ class TestUpdate:
         assert response.status_code == 200
 
         updated_user = response.json()
-        assert UserResponseJson.model_validate(updated_user)
+        assert UserResponse.model_validate(updated_user)

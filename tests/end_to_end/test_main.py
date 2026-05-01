@@ -1,11 +1,10 @@
-from unittest.mock import MagicMock
 import os
 from pathlib import Path
 from typing import AsyncGenerator
+from unittest.mock import MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from pytest_mock import MockerFixture
 from testcontainers.postgres import PostgresContainer
 
 from api.main import app
