@@ -22,10 +22,14 @@
 - [x] api version in the name
 - [x] use detail everywhere possible
 - [x] rename credentials to creds
-- [ ] update unit tests to registered_user_id?
-- [ ] move auth helpers out of routers
+- [x] move auth helpers out of routers
+
 - [ ] services folder as an extra layer between routers and models
+
 - [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
+
+- [ ] re-write tests
+
 - [ ] CORS middleware?
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] pydantic-settings?
