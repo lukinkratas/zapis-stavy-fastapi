@@ -6,7 +6,6 @@ from pytest_mock import MockerFixture
 
 from api.routers.auth import create_access_token, create_confirmation_token
 
-
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
     return mocker.patch(
@@ -19,7 +18,7 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
 
 
 @pytest.fixture
-def credentials() -> dict[str, str]:
+def creds() -> dict[str, str]:
     """Used in unit and integration user/register and auth/login tests."""
     return {"email": "test@test.net", "password": "password"}
 
@@ -52,10 +51,10 @@ def update_location_payload() -> dict[str, str]:
 
 
 @pytest.fixture
-async def access_token(registered_user: dict[str, Any]) -> str:
-    return create_access_token(registered_user["id"])
+async def access_token(registered_user_id: str) -> str:
+    return create_access_token(registered_user_id)
 
 
 @pytest.fixture
-async def confirmation_token(registered_user: dict[str, Any]) -> str:
-    return create_confirmation_token(registered_user["id"])
+async def confirmation_token(registered_user_id) -> str:
+    return create_confirmation_token(registered_user_id)

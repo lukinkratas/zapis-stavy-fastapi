@@ -10,12 +10,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from psycopg import AsyncConnection
-from pwdlib import PasswordHash
 
 from ..db import connect_to_db
 from ..models.users import users_table
 from ..schemas.auth import Token
 from ..utils import log_async_func, log_func
+from ..auth import verify_password
 
 load_dotenv(override=True)
 logger = logging.getLogger(__name__)
@@ -24,7 +24,6 @@ router = APIRouter(prefix="/v1")
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
-password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 credentials_exception = HTTPException(
@@ -38,30 +37,6 @@ token_exception = HTTPException(
     detail="Invalid token",
     headers={"WWW-Authenticate": "Bearer"},
 )
-
-
-def get_password_hash(password: str) -> str:
-    """Get hashed password.
-
-    Args:
-        password: textual form of password
-
-    Returns: hashed password
-    """
-    return password_hash.hash(password)
-
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Compare password and password hash.
-
-    Args:
-        plain_password: textual form of password
-        hashed_password: password hash
-
-    Returns: True if passwords match, otherwise False
-    """
-    return password_hash.verify(plain_password, hashed_password)
-
 
 @log_async_func(logger.info)
 async def authenticate_user(
@@ -234,7 +209,7 @@ async def login_user(
 @log_async_func(logger.info)
 async def confirm_user(
     token: str, conn: Annotated[AsyncConnection, Depends(connect_to_db)]
-) -> dict[str, Any]:
+) -> dict[str, str]:
     """Update user to confirmed = True based on email from token.
 
     Args:

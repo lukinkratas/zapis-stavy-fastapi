@@ -18,7 +18,7 @@ class TestCreateAndDelete:
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         access_token: str,
         db_conn: AsyncConnection,
     ) -> None:
@@ -58,7 +58,7 @@ class TestCreate:
         async_client: AsyncClient,
         created_location: dict[str, Any],
         location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         access_token: str,
     ) -> None:
         response = await async_client.post(
@@ -74,7 +74,7 @@ class TestCreate:
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         access_token: str,
     ) -> None:
         response = await async_client.post(
@@ -109,7 +109,7 @@ class TestCreate:
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
@@ -126,7 +126,7 @@ class TestCreate:
         self,
         async_client: AsyncClient,
         location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         confirmation_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
@@ -146,7 +146,7 @@ class TestDelete:
     async def test_delete_non_existing_location(
         self,
         async_client: AsyncClient,
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         access_token: str,
     ) -> None:
         location_id = uuid.uuid4()
@@ -237,7 +237,7 @@ class TestUpdate:
         async_client: AsyncClient,
         created_location: dict[str, Any],
         update_location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         access_token: str,
     ) -> None:
         """Testing expected case."""
@@ -258,7 +258,7 @@ class TestUpdate:
         self,
         async_client: AsyncClient,
         update_location_payload: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         access_token: str,
     ) -> None:
         location_id = str(uuid.uuid4())

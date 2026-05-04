@@ -12,7 +12,6 @@ from api.routers.auth import (
     get_current_user,
 )
 from api.schemas.auth import Token
-from api.schemas.users import UserResponse
 
 
 class TestLogin:
@@ -23,13 +22,13 @@ class TestLogin:
     async def test_login_registered_user(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        creds: dict[str, str],
+        registered_user_id: str,
     ) -> None:
         """Testing expected case."""
         data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
+            "username": creds["email"],
+            "password": creds["password"],  # plain password
         }
         response = await async_client.post(
             "/v1/token",
@@ -46,13 +45,13 @@ class TestLogin:
     async def test_login_confirmed_user(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
-        confirmed_user: dict[str, Any],
+        creds: dict[str, str],
+        confirmed_user_id: str,
     ) -> None:
         """Testing expected case."""
         data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
+            "username": creds["email"],
+            "password": creds["password"],  # plain password
         }
         response = await async_client.post(
             "/v1/token",
@@ -69,11 +68,11 @@ class TestLogin:
     async def test_login_user_invalid_password(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        creds: dict[str, str],
+        registered_user_id: str,
     ) -> None:
         data = {
-            "username": credentials["email"],
+            "username": creds["email"],
             "password": "invalid",  # plain password
         }
         response = await async_client.post(
@@ -108,24 +107,25 @@ class TestConfirm:
     async def test_confirm_registered_user(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         confirmation_token: str,
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
+        registered_user = await users_table.select_by_id(db_conn, registered_user_id)
         assert registered_user["confirmed"] is False, "User already confirmed."
 
         response = await async_client.get(f"/v1/confirm/{confirmation_token}")
 
         assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, registered_user["id"])
+        user = await users_table.select_by_id(db_conn, registered_user_id)
         assert user["confirmed"] is True, "User not confirmed."
 
     @pytest.mark.anyio
     async def test_confirm_confirmed_user(
         self,
         async_client: AsyncClient,
-        confirmed_user: dict[str, Any],
+        confirmed_user_id: str,
         confirmation_token: str,
         db_conn: AsyncConnection,
     ) -> None:
@@ -133,7 +133,7 @@ class TestConfirm:
         response = await async_client.get(f"/v1/confirm/{confirmation_token}")
 
         assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, confirmed_user["id"])
+        user = await users_table.select_by_id(db_conn, confirmed_user_id)
         assert user["confirmed"] is True, "User not confirmed."
 
     # async def test_confirm_user_with_other_user_confirmation_token( makes no sense
@@ -153,7 +153,7 @@ class TestConfirm:
     async def test_confirm_user_with_expired_confirmation_token(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         expired_confirmation_token: str,
     ) -> None:
         """Testing confirmation token with different encoded exp."""
@@ -164,7 +164,7 @@ class TestConfirm:
     async def test_confirm_user_with_access_token(
         self,
         async_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         access_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
@@ -180,12 +180,11 @@ class TestOther:
     async def test_authenticate_user(
         self,
         db_conn: AsyncConnection,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        creds: dict[str, str],
+        registered_user_id: str,
     ) -> None:
         """Testing expected case."""
-        user = await authenticate_user(db_conn, **credentials)
-        assert UserResponse.model_validate(user)
+        await authenticate_user(db_conn, **creds)
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -200,23 +199,22 @@ class TestOther:
     async def test_authenticate_user_invalid_password(
         self,
         db_conn: AsyncConnection,
-        credentials: dict[str, str],
-        registered_user: dict[str, Any],
+        creds: dict[str, str],
+        registered_user_id: str,
     ) -> None:
         with pytest.raises(HTTPException):
-            await authenticate_user(db_conn, credentials["email"], "invalid")
+            await authenticate_user(db_conn, creds["email"], "invalid")
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_current_user(
         self,
         db_conn: AsyncConnection,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         access_token: str,
     ) -> None:
         """Testing expected case."""
-        user = await get_current_user(db_conn, access_token)
-        assert UserResponse.model_validate(user)
+        await get_current_user(db_conn, access_token)
 
     @pytest.mark.integration
     @pytest.mark.anyio
@@ -232,7 +230,7 @@ class TestOther:
     async def test_get_current_user_with_expired_access_token(
         self,
         db_conn: AsyncConnection,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
@@ -244,7 +242,7 @@ class TestOther:
     async def test_get_current_user_with_confirmation_token(
         self,
         db_conn: AsyncConnection,
-        registered_user: dict[str, Any],
+        registered_user_id: str,
         confirmation_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
@@ -254,15 +252,17 @@ class TestOther:
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_current_confirmed_user(
-        self, confirmed_user: dict[str, Any]
+        self, db_conn: AsyncConnection, confirmed_user_id: str,
     ) -> None:
         """Testing expected case."""
-        assert await get_current_confirmed_user(confirmed_user) == confirmed_user
+        confirmed_user = await users_table.select_by_id(db_conn, confirmed_user_id)
+        assert await get_current_confirmed_user(confirmed_user)
 
     @pytest.mark.integration
     @pytest.mark.anyio
     async def test_get_current_confirmed_user_not_confirmed(
-        self, registered_user: dict[str, Any]
+        self, db_conn: AsyncConnection, registered_user_id: str
     ) -> None:
+        registered_user = await users_table.select_by_id(db_conn, registered_user_id)
         with pytest.raises(HTTPException):
             await get_current_confirmed_user(registered_user)

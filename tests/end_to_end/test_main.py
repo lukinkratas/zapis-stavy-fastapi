@@ -51,29 +51,27 @@ class TestEndToEnd:
     async def test(
         self,
         async_client: AsyncClient,
-        credentials: dict[str, str],
+        creds: dict[str, str],
         update_user_payload: dict[str, str],
         location_payload: dict[str, str],
         update_location_payload: dict[str, str],
         mock_send_email: MagicMock,
     ) -> None:
         # register user
-        credentials = {"email": "test@test.net", "password": "password"}
-        response = await async_client.post("/v1/register", json=credentials)
+        creds = {"email": "test@test.net", "password": "password"}
+        response = await async_client.post("/v1/register", json=creds)
         assert response.status_code == 201
 
-        registered_user = response.json()["user"]
-        user_id = registered_user["id"]
-
         # confirm user
+        user_id = response.json()["id"]
         confirmation_token = create_confirmation_token(user_id)
         response = await async_client.get(f"/v1/confirm/{confirmation_token}")
         assert response.status_code == 200
 
         # login / get access token
         data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
+            "username": creds["email"],
+            "password": creds["password"],  # plain password
         }
         response = await async_client.post(
             "/v1/token",

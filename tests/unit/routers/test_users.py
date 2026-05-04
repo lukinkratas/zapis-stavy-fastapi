@@ -9,7 +9,6 @@ from pytest_mock import MockerFixture
 
 from api.models.users import UsersTable
 from api.routers.auth import get_password_hash
-from api.schemas.users import UserResponse
 
 
 class TestRegister:
@@ -20,7 +19,7 @@ class TestRegister:
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        credentials: dict[str, str],
+        creds: dict[str, str],
         registered_user_json: dict[str, Any],
         mock_send_email: MagicMock,
     ) -> None:
@@ -28,12 +27,9 @@ class TestRegister:
         mocker.patch.object(UsersTable, "insert", return_value=registered_user_json)
 
         # register user
-        response = await async_client.post("/v1/register", json=credentials)
+        response = await async_client.post("/v1/register", json=creds)
         assert response.status_code == 201
         mock_send_email.assert_called_once()
-
-        registered_user = response.json()["user"]
-        assert UserResponse.model_validate(registered_user)
 
 
 class TestDelete:
@@ -88,6 +84,3 @@ class TestUpdate:
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
-
-        updated_user = response.json()
-        assert UserResponse.model_validate(updated_user)

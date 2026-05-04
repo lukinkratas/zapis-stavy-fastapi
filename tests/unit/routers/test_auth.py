@@ -28,12 +28,12 @@ class TestLogin:
         self,
         async_client: AsyncClient,
         mocker: MockerFixture,
-        credentials: dict[str, str],
+        creds: dict[str, str],
         registered_user: dict[str, Any],
     ) -> None:
         data = {
-            "username": credentials["email"],
-            "password": credentials["password"],  # plain password
+            "username": creds["email"],
+            "password": creds["password"],  # plain password
         }
         response = await async_client.post("/v1/token", data=data)
         assert response.status_code == 200
@@ -62,9 +62,9 @@ class TestOther:
 
     @pytest.mark.anyio
     async def test_verify_password(
-        self, credentials: dict[str, str], registered_user: dict[str, Any]
+        self, creds: dict[str, str], registered_user: dict[str, Any]
     ) -> None:
-        verify_password(credentials["password"], registered_user["password"])
+        verify_password(creds["password"], registered_user["password"])
 
     @pytest.mark.anyio
     async def test_create_access_token(self) -> None:

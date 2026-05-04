@@ -5,19 +5,19 @@ from pydantic import BaseModel
 
 
 class LocationCreateRequest(BaseModel):
-    """Location create request body model for validation."""
+    """Location create request model for validation."""
 
     name: str
 
 
 class LocationUpdateRequest(BaseModel):
-    """Location update request body model for validation."""
+    """Location update request model for validation."""
 
     name: str | None = None
 
 
 class LocationResponse(BaseModel):
-    """Location response json model for validation."""
+    """Location response model for validation."""
 
     id: uuid.UUID
     created_at: datetime.datetime

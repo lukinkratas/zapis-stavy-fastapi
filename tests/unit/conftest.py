@@ -45,11 +45,11 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 @pytest.fixture
 def registered_user_json(
-    mocker: MockerFixture, credentials: dict[str, str]
+    mocker: MockerFixture, creds: dict[str, str]
 ) -> dict[str, Any]:
     return {
-        "email": credentials["email"],
-        "password": get_password_hash(credentials["password"]),
+        "email": creds["email"],
+        "password": get_password_hash(creds["password"]),
         "id": str(uuid.uuid4()),
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "confirmed": False,

@@ -56,30 +56,29 @@ async def db_conn() -> AsyncGenerator[AsyncConnection, None]:
 
 
 @pytest.fixture
-async def registered_user(
+async def registered_user_id(
     async_client: AsyncClient,
-    credentials: dict[str, str],
+    creds: dict[str, str],
     mock_send_email: MagicMock,
-) -> AsyncGenerator[dict[str, Any], None]:
+) -> AsyncGenerator[str, None]:
     mock_send_email.reset_mock()
-    response = await async_client.post("/v1/register", json=credentials)
+    response = await async_client.post("/v1/register", json=creds)
+    assert response.status_code == 201, f"Setup failed. {response.status_code}"
 
-    registered_user = response.json()["user"]
-    yield registered_user
+    user_id = response.json()["id"]
+    yield user_id
 
-    access_token = create_access_token(registered_user["id"])
+    access_token = create_access_token(user_id)
     response = await async_client.delete(
         "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
     )
+    assert response.status_code == 200, f"Teardown failed. {response.status_code}"
 
 
 @pytest.fixture
-async def confirmed_user(
-    async_client: AsyncClient,
-    registered_user: dict[str, Any],
-    db_conn: AsyncConnection,
-) -> dict[str, Any]:
-    return await users_table.update(db_conn, registered_user["id"], {"confirmed": True})
+async def confirmed_user_id(registered_user_id: str, db_conn: AsyncConnection) -> str:
+    await users_table.update(db_conn, registered_user_id, {"confirmed": True})
+    return registered_user_id
 
 
 @pytest.fixture
@@ -87,7 +86,7 @@ async def created_location(
     async_client: AsyncClient,
     location_payload: dict[str, str],
     access_token: str,
-    confirmed_user: dict[str, Any],
+    confirmed_user_id: str,
 ) -> AsyncGenerator[dict[str, Any], None]:
     response = await async_client.post(
         "/v1/location",
@@ -108,43 +107,45 @@ def location_id(created_location: dict[str, str]) -> str:
 
 
 @pytest.fixture
-async def other_confirmed_user(
+async def other_confirmed_user_id(
     async_client: AsyncClient,
     db_conn: AsyncConnection,
     mock_send_email: MagicMock,
-) -> AsyncGenerator[dict[str, Any], None]:
+) -> AsyncGenerator[str, None]:
     mock_send_email.reset_mock()
     other_creds = {"email": "other@test.net", "password": "password"}
     response = await async_client.post("/v1/register", json=other_creds)
+    assert response.status_code == 201, f"Setup failed. {response.status_code}"
 
-    other_user = response.json()["user"]
-    await users_table.update(db_conn, other_user["id"], {"confirmed": True})
-    yield other_user
+    user_id = response.json()["id"]
+    await users_table.update(db_conn, user_id, {"confirmed": True})
+    yield user_id
 
-    access_token = create_access_token(other_user["id"])
+    access_token = create_access_token(user_id)
     response = await async_client.delete(
         "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
     )
+    assert response.status_code == 200, f"Teardown failed. {response.status_code}"
 
 
 @pytest.fixture
-async def expired_access_token(registered_user: dict[str, Any]) -> str:
-    return create_access_token(registered_user["id"], expires_delta=timedelta(-1))
+async def expired_access_token(registered_user_id: str) -> str:
+    return create_access_token(registered_user_id, expires_delta=timedelta(-1))
 
 
 @pytest.fixture
-async def expired_confirmation_token(registered_user: dict[str, Any]) -> str:
-    return create_confirmation_token(registered_user["id"], expires_delta=timedelta(-1))
+async def expired_confirmation_token(registered_user_id: str) -> str:
+    return create_confirmation_token(registered_user_id, expires_delta=timedelta(-1))
 
 
 @pytest.fixture
-def other_user_access_token(other_confirmed_user: dict[str, Any]) -> str:
-    return create_access_token(other_confirmed_user["id"])
+def other_user_access_token(other_confirmed_user_id: str) -> str:
+    return create_access_token(other_confirmed_user_id)
 
 
 @pytest.fixture
-async def other_user_confirmation_token(other_confirmed_user: dict[str, Any]) -> str:
-    return create_confirmation_token(other_confirmed_user["id"])
+async def other_user_confirmation_token(other_confirmed_user_id: str) -> str:
+    return create_confirmation_token(other_confirmed_user_id)
 
 
 @pytest.fixture
