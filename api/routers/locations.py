@@ -7,7 +7,6 @@ from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
 from ..db import connect_to_db
-from ..models.locations import locations_table
 from ..schemas.locations import (
     LocationCreateRequest,
     LocationResponse,
@@ -15,12 +14,14 @@ from ..schemas.locations import (
 )
 from ..utils import log_async_func
 from .auth import get_current_confirmed_user
+from ..services.locations import create_location, update_location, delete_location
+from ..schemas.base import BaseResponse, ResponseWithId
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/location")
 
 
-@router.post("", status_code=201, response_model=LocationResponse)
+@router.post("", status_code=201, response_model=ResponseWithId)
 @log_async_func(logger.info)
 async def create_location(
     location: LocationCreateRequest,
@@ -41,19 +42,19 @@ async def create_location(
     Raises:
         HTTPException: if location cannot be inserted in the database
     """
-    data = location.model_dump()
-    data["user_id"] = current_confirmed_user["id"]
-
     try:
-        created_location = await locations_table.insert(conn, data)
+        created_location = await create_location(conn, current_confirmed_user["id"], data=location.model_dump())
 
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="Location already exists")
 
-    return created_location
+    return {
+        "detail": "Location created.",
+        "id": str(created_location["id"]),
+    }
 
 
-@router.delete("/{id}", status_code=200)
+@router.delete("/{id}", reponse_model=BaseResponse)
 @log_async_func(logger.info)
 async def delete_location(
     id: uuid.UUID,
@@ -74,10 +75,11 @@ async def delete_location(
     Raises:
         HTTPException: if location cannot be deleted from the database
     """
-    await locations_table.delete(conn, id, current_confirmed_user["id"])
+    await delete_location(conn, id, current_confirmed_user["id"])
+    return {"detail": "Location deleted"}
 
 
-@router.put("/{id}", response_model=LocationResponse)
+@router.put("/{id}", response_model=BaseResponse)
 @log_async_func(logger.info)
 async def update_location(
     id: uuid.UUID,
@@ -100,13 +102,5 @@ async def update_location(
     Raises:
         HTTPException: if location cannot be updated in the database
     """
-    data = location.model_dump(exclude_unset=True)
-
-    updated_location = await locations_table.update(
-        conn, id, current_confirmed_user["id"], data
-    )
-
-    if updated_location is None:
-        raise HTTPException(status_code=404, detail="Location not found")
-
-    return updated_location
+    await update_location(conn, id, current_confirmed_user["id"], data=location.model_dump(exclude_unset=True))
+    return {"detail": "Location updated"}

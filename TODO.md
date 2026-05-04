@@ -23,8 +23,7 @@
 - [x] use detail everywhere possible
 - [x] rename credentials to creds
 - [x] move auth helpers out of routers
-
-- [ ] services folder as an extra layer between routers and models
+- [x] services folder as an extra layer between routers and models
 
 - [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
 

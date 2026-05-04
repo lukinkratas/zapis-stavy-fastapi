@@ -12,7 +12,7 @@ from ..utils import log_async_func
 from ..auth import authenticate_user, create_access_token, get_sub, token_exception
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/v1")
+router = APIRouter(prefix="/v1/auth")
 
 @router.post("/token", response_model=Token)
 @log_async_func(logger.info)
