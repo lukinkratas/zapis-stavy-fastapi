@@ -1,11 +1,11 @@
 -- DROP TABLE IF EXISTS public.meters;
 
-CREATE TABLE public.meters (
-    id UUID DEFAULT uuidv4(),
-    name TEXT NOT NULL,
-    description TEXT DEFAULT NULL,
-    PRIMARY key (id)
-);
+-- CREATE TABLE public.meters (
+--     id UUID DEFAULT uuidv4(),
+--     name TEXT NOT NULL,
+--     description TEXT DEFAULT NULL,
+--     PRIMARY key (id)
+-- );
 
 -- SELECT * FROM public.meters;
 
