@@ -1,0 +1,29 @@
+info:
+  name: register user
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://127.0.0.1:8080/v1/user/register
+  body:
+    type: json
+    data: |-
+      {
+        "email": "lukin.kratas@seznam.cz",
+        "password": "password"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        bru.setEnvVar("confirmation_token", res.body.confirmation_token);
+        console.log("env var confirmation_token set: " + res.body.confirmation_token);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

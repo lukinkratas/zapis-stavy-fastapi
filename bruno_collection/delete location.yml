@@ -1,0 +1,31 @@
+info:
+  name: delete location
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: http://127.0.0.1:8080/v1/location/{{location_id}}
+  body:
+    type: json
+    data: ""
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiNTE4NjE2NDEtYTc1ZC00MzRiLWFjNzUtMjU0M2Q2Nzk1MTFjIiwiZXhwIjoxNzc4MzIxMjk4fQ.qr2nZm7aBfqH8hOhvXPmyTQa_05eKarDiG4qbswoyBI
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        if (bru.hasEnvVar("access_token")) {
+          console.log("Env var access_token found");
+          req.setHeader("Authorization", "Bearer " + bru.getEnvVar("access_token"));
+        } else {
+          console.warn("No access token found. Login first.");
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
