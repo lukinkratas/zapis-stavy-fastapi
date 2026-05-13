@@ -6,68 +6,33 @@ from typing import Annotated, Any, Literal
 
 import jwt
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from psycopg import AsyncConnection
-from pwdlib import PasswordHash
 
 from .db import connect_to_db
-from .models.users import users_table
+from .exceptions import credentials_exception, token_exception
+from .security import verify_password
+from .services.users import select_user_by_email, select_user_by_id
 from .utils import log_async_func, log_func
 
-load_dotenv(override=True)
+load_dotenv()
 logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
-password_hash = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Invalid credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-token_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Invalid token",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-def get_password_hash(password: str) -> str:
-    """Get hashed password.
-
-    Args:
-        password: textual form of password
-
-    Returns: hashed password
-    """
-    return password_hash.hash(password)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Compare password and password hash.
-
-    Args:
-        plain_password: textual form of password
-        hashed_password: password hash
-
-    Returns: True if passwords match, otherwise False
-    """
-    return password_hash.verify(plain_password, hashed_password)
-
-
-@log_async_func(logger.info)
+@log_async_func(logger.debug)
 async def authenticate_user(
     conn: AsyncConnection, email: str, password: str
 ) -> dict[str, Any]:
     """Authenticate user.
 
     Args:
-        conn: database connection
         email: email to authenticate
         password: password corresponding to the email
 
@@ -76,15 +41,14 @@ async def authenticate_user(
     Raises:
         HTTPException: if user is not found in the database or password mismatch.
     """
-    user = await users_table.select_by_email(conn, email)
+    user = await select_user_by_email(conn, email)
 
-    if user is None or not verify_password(password, user["password"]):
+    if user is None or not verify_password(password, user["password_hash"]):
         raise credentials_exception
 
     return user
 
 
-@log_func(logger.info)
 def _create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     """Create JWT token.
 
@@ -130,7 +94,7 @@ def create_confirmation_token(
     )
 
 
-def get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
+def _get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
     """Get subject from JWT token.
 
     Args:
@@ -161,17 +125,16 @@ async def get_current_user(
     """Get current user from token.
 
     Args:
-        conn: database connection
         token: JWT token with encoded email
 
     Returns: user dict
 
-
     Raises:
         HTTPException: if user is not found in the database.
     """
-    user_id = get_sub(token, typ="access")
-    user = await users_table.select_by_id(conn, user_id)
+    user_id = _get_sub(token, typ="access")
+    user = await select_user_by_id(conn, user_id)
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
