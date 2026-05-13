@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from .utils import log_func
 
 logger = logging.getLogger(__name__)
-load_dotenv(override=True)
+load_dotenv()
 
 session = Session(
     aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],

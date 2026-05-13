@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 from .aws import get_logs_client
 
-load_dotenv(override=True)
+load_dotenv()
 
 ENV = os.getenv("ENV", "dev")
 LOG_DIR = Path("logs")
@@ -49,7 +49,7 @@ def configure_logging() -> None:
                 ),
             },
             "json": {
-                "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
+                "class": "pythonjsonlogger.json.JsonFormatter",
                 "datefmt": "%Y-%m-%dT%H:%M:%SZ",
                 "format": (
                     "%(asctime)s"
