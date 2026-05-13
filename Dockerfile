@@ -38,7 +38,7 @@ USER appuser
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://127.0.0.1:8080/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://127.0.0.1:8080/v1/health || exit 1
 
 # start the server
 CMD ["/zapis-stavy-fastapi/.venv/bin/uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
