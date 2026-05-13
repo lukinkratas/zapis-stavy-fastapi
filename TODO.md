@@ -1,4 +1,5 @@
 - [ ] phase 1 works locally
+
 - [x] add e2e testing
 - [x] review e2e postman collection
 - [x] user endpoints with access token
@@ -9,7 +10,7 @@
 - [x] refactor int tests
 - [x] refactor unit tests
 - [x] tests update - every token dependent endpoint test with valid, expired, random_id_token
-- [x] tests for deleteing, updating non existing and foregin user data
+- [x] tests for deleting, updating non existing and foregin user data
 - [x] tests update - every user dependent endpoint test with confirmed and not confirmed user
 - [x] test pydantic validations
 - [x] test classes per endpoint? TestUpdate, TestCreateAndDelete, etc.
@@ -24,19 +25,58 @@
 - [x] rename credentials to creds
 - [x] move auth helpers out of routers
 - [x] services folder as an extra layer between routers and models
+- [x] log func - do not logs args, kwargs, bcs of PIIs
+- [x] db_conn.commit() needed in conftest?
+- [x] keep db_conn: Annotated[AsyncConnection, Depends(connect_to_db)] on routers lvl or ~~move to services lvl~~ NOT (keep service layer independent of fastapi dependencies)?
+- [x] are logs for API (info lvl) needed, or already handled by default fastapi logging well?
+- [x] bruno collection instead of postman
+- [x] docker_db fixture in conftest
+- [x] tests async backend asyncio instd of anyio
+- [x] app state connection pool?
+- [x] common.sql not needed?
 
-- [ ] sqlalchemy orm -> more secure (set build clause is fragile now)
+- [ ] bruno collection
+  - [x] script to set confirmation token url
+  - [x] script to set access token
+  - [x] set location id
+  - [ ] creds redacted
 
-- [ ] re-write tests
+- [ ] logging lvl debug in all other places? + debug only used in dev?
+- [ ] unit: pydantic models assertions in place
+- [ ] int: pydantic models assertions in place
+- [ ] int: db assertions
+- [ ] test failed schema, even for locations
+- [ ] dict_row factory -> User / Location factory? -> No, bcs of perf, but use dataclass or namedtuple ??
 
-- [ ] CORS middleware?
+- [ ] namedtuple_row instead of dict_row? (check annotations) https://www.psycopg.org/psycopg3/docs/advanced/rows.html
+
+- [ ] sqlfluff for sql linting - CI, Makefile?
+- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
+- [ ] services logging and docstrings
+- [ ] register_user / create_location (service + models + routers) use hardcoded instead of data dict, update_user / update_location uses data dict (bcs of dynamic update fields)  - unify - either use dynamic or hardcoded fields in both.
+  - [ ] if dynamic fields: allowed fields in models
+  ```
+    ALLOWED_UPDATE_FIELDS = {"email", "password"}
+
+    invalid = set(data) - ALLOWED_UPDATE_FIELDS
+    if invalid:
+        raise ValueError(f"Invalid fields: {invalid}")
+  ```
+
+- [ ] fix GH actions
+- [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] pydantic-settings?
-- [ ] fix GH actions
+- [ ] CORS middleware?
+- [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
+
 - [ ] prod: remove confirmation url from register response json
 - [ ] prod: no file logging (diff between dev and prod)
+
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
+- [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
+
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests
@@ -194,6 +234,7 @@ asyncpg: https://www.sheshbabu.com/posts/fastapi-without-orm-getting-started-wit
 psycopg: https://blog.danielclayton.co.uk/posts/database-connections-with-fastapi/
 psycopg: https://spwoodcock.dev/blog/2024-10-fastapi-pydantic-psycopg/
 psycopg: https://medium.com/@benshearlaw/asynchronous-postgres-with-python-fastapi-and-psycopg-3-fafa5faa2c08
+psycopg: https://blog.danielclayton.co.uk/posts/database-connections-with-fastapi/
 
 SQLAlchemy: https://www.youtube.com/watch?v=cmnPiUVlIsM
 
@@ -216,25 +257,14 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
 ## Decisions Log
 
-### Db Engine
+### DB
 
   1. sqlite
   2. postgresql
 
-### Db Driver
+### DB Driver
 
-  1. SQLAlchemy
-
-    + easy to switch db engine (sql only)
-    -- too bloated
-
-  2. sqlmodel (=pydantic + sql alchemy wrapper)
-
-    + FastAPI docs recommended
-    - async not documented
-    --- db and req/resp validation models coupled
-
-  3. psycopg
+  1. psycopg
 
     ++ minimal
     + sql query sanitation
@@ -243,7 +273,7 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
     + sync and async
     - pg only
 
-  4. asyncpg
+  2. asyncpg
 
     ++ even faster, than psycopg
     + sql query sanitation
@@ -251,8 +281,25 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
     - async only
 
 
-### Depends(db_connect) directly db_models methods args?
-  E.g.: routes.py - get_meter_with_readings() - uses the same connection for both queries (Meters and Readings queries) -> One connection per one request is correct.
+### ORM or not
+
+  1. sqlmodel (=pydantic + sql alchemy wrapper)
+
+    + FastAPI docs recommended
+    - async not documented
+    --- db and req/resp validation models coupled
+
+  2. SQLAlchemy
+
+    + easy to switch db engine (sql only)
+    + handles security
+
+  3. No ORM
+
+    + no bloat
+    - security
+
+### pydantic-settings or python-dotenv
 
 ### Dockerfile base image
 
