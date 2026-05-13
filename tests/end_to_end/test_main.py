@@ -1,56 +1,23 @@
-import os
-from pathlib import Path
 from typing import AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from testcontainers.postgres import PostgresContainer
 
+from api.auth import create_confirmation_token
 from api.main import app
-from api.routers.auth import create_confirmation_token
-
-ROOT = Path(__file__).parent.parent.parent.resolve()
 
 
 class TestEndToEnd:
     """End to end test."""
 
-    @pytest.fixture(scope="session")
-    def anyio_backend(self) -> str:
-        return "asyncio"
-
-    @pytest.fixture(scope="session")
-    async def async_client(self) -> AsyncGenerator[AsyncClient, None]:
-        app.state.limiter.enabled = False
-
-        with (
-            PostgresContainer("postgres:14")
-            .with_volume_mapping(
-                str(ROOT / "scripts/init-db.sh"),
-                "/docker-entrypoint-initdb.d/init-db.sh",
-            )
-            .with_volume_mapping(
-                str(ROOT / "sql/"), "/docker-entrypoint-initdb.d/sql/"
-            ) as postgres
-        ):
-            os.environ["DB_NAME"] = postgres.dbname
-            os.environ["DB_USERNAME"] = postgres.username
-            os.environ["DB_PASSWORD"] = postgres.password
-            os.environ["DB_PORT"] = str(postgres.get_exposed_port(5432))
-            os.environ["DB_HOST"] = postgres.get_container_host_ip()
-
-            async with app.router.lifespan_context(app):
-                async with AsyncClient(
-                    transport=ASGITransport(app=app), base_url="http://test"
-                ) as async_client:
-                    yield async_client
-
     @pytest.mark.end_to_end
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         creds: dict[str, str],
         update_user_payload: dict[str, str],
         location_payload: dict[str, str],
@@ -58,14 +25,13 @@ class TestEndToEnd:
         mock_send_email: MagicMock,
     ) -> None:
         # register user
-        creds = {"email": "test@test.net", "password": "password"}
-        response = await async_client.post("/v1/register", json=creds)
+        response = await test_client.post("/v1/user/register", json=creds)
         assert response.status_code == 201
 
         # confirm user
         user_id = response.json()["id"]
         confirmation_token = create_confirmation_token(user_id)
-        response = await async_client.get(f"/v1/confirm/{confirmation_token}")
+        response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
         assert response.status_code == 200
 
         # login / get access token
@@ -73,8 +39,8 @@ class TestEndToEnd:
             "username": creds["email"],
             "password": creds["password"],  # plain password
         }
-        response = await async_client.post(
-            "/v1/token",
+        response = await test_client.post(
+            "/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -83,7 +49,7 @@ class TestEndToEnd:
         access_token = response.json()["access_token"]
 
         # update user
-        response = await async_client.put(
+        response = await test_client.put(
             "/v1/user",
             json=update_user_payload,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -91,7 +57,7 @@ class TestEndToEnd:
         assert response.status_code == 200
 
         # create location
-        response = await async_client.post(
+        response = await test_client.post(
             "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -102,7 +68,7 @@ class TestEndToEnd:
         location_id = new_location["id"]
 
         # update location
-        response = await async_client.put(
+        response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -110,14 +76,14 @@ class TestEndToEnd:
         assert response.status_code == 200
 
         # delete created location
-        response = await async_client.delete(
+        response = await test_client.delete(
             f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
         # delete registered user
-        response = await async_client.delete(
+        response = await test_client.delete(
             "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200

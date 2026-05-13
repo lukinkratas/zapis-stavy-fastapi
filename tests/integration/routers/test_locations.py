@@ -5,63 +5,54 @@ import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.models.locations import locations_table
-from api.schemas.locations import LocationResponse
-
-
-class TestCreateAndDelete:
-    """Integration tests for create and delete location endpoints."""
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_create_and_delete_location(
-        self,
-        async_client: AsyncClient,
-        location_payload: dict[str, str],
-        confirmed_user_id: str,
-        access_token: str,
-        db_conn: AsyncConnection,
-    ) -> None:
-        """Testing expected case."""
-        # create location
-        response = await async_client.post(
-            "/v1/location",
-            json=location_payload,
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        assert response.status_code == 201
-
-        new_location = response.json()
-        new_location_id = new_location["id"]
-        assert LocationResponse.model_validate(new_location)
-        assert new_location["name"] == location_payload["name"]
-        location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
-        assert location_from_db is not None, "Location does not exist in db."
-
-        # delete created location
-        response = await async_client.delete(
-            f"/v1/location/{new_location_id}",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        assert response.status_code == 200
-        location_from_db = await locations_table.select_by_id(db_conn, new_location_id)
-        assert location_from_db is None, "Location still exists in db."
+from api.schemas import BaseResponse, ResponseWithId
+from api.services.locations import (
+    create_location,
+    delete_location,
+    select_location_by_id,
+)
 
 
 class TestCreate:
     """Integration tests for create location endpoints."""
 
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
+    async def test_create_location(
+        self,
+        test_client: AsyncClient,
+        location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        access_token: str,
+        db_conn: AsyncConnection,
+    ) -> None:
+        """Testing expected case."""
+        response = await test_client.post(
+            "/v1/location", 
+            json=location_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 201
+        assert ResponseWithId.model_validate(response.json())
+
+        location_id = response.json()["id"]
+        location_from_db = await select_location_by_id(db_conn, location_id)
+        assert location_from_db is not None, "Location does not exist in db."
+
+        # clean-up
+        await delete_location(db_conn, location_id, confirmed_user["id"])
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
     async def test_create_already_created_location(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         created_location: dict[str, Any],
         location_payload: dict[str, str],
-        confirmed_user_id: str,
+        confirmed_user: dict[str, Any],
         access_token: str,
     ) -> None:
-        response = await async_client.post(
+        response = await test_client.post(
             "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -69,200 +60,220 @@ class TestCreate:
         assert response.status_code == 409
 
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_create_location_by_registered_user(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         location_payload: dict[str, str],
-        registered_user_id: str,
+        registered_user: dict[str, Any],
         access_token: str,
     ) -> None:
-        response = await async_client.post(
+        response = await test_client.post(
             "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 401
 
-    # async def test_create_location_with_other_user_access_token( makes no sense
-    # it is testing the same as was already tests in test_create_and_delete_location
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_create_location_with_not_registered_user_access_token(
-        self,
-        async_client: AsyncClient,
-        location_payload: dict[str, str],
-        not_registered_user_access_token: str,
-    ) -> None:
-        """Testing access token with different encoded sub, that is not registered."""
-        response = await async_client.post(
-            "/v1/location",
-            json=location_payload,
-            headers={"Authorization": f"Bearer {not_registered_user_access_token}"},
-        )
-        assert response.status_code == 401
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_create_location_with_expired_access_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         location_payload: dict[str, str],
-        confirmed_user_id: str,
+        confirmed_user: dict[str, Any],
         expired_access_token: str,
+        db_conn: AsyncConnection,
     ) -> None:
         """Testing access token with different encoded exp."""
-        response = await async_client.post(
-            "/v1/location",
+        response = await test_client.post(
+            "/v1/location", 
             json=location_payload,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
 
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
+    async def test_create_location_with_random_user_access_token(
+        self,
+        test_client: AsyncClient,
+        location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        random_user_access_token: str,
+        db_conn: AsyncConnection,
+    ) -> None:
+        """Testing access token with random access token."""
+        response = await test_client.post(
+            "/v1/location", 
+            json=location_payload,
+            headers={"Authorization": f"Bearer {random_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
     async def test_create_location_with_confirmation_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         location_payload: dict[str, str],
-        confirmed_user_id: str,
+        confirmed_user: dict[str, Any],
         confirmation_token: str,
+        db_conn: AsyncConnection,
     ) -> None:
         """Testing access token with different encoded typ."""
-        response = await async_client.post(
-            "/v1/location",
+        response = await test_client.post(
+            "/v1/location", 
             json=location_payload,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
-
 
 class TestDelete:
     """Integration tests for delete location endpoints."""
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_delete_non_existing_location(
+    @pytest.mark.asyncio
+    async def test_delete_location(
         self,
-        async_client: AsyncClient,
-        confirmed_user_id: str,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
+        created_location: dict[str, Any],
         access_token: str,
+        db_conn: AsyncConnection,
     ) -> None:
-        location_id = uuid.uuid4()
-        response = await async_client.delete(
+        """Testing expected case."""
+        location_id = created_location["id"]
+        response = await test_client.delete(
             f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
+        assert BaseResponse.model_validate(response.json())
 
-    # async def test_delete_location_by_registered_user() makes no sense
-    # (In order to delete a location, one has to be created first [by confirmed user])
+        location_from_db = await select_location_by_id(db_conn, location_id)
+        assert location_from_db is None, "Location still exists in db."
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_delete_location_with_other_user_access_token(
+    @pytest.mark.asyncio
+    async def test_delete_non_existing_location(
         self,
-        async_client: AsyncClient,
-        created_location: dict[str, Any],
-        other_user_access_token: str,
-        db_conn: AsyncConnection,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
+        access_token: str,
     ) -> None:
-        """Testing access token with different encoded sub."""
-        location_id = created_location["id"]
-        response = await async_client.delete(
+        location_id = uuid.uuid4()
+        response = await test_client.delete(
             f"/v1/location/{location_id}",
-            headers={"Authorization": f"Bearer {other_user_access_token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
         )
-        assert response.status_code == 200
-        location_from_db = await locations_table.select_by_id(db_conn, location_id)
-        assert location_from_db is not None, "Location was deleted by other user."
+        assert response.status_code == 404
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_delete_location_with_not_registered_user_access_token(
-        self,
-        async_client: AsyncClient,
-        created_location: dict[str, Any],
-        not_registered_user_access_token: str,
-    ) -> None:
-        """Testing access token with different encoded sub, that is not registered."""
-        location_id = created_location["id"]
-        response = await async_client.delete(
-            f"/v1/location/{location_id}",
-            headers={"Authorization": f"Bearer {not_registered_user_access_token}"},
-        )
-        assert response.status_code == 401
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_delete_location_with_expired_access_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
         created_location: dict[str, Any],
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
         location_id = created_location["id"]
-        response = await async_client.delete(
+        response = await test_client.delete(
             f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
 
+
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
+    async def test_delete_location_with_other_user_access_token(
+        self,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
+        created_location: dict[str, Any],
+        other_user_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded sub."""
+        location_id = created_location["id"]
+        response = await test_client.delete(
+            f"/v1/location/{location_id}",
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 404
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_delete_location_with_random_user_access_token(
+        self,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
+        created_location: dict[str, Any],
+        random_user_access_token: str,
+    ) -> None:
+        """Testing access token with random access token."""
+        location_id = created_location["id"]
+        response = await test_client.delete(
+            f"/v1/location/{location_id}",
+            headers={"Authorization": f"Bearer {random_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
     async def test_delete_location_with_confirmation_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
+        confirmed_user: dict[str, Any],
         created_location: dict[str, Any],
         confirmation_token: str,
     ) -> None:
-        """Testing access token with different encoded typ."""
+        """Testing access token with random access token."""
         location_id = created_location["id"]
-        response = await async_client.delete(
+        response = await test_client.delete(
             f"/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
 
-
 class TestUpdate:
     """Integration tests for update location endpoint."""
 
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_update_location(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         created_location: dict[str, Any],
         update_location_payload: dict[str, str],
-        confirmed_user_id: str,
+        confirmed_user: dict[str, Any],
         access_token: str,
     ) -> None:
         """Testing expected case."""
         location_id = created_location["id"]
-        response = await async_client.put(
+        response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
-
-        updated_location = response.json()
-        assert LocationResponse.model_validate(updated_location)
+        assert BaseResponse.model_validate(response.json())
 
     @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_update_non_existing_location(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         update_location_payload: dict[str, str],
-        confirmed_user_id: str,
+        confirmed_user: dict[str, Any],
         access_token: str,
     ) -> None:
         location_id = str(uuid.uuid4())
-        response = await async_client.put(
+        response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -272,54 +283,20 @@ class TestUpdate:
     # async def test_update_location_by_registered_user() makes no sense
     # (In order to update a location, one has to be created first [by confirmed user])
 
-    @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_update_location_with_other_user_access_token(
-        self,
-        async_client: AsyncClient,
-        created_location: dict[str, Any],
-        update_location_payload: dict[str, str],
-        other_user_access_token: str,
-    ) -> None:
-        """Testing access token with different encoded sub."""
-        location_id = created_location["id"]
-        response = await async_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
-            headers={"Authorization": f"Bearer {other_user_access_token}"},
-        )
-        assert response.status_code == 404, "Location updated by other user."
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_update_location_with_not_registered_user_access_token(
-        self,
-        async_client: AsyncClient,
-        created_location: dict[str, Any],
-        update_location_payload: dict[str, str],
-        not_registered_user_access_token: str,
-    ) -> None:
-        """Testing access token with different encoded sub, that is not registered."""
-        location_id = created_location["id"]
-        response = await async_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
-            headers={"Authorization": f"Bearer {not_registered_user_access_token}"},
-        )
-        assert response.status_code == 401
-
-    @pytest.mark.integration
-    @pytest.mark.anyio
+    @pytest.mark.asyncio
     async def test_update_location_with_expired_access_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         created_location: dict[str, Any],
         update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
         location_id = created_location["id"]
-        response = await async_client.put(
+        response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {expired_access_token}"},
@@ -327,17 +304,57 @@ class TestUpdate:
         assert response.status_code == 401
 
     @pytest.mark.integration
-    @pytest.mark.anyio
-    async def test_update_location_with_confirmation_token(
+    @pytest.mark.asyncio
+    async def test_update_location_with_other_user_access_token(
         self,
-        async_client: AsyncClient,
+        test_client: AsyncClient,
         created_location: dict[str, Any],
         update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        other_user_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded sub."""
+        location_id = created_location["id"]
+        response = await test_client.put(
+            f"/v1/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 404
+
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_update_location_with_random_user_access_token(
+        self,
+        test_client: AsyncClient,
+        created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
+        random_user_access_token: str,
+    ) -> None:
+        """Testing access token with random access token."""
+        location_id = created_location["id"]
+        response = await test_client.put(
+            f"/v1/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {random_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_update_location_with_confirmation_token(
+        self,
+        test_client: AsyncClient,
+        created_location: dict[str, Any],
+        update_location_payload: dict[str, str],
+        confirmed_user: dict[str, Any],
         confirmation_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
         location_id = created_location["id"]
-        response = await async_client.put(
+        response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
             headers={"Authorization": f"Bearer {confirmation_token}"},

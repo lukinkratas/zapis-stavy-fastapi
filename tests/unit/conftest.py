@@ -4,6 +4,7 @@ from typing import Any, AsyncGenerator
 from unittest.mock import AsyncMock
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
 from pytest_mock import MockerFixture
@@ -11,16 +12,11 @@ from pytest_mock import MockerFixture
 from api.db import connect_to_db
 from api.main import app
 from api.models.users import UsersTable
-from api.routers.auth import get_password_hash
+from api.security import get_password_hash
 
 
-@pytest.fixture(scope="session")
-def anyio_backend() -> str:
-    return "asyncio"
-
-
-@pytest.fixture(scope="session")
-async def async_client() -> AsyncGenerator[AsyncClient, None]:
+@pytest_asyncio.fixture(scope="session")
+async def test_client() -> AsyncGenerator[AsyncClient, None]:
     # Create a mock connection
     mock_conn = AsyncMock(spec=AsyncConnection)
 
@@ -36,21 +32,21 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
     async with app.router.lifespan_context(app):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
-        ) as async_client:
-            yield async_client
+        ) as client:
+            yield client
 
     # Clean up
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def registered_user_json(
+def registered_user_from_db(
     mocker: MockerFixture, creds: dict[str, str]
 ) -> dict[str, Any]:
     return {
         "email": creds["email"],
-        "password": get_password_hash(creds["password"]),
-        "id": str(uuid.uuid4()),
+        "password_hash": get_password_hash(creds["password"]),
+        "id": uuid.uuid4(),
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "confirmed": False,
     }
@@ -58,13 +54,15 @@ def registered_user_json(
 
 @pytest.fixture
 def registered_user(
-    mocker: MockerFixture, registered_user_json: dict[str, Any]
+    mocker: MockerFixture, registered_user_from_db: dict[str, Any]
 ) -> dict[str, Any]:
-    mocker.patch.object(UsersTable, "select_by_id", return_value=registered_user_json)
     mocker.patch.object(
-        UsersTable, "select_by_email", return_value=registered_user_json
+        UsersTable, "select_by_id", return_value=registered_user_from_db
     )
-    return registered_user_json
+    mocker.patch.object(
+        UsersTable, "select_by_email", return_value=registered_user_from_db
+    )
+    return registered_user_from_db
 
 
 @pytest.fixture
@@ -76,3 +74,12 @@ def confirmed_user(
     mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_json)
     mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_json)
     return confirmed_user_json
+
+
+@pytest.fixture
+def location_from_db(location_payload: dict[str, str]) -> dict[str, Any]:
+    return location_payload | {
+        "id": uuid.uuid4(),
+        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        "user_id": uuid.uuid4(),
+    }

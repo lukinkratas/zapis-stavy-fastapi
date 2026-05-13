@@ -1,10 +1,14 @@
-from typing import Any
+from typing import Any, AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
+from httpx import ASGITransport, AsyncClient
+from psycopg import AsyncConnection
 
-from api.routers.auth import create_access_token, create_confirmation_token
+from api.auth import create_access_token, create_confirmation_token
+from api.main import app
+
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
@@ -16,6 +20,59 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
         },
     )
 
+
+import os
+from pathlib import Path
+
+import pytest_asyncio
+from testcontainers.postgres import PostgresContainer
+from psycopg.conninfo import make_conninfo
+from testcontainers.postgres import PostgresContainer
+
+ROOT = Path(__file__).parent.parent.resolve()
+
+
+@pytest_asyncio.fixture(scope="session")
+def test_db():
+    with (
+        PostgresContainer("postgres:14")
+        .with_volume_mapping(
+            str(ROOT / "scripts" / "init-db.sh"),
+            "/docker-entrypoint-initdb.d/init-db.sh",
+        )
+        .with_volume_mapping(
+            str(ROOT / "sql"), "/docker-entrypoint-initdb.d/sql/"
+        ) as postgres
+    ):
+        os.environ["DB_NAME"] = postgres.dbname
+        os.environ["DB_USERNAME"] = postgres.username
+        os.environ["DB_PASSWORD"] = postgres.password
+        os.environ["DB_PORT"] = str(postgres.get_exposed_port(5432))
+        os.environ["DB_HOST"] = postgres.get_container_host_ip()
+        yield postgres
+
+@pytest_asyncio.fixture(scope="session")
+async def test_client(test_db: PostgresContainer) -> AsyncGenerator[AsyncClient, None]:
+    app.state.limiter.enabled = False
+
+    async with app.router.lifespan_context(app):
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            yield client
+
+@pytest_asyncio.fixture
+async def db_conn(test_db: PostgresContainer) -> AsyncGenerator[AsyncConnection, None]:
+    """Create connection."""
+    conninfo = make_conninfo(
+        dbname=test_db.dbname,
+        user=test_db.username,
+        password=test_db.password,
+        host=test_db.get_container_host_ip(),
+        port=test_db.get_exposed_port(5432),
+    )
+    async with await AsyncConnection.connect(conninfo) as conn:
+        yield conn
 
 @pytest.fixture
 def creds() -> dict[str, str]:
@@ -51,10 +108,10 @@ def update_location_payload() -> dict[str, str]:
 
 
 @pytest.fixture
-async def access_token(registered_user_id: str) -> str:
-    return create_access_token(registered_user_id)
+def access_token(registered_user: dict[str, Any]) -> str:
+    return create_access_token(registered_user["id"])
 
 
 @pytest.fixture
-async def confirmation_token(registered_user_id) -> str:
-    return create_confirmation_token(registered_user_id)
+def confirmation_token(registered_user: dict[str, Any]) -> str:
+    return create_confirmation_token(registered_user["id"])
