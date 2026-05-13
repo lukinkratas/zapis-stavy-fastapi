@@ -1,13 +1,44 @@
+import logging
 import uuid
-from psycopg import AsyncConnection
-from ..models.users import locations_table
 from typing import Any
 
-async def create_location(conn: AsyncConnection, user_id: str | uuid.UUID, data: dict[str, Any]):
-    return await locations_table.insert(conn, user_id, data)
+from psycopg import AsyncConnection
 
-async def update_location(conn: AsyncConnection, location_id: str | uuid.UUID, user_id: str | uuid.UUID, data: dict[str, Any]):
-    await locations_table.update(conn, location_id, user_id, data)
+from ..models.locations import locations_table
+from ..utils import log_async_func
 
-async def delete_location(conn: AsyncConnection, location_id: str | uuid.UUID, user_id: str | uuid.UUID):
-    await locations_table.delete(conn, location_id, user_id)
+logger = logging.getLogger(__name__)
+
+
+@log_async_func(logger.debug)
+async def select_location_by_id(
+    db_conn: AsyncConnection, location_id: uuid.UUID
+) -> dict[str, Any] | None:
+    return await locations_table.select_by_id(db_conn, location_id)
+
+
+@log_async_func(logger.debug)
+async def create_location(
+    db_conn: AsyncConnection, user_id: uuid.UUID, name: str
+) -> dict[str, Any]:
+    async with db_conn.transaction():
+        return await locations_table.insert(db_conn, user_id, name)
+
+
+@log_async_func(logger.debug)
+async def update_location(
+    db_conn: AsyncConnection,
+    location_id: uuid.UUID,
+    user_id: uuid.UUID,
+    data: dict[str, Any],
+) -> dict[str, Any]:
+    async with db_conn.transaction():
+        return await locations_table.update(db_conn, location_id, user_id, data)
+
+
+@log_async_func(logger.debug)
+async def delete_location(
+    db_conn: AsyncConnection, location_id: uuid.UUID, user_id: uuid.UUID
+) -> dict[str, Any]:
+    async with db_conn.transaction():
+        return await locations_table.delete(db_conn, location_id, user_id)

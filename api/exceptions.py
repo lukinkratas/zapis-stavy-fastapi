@@ -16,6 +16,10 @@ user_exists_exception = HTTPException(status_code=409, detail="User already exis
 
 user_not_found_exception = HTTPException(status_code=404, detail="User not found")
 
-location_exists_exception = HTTPException(status_code=409, detail="Location already exists")
+location_exists_exception = HTTPException(
+    status_code=409, detail="Location already exists"
+)
 
-location_not_found_exception = HTTPException(status_code=404, detail="Location not found")
+location_not_found_exception = HTTPException(
+    status_code=404, detail="Location not found"
+)

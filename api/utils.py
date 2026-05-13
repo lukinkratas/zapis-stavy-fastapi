@@ -5,21 +5,26 @@ from typing import Any, Iterable
 from psycopg import sql
 
 
-def format_sql_query(sql_query: sql.Composed | sql.SQL) -> str:
+def format_sql_query(sql_query: sql.SQL) -> str:
     """Format SQL for logs."""
     sql_query_str = sql.as_string(sql_query)
     sql_query_lines = sql_query_str.split("\n")
     return " ".join([query_line.strip() for query_line in sql_query_lines])
 
 
-def build_set_clause(columns: Iterable[str]) -> sql.Composed:
+def build_set_clause(columns: Iterable[str]) -> sql.SQL:
     """Build comma delimited SET clause: col = %(col)s from columns for UPDATE query.
 
     Args:
         columns: iterable of column names
 
     Returns: SET clause as SQL query object
+
+    Raises: ValueError, if columns iterable is empty
     """
+    if not columns:
+        raise ValueError("At least one column required")
+
     return sql.SQL(", ").join(
         sql.SQL("{columns} = {value_placeholder}").format(
             columns=sql.Identifier(col),
@@ -29,9 +34,7 @@ def build_set_clause(columns: Iterable[str]) -> sql.Composed:
     )
 
 
-def get_func_name_and_args(
-    func: Callable[..., Any], args: tuple[Any, ...]
-) -> tuple[str, tuple[Any, ...]]:
+def _get_func_name(func: Callable[..., Any], args: tuple[Any, ...]) -> str:
     """Helper function for function name logging.
 
     Args:
@@ -42,10 +45,9 @@ def get_func_name_and_args(
     """
     # check if first argument is class instance (self)
     if args and hasattr(args[0], func.__name__):
-        func_name = f"{args[0].__class__.__name__}.{func.__name__}"
-        return func_name, args[1:]
+        return f"{args[0].__class__.__name__}.{func.__name__}"
 
-    return func.__name__, args
+    return func.__name__
 
 
 def log_async_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
@@ -56,11 +58,11 @@ def log_async_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
 
         @wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            func_name, args_copy = get_func_name_and_args(func, args)
+            func_name = _get_func_name(func, args)
 
-            log_func(f"{func_name} was called with args={args_copy}, {kwargs=}.")
+            log_func(f"{func_name}() was called.")
             result = await func(*args, **kwargs)
-            log_func(f"{func_name} finished successfully with {result=}.")
+            log_func(f"{func_name}() finished.")
 
             return result
 
@@ -77,11 +79,11 @@ def log_func(log_func: Callable[..., Any] = print) -> Callable[..., Any]:
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            func_name, args_copy = get_func_name_and_args(func, args)
+            func_name = _get_func_name(func, args)
 
-            log_func(f"{func_name} was called with args={args_copy}, {kwargs=}.")
+            log_func(f"{func_name}() was called.")
             result = func(*args, **kwargs)
-            log_func(f"{func_name} finished successfully with {result=}.")
+            log_func(f"{func_name}() finished")
 
             return result
 
