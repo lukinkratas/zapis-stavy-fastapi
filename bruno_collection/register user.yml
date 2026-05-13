@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "email": "lukin.kratas@seznam.cz",
-        "password": "password"
+        "email": "{{process.env.ZAPIS_STAVY_EMAIL}}",
+        "password": "{{process.env.ZAPIS_STAVY_PASSWORD}}"
       }
   auth: inherit
 

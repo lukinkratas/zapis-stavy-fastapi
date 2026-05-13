@@ -34,12 +34,7 @@
 - [x] tests async backend asyncio instd of anyio
 - [x] app state connection pool?
 - [x] common.sql not needed?
-
-- [ ] bruno collection
-  - [x] script to set confirmation token url
-  - [x] script to set access token
-  - [x] set location id
-  - [ ] creds redacted
+- [x] bruno collection
 
 - [ ] logging lvl debug in all other places? + debug only used in dev?
 - [ ] unit: pydantic models assertions in place
