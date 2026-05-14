@@ -46,6 +46,7 @@ async def test_get_current_user(
     """Testing expected case."""
     await get_current_user(db_conn, access_token)
 
+
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_get_current_user_with_expired_access_token(
@@ -56,6 +57,7 @@ async def test_get_current_user_with_expired_access_token(
     """Testing access token with different encoded exp."""
     with pytest.raises(HTTPException):
         await get_current_user(db_conn, expired_access_token)
+
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -68,6 +70,7 @@ async def test_get_current_user_with_random_user_access_token(
     with pytest.raises(HTTPException):
         await get_current_user(db_conn, random_user_access_token)
 
+
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_get_current_user_with_confirmation_token(
@@ -78,6 +81,7 @@ async def test_get_current_user_with_confirmation_token(
     """Testing access token with different encoded typ."""
     with pytest.raises(HTTPException):
         await get_current_user(db_conn, confirmation_token)
+
 
 @pytest.mark.integration
 @pytest.mark.asyncio

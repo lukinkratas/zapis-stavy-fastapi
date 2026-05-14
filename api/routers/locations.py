@@ -1,3 +1,8 @@
+"""
+Routers layer for handling location lifecycle - register, update and delete.
+Pydantic validation is handled in this module.
+Database connection is passed to downstream user service.
+"""
 import logging
 import uuid
 from typing import Annotated, Any
@@ -29,16 +34,17 @@ async def create(
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
 ) -> dict[str, Any] | None:
-    """Add new location into the database.
+    """Create new location.
 
     Args:
         location: location create request payload from client
+        db_conn: database connection
         current_confirmed_user: current authorized and confirmed user
 
-    Returns: location dict
+    Returns: response with detail and location_id
 
     Raises:
-        HTTPException: if location cannot be inserted in the database
+        HTTPException: if location already exists
     """
     try:
         location = await create_location(
@@ -63,17 +69,18 @@ async def update(
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
 ) -> dict[str, Any]:
-    """Update a location in the database.
+    """Update a location.
 
     Args:
         id: uuid of location
         location: location update request payload from client
+        db_conn: database connection
         current_confirmed_user: current authorized and confirmed user
 
-    Returns: location dict
+    Returns: response with detail
 
     Raises:
-        HTTPException: if location cannot be updated in the database
+        HTTPException: if location was not found or name already exists.
     """
     try:
         location = await update_location(
@@ -100,16 +107,17 @@ async def delete(
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
 ) -> None:
-    """Delete a location from the database.
+    """Delete a location.
 
     Args:
         id: uuid of location
+        db_conn: database connection
         current_confirmed_user: current authorized and confirmed user
 
-    Returns: None
+    Returns: response with detail
 
     Raises:
-        HTTPException: if location cannot be deleted from the database
+        HTTPException: if location was not found
     """
     location = await delete_location(db_conn, id, current_confirmed_user["id"])
 

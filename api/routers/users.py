@@ -1,3 +1,8 @@
+"""
+Routers layer for handling users lifecycle - register, update and delete.
+Pydantic validation is handled in this module.
+Database connection is passed to downstream user service.
+"""
 import logging
 import os
 from typing import Annotated, Any
@@ -57,14 +62,19 @@ async def register(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     background_tasks: BackgroundTasks,
 ) -> dict[str, str]:
-    """Add new user into the database.
+    """Register new user.
 
     Args:
         request: FastAPI request object (used for accessing headers, client info, etc.).
         user: user create request payload from client
+        db_conn: database connection
         background_tasks: FastAPI's background que for tasks
 
     Returns: response with detail and user_id
+
+    Raises:
+        HTTPException: if user already exists
+
     """
     try:
         user = await register_user(db_conn, **creds.model_dump())
@@ -95,13 +105,17 @@ async def update(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> dict[str, str]:
-    """Update a meter in the database.
+    """Update a user.
 
     Args:
         user: user update request payload from client
+        db_conn: database connection
         current_user: current authorized user
 
     Returns: response with detail
+    Raises:
+        HTTPException: if user was not found or email already exists.
+
     """
     try:
         user = await update_user(
@@ -122,12 +136,17 @@ async def delete(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> dict[str, str]:
-    """Delete a user from the database.
+    """Delete a user.
 
     Args:
+        db_conn: database connection
         current_user: current authorized user
 
     Returns: response with detail
+        
+    Raises:
+        HTTPException: if user was not found
+
     """
     user = await delete_user(db_conn, current_user["id"])
 

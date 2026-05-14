@@ -1,13 +1,9 @@
-from typing import AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
-import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from testcontainers.postgres import PostgresContainer
+from httpx import AsyncClient
 
 from api.auth import create_confirmation_token
-from api.main import app
 
 
 class TestEndToEnd:

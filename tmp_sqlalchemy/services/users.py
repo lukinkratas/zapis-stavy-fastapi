@@ -1,8 +1,7 @@
 import uuid
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models import User
 from ..security import get_password_hash

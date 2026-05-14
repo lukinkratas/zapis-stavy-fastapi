@@ -128,7 +128,6 @@ class TestConfirm:
         user = await users_table.select_by_id(db_conn, confirmed_user["id"])
         assert user["confirmed"] is True, "User not confirmed."
 
-
     @pytest.mark.asyncio
     async def test_confirm_user_with_expired_confirmation_token(
         self,
@@ -137,7 +136,9 @@ class TestConfirm:
         expired_confirmation_token: str,
     ) -> None:
         """Testing confirmation token with different encoded exp."""
-        response = await test_client.get(f"/v1/auth/confirm/{expired_confirmation_token}")
+        response = await test_client.get(
+            f"/v1/auth/confirm/{expired_confirmation_token}"
+        )
         assert response.status_code == 401
 
     @pytest.mark.asyncio

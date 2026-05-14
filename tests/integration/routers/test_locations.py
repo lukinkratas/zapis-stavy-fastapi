@@ -7,7 +7,6 @@ from psycopg import AsyncConnection
 
 from api.schemas import BaseResponse, ResponseWithId
 from api.services.locations import (
-    create_location,
     delete_location,
     select_location_by_id,
 )
@@ -28,7 +27,7 @@ class TestCreate:
     ) -> None:
         """Testing expected case."""
         response = await test_client.post(
-            "/v1/location", 
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -75,7 +74,6 @@ class TestCreate:
         )
         assert response.status_code == 401
 
-
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_create_location_with_expired_access_token(
@@ -88,7 +86,7 @@ class TestCreate:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.post(
-            "/v1/location", 
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -106,7 +104,7 @@ class TestCreate:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.post(
-            "/v1/location", 
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
@@ -124,11 +122,12 @@ class TestCreate:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.post(
-            "/v1/location", 
+            "/v1/location",
             json=location_payload,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
+
 
 class TestDelete:
     """Integration tests for delete location endpoints."""
@@ -187,7 +186,6 @@ class TestDelete:
         )
         assert response.status_code == 401
 
-
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_delete_location_with_other_user_access_token(
@@ -222,7 +220,6 @@ class TestDelete:
         )
         assert response.status_code == 401
 
-
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_delete_location_with_confirmation_token(
@@ -239,6 +236,7 @@ class TestDelete:
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
+
 
 class TestUpdate:
     """Integration tests for update location endpoint."""
@@ -283,7 +281,6 @@ class TestUpdate:
     # async def test_update_location_by_registered_user() makes no sense
     # (In order to update a location, one has to be created first [by confirmed user])
 
-
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_update_location_with_expired_access_token(
@@ -321,7 +318,6 @@ class TestUpdate:
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 404
-
 
     @pytest.mark.integration
     @pytest.mark.asyncio

@@ -11,6 +11,7 @@ from api.auth import create_access_token, create_confirmation_token
 from api.services.locations import create_location, delete_location
 from api.services.users import confirm_user, delete_user, register_user
 
+
 @pytest_asyncio.fixture
 async def registered_user(
     db_conn: AsyncConnection, creds: dict[str, str], mock_send_email: MagicMock
@@ -24,8 +25,7 @@ async def registered_user(
 async def confirmed_user(
     db_conn: AsyncConnection, registered_user: dict[str, Any]
 ) -> str:
-    user = await confirm_user(db_conn, registered_user["id"])
-    return user
+    return await confirm_user(db_conn, registered_user["id"])
 
 
 @pytest_asyncio.fixture

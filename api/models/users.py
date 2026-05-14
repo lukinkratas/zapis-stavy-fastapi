@@ -1,3 +1,6 @@
+"""
+Databse models layer for handling users lifecycle - insert, update and delete.
+"""
 import logging
 import uuid
 from typing import Any
@@ -11,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class UsersTable:
-    """Users database model."""
+    """User database model."""
 
     def __init__(self) -> None:
         self.table_name = "users"
@@ -20,7 +23,15 @@ class UsersTable:
     async def insert(
         self, db_conn: AsyncConnection, email: str, password_hash: str
     ) -> dict[str, Any] | None:
-        """Insert new record into db."""
+        """Insert new user record into db.
+        
+        Args:
+            db_conn: database connection
+            email: email of the user being inserted
+            password_hash: hashed password of the user being registered
+
+        Returns: user dict
+        """
         query = sql.SQL("""
             INSERT INTO {table} (email, password_hash)
             VALUES (%(email)s, %(password_hash)s)
@@ -34,7 +45,14 @@ class UsersTable:
 
     @log_async_func(logger.debug)
     async def delete(self, db_conn: AsyncConnection, user_id: uuid.UUID) -> None:
-        """Delete user record from db."""
+        """Delete user record from db.
+        
+        Args:
+            db_conn: database connection
+            user_id: user id to be deleted
+
+        Returns: user dict
+        """
         query = sql.SQL("""
             DELETE FROM {table}
             WHERE id = %(user_id)s
@@ -50,7 +68,15 @@ class UsersTable:
     async def update(
         self, db_conn: AsyncConnection, user_id: uuid.UUID, data: dict[str, Any]
     ) -> dict[str, Any] | None:
-        """Update user record in db."""
+        """Update user record in db.
+        
+        Args:
+            db_conn: database connection
+            user_id: user id to be updated
+            data: field-value pairs to be updated
+
+        Returns: user dict
+        """
         query = sql.SQL("""
             UPDATE {table}
             SET {set_clause}
@@ -58,7 +84,7 @@ class UsersTable:
             RETURNING *;
         """).format(
             table=sql.Identifier(self.table_name),
-            set_clause=build_set_clause(data.keys()),
+            set_clause=build_set_clause(data),
         )
         logger.debug(f"SQL query: {format_sql_query(query)}")
 
@@ -70,7 +96,14 @@ class UsersTable:
     async def select_by_id(
         self, db_conn: AsyncConnection, user_id: uuid.UUID
     ) -> dict[str, Any] | None:
-        """Select user record by email from db."""
+        """Select user record from db filtered by id.
+
+        Args:
+            db_conn: database connection
+            user_id: user id to be selected
+
+        Returns: user dict
+        """
         query = sql.SQL("""
             SELECT * FROM {table}
             WHERE id = %(user_id)s;
@@ -85,7 +118,14 @@ class UsersTable:
     async def select_by_email(
         self, db_conn: AsyncConnection, email: str
     ) -> dict[str, Any] | None:
-        """Select user record by email from db."""
+        """Select user record from db filtered by email.
+
+        Args:
+            db_conn: database connection
+            email: email of the user being selected
+
+        Returns: user dict
+        """
         query = sql.SQL("""
             SELECT * FROM {table}
             WHERE email = %(email)s;

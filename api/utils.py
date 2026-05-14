@@ -12,17 +12,17 @@ def format_sql_query(sql_query: sql.SQL) -> str:
     return " ".join([query_line.strip() for query_line in sql_query_lines])
 
 
-def build_set_clause(columns: Iterable[str]) -> sql.SQL:
+def build_set_clause(data: dict[str, Any]) -> sql.SQL:
     """Build comma delimited SET clause: col = %(col)s from columns for UPDATE query.
 
     Args:
-        columns: iterable of column names
+        data: dict of column name: value pairs for the update SET clause
 
     Returns: SET clause as SQL query object
 
-    Raises: ValueError, if columns iterable is empty
+    Raises: ValueError, if data iterable is empty
     """
-    if not columns:
+    if not data:
         raise ValueError("At least one column required")
 
     return sql.SQL(", ").join(
@@ -30,7 +30,8 @@ def build_set_clause(columns: Iterable[str]) -> sql.SQL:
             columns=sql.Identifier(col),
             value_placeholder=sql.Placeholder(col),
         )
-        for col in columns
+        for col, val in data.items()
+        if val is not None
     )
 
 

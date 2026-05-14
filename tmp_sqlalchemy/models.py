@@ -1,11 +1,10 @@
 import uuid
 from datetime import datetime
 
+from sqlalchemy import Boolean, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
-
-from sqlalchemy import Boolean, ForeignKey, String, Text, UniqueConstraint
 
 from .db import Base
 

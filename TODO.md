@@ -35,13 +35,16 @@
 - [x] app state connection pool?
 - [x] common.sql not needed?
 - [x] bruno collection
+- [x] module docstrings
 
+- [ ] services docstrings
+- [ ] services create/regoster(email, password) x update(data) + same for location
 - [ ] logging lvl debug in all other places? + debug only used in dev?
 - [ ] unit: pydantic models assertions in place
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
-- [ ] dict_row factory -> User / Location factory? -> No, bcs of perf, but use dataclass or namedtuple ??
+- [ ] dict_row factory -> User / Location factory? -> No, bcs of perf, but use dataclass or namedtuple or typeddict??
 
 - [ ] namedtuple_row instead of dict_row? (check annotations) https://www.psycopg.org/psycopg3/docs/advanced/rows.html
 

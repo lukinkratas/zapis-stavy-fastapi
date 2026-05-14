@@ -2,13 +2,21 @@ from typing import Any, AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
-from pytest_mock import MockerFixture
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
+from pytest_mock import MockerFixture
 
 from api.auth import create_access_token, create_confirmation_token
 from api.main import app
 
+import os
+from pathlib import Path
+
+import pytest_asyncio
+from psycopg.conninfo import make_conninfo
+from testcontainers.postgres import PostgresContainer
+
+ROOT = Path(__file__).parent.parent.resolve()
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
@@ -19,17 +27,6 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
             "ResponseMetadata": {},
         },
     )
-
-
-import os
-from pathlib import Path
-
-import pytest_asyncio
-from testcontainers.postgres import PostgresContainer
-from psycopg.conninfo import make_conninfo
-from testcontainers.postgres import PostgresContainer
-
-ROOT = Path(__file__).parent.parent.resolve()
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -51,6 +48,7 @@ def test_db():
         os.environ["DB_HOST"] = postgres.get_container_host_ip()
         yield postgres
 
+
 @pytest_asyncio.fixture(scope="session")
 async def test_client(test_db: PostgresContainer) -> AsyncGenerator[AsyncClient, None]:
     app.state.limiter.enabled = False
@@ -60,6 +58,7 @@ async def test_client(test_db: PostgresContainer) -> AsyncGenerator[AsyncClient,
             transport=ASGITransport(app=app), base_url="http://test"
         ) as client:
             yield client
+
 
 @pytest_asyncio.fixture
 async def db_conn(test_db: PostgresContainer) -> AsyncGenerator[AsyncConnection, None]:
@@ -73,6 +72,7 @@ async def db_conn(test_db: PostgresContainer) -> AsyncGenerator[AsyncConnection,
     )
     async with await AsyncConnection.connect(conninfo) as conn:
         yield conn
+
 
 @pytest.fixture
 def creds() -> dict[str, str]:

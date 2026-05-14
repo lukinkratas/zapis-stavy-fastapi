@@ -1,3 +1,6 @@
+"""
+Databse models layer for handling location lifecycle - insert, update and delete.
+"""
 import logging
 import uuid
 from typing import Any
@@ -11,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocationsTable:
-    """General database model."""
+    """Location database model."""
 
     def __init__(self) -> None:
         self.table_name = "locations"
@@ -20,7 +23,15 @@ class LocationsTable:
     async def insert(
         self, db_conn: AsyncConnection, user_id: uuid.UUID, name: str
     ) -> dict[str, Any] | None:
-        """Insert new record into db."""
+        """Insert new location record into db.
+        
+        Args:
+            db_conn: database connection
+            user_id: location owner's user id
+            name: name of the location being inserted
+
+        Returns: location dict
+        """
         query = sql.SQL("""
             INSERT INTO {table} (user_id, name)
             VALUES (%(user_id)s, %(name)s)
@@ -36,7 +47,15 @@ class LocationsTable:
     async def delete(
         self, db_conn: AsyncConnection, location_id: uuid.UUID, user_id: uuid.UUID
     ) -> None:
-        """Delete record from db."""
+        """Delete location record from db.
+        
+        Args:
+            db_conn: database connection
+            location_id: location id to be deleted
+            user_id: location owner's user id
+
+        Returns: location dict
+        """
         query = sql.SQL("""
             DELETE FROM {table}
             WHERE id = %(location_id)s AND user_id = %(user_id)s
@@ -56,7 +75,16 @@ class LocationsTable:
         user_id: uuid.UUID,
         data: dict[str, Any],
     ) -> dict[str, Any] | None:
-        """Update record in db."""
+        """Update location record in db.
+        
+        Args:
+            db_conn: database connection
+            location_id: location id to be updated
+            user_id: user id to be updated
+            data: field-value pairs to be updated
+
+        Returns: location dict
+        """
         query = sql.SQL("""
             UPDATE {table}
             SET {set_clause}
@@ -80,7 +108,14 @@ class LocationsTable:
         db_conn: AsyncConnection,
         location_id: uuid.UUID,
     ) -> dict[str, Any] | None:
-        """Select user record by id from db."""
+        """Select location record by id from db.
+
+        Args:
+            db_conn: database connection
+            location_id: location id to be selected
+
+        Returns: location dict
+        """
         query = sql.SQL("""
             SELECT * FROM {table}
             WHERE id = %(location_id)s
