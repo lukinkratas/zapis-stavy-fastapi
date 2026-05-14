@@ -24,7 +24,7 @@ async def login(
 
     Args:
         form_data: form data with credentials from client
-        db_session: database db_sessionection
+        db_conn: database connection
 
     Returns: access token
 
@@ -44,7 +44,7 @@ async def confirm(
 
     Args:
         token: encoded JWT token
-        db_session: database db_sessionection
+        db_conn: database connection
 
     Returns: dict with detail message
     """
