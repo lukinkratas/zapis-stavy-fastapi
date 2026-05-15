@@ -96,17 +96,3 @@ async def delete_user(db_conn: AsyncConnection, user_id: uuid.UUID) -> UserRow |
     """
     async with db_conn.transaction():
         return await users_table.delete(db_conn, user_id)
-
-
-@log_async_func(logger.debug)
-async def confirm_user(db_conn: AsyncConnection, user_id: uuid.UUID) -> UserRow | None:
-    """Confirm a user in the database.
-
-    Args:
-        db_conn: database connection
-        user_id: user id to be confirmed
-
-    Returns: user row
-    """
-    async with db_conn.transaction():
-        return await users_table.update(db_conn, user_id, {"confirmed": True})

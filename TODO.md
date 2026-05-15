@@ -46,6 +46,7 @@
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
 - [ ] review coverage
+- [ ] test update_user with creds email -> unique violation err
 
 - [ ] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
 - [ ] terraform fmt as park of make fmt

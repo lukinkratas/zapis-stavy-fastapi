@@ -11,7 +11,8 @@ from ..auth import _get_sub, authenticate_user, create_access_token, token_excep
 from ..db import connect_to_db
 from ..exceptions import token_exception
 from ..schemas import Token
-from ..services.users import confirm_user, select_user_by_id
+from ..services.auth import confirm_user
+from ..services.users import select_user_by_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/auth")
@@ -51,11 +52,9 @@ async def confirm(
     Returns: dict with detail message
     """
     user_id = _get_sub(token, typ="confirmation")
-    # check user exists
-    user = await select_user_by_id(db_conn, user_id)
+    user = await confirm_user(db_conn, user_id)
 
     if user is None:
         raise token_exception
 
-    await confirm_user(db_conn, user_id)
     return {"detail": "User confirmed."}
