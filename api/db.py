@@ -25,6 +25,6 @@ def get_conn_info() -> str:
 async def connect_to_db(request: Request) -> AsyncGenerator[AsyncConnection, None]:
     """Create connection in connection pool."""
     async with request.app.state.pool.connection() as conn:
-        logger.info(f"New DB connection created. ({str(conn)})")
+        logger.info(f"New DB connection created.")
         yield conn
-        logger.info(f"DB connection closed. ({conn})")
+        logger.info(f"DB connection closed.")
