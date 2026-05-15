@@ -20,11 +20,11 @@ fmt:
 
 lint:
 	uv run --dev ruff check
-	uv run --dev sqlfluff --dialect postgres lint sql/
+	uv run --dev sqlfluff lint --dialect postgres sql/
 
 lint-fix:
 	uv run --dev ruff check --fix
-	uv run --dev sqlfluff --dialect postgres fix sql/
+	uv run --dev sqlfluff fix --dialect postgres  sql/
 
 typechk:
 	uv run --dev mypy .
