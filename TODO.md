@@ -40,19 +40,9 @@
 - [x] psycopg row factory - dataclass / namedtuple / typeddict
 - [x] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
 - [x] terraform fmt as park of make fmt
+- [x] services logging
 
-- [ ] services create/register(email, password) x update(data) + same for location
-- [ ] logging lvl debug in all other places? + debug only used in dev?
-- [ ] unit: pydantic models assertions in place
-- [ ] int: pydantic models assertions in place
-- [ ] int: db assertions
-- [ ] test failed schema, even for locations
-- [ ] review coverage
-- [ ] test update_user with creds email -> unique violation err
-
-- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
-- [ ] services logging and docstrings
-- [ ] register_user / create_location (service + models + routers) use hardcoded instead of data dict, update_user / update_location uses data dict (bcs of dynamic update fields)  - unify - either use dynamic or hardcoded fields in both.
+- [ ] services create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
   - [ ] if dynamic fields: allowed fields in models
   ```
     ALLOWED_UPDATE_FIELDS = {"email", "password"}
@@ -61,6 +51,17 @@
     if invalid:
         raise ValueError(f"Invalid fields: {invalid}")
   ```
+
+- [ ] logging lvl debug in all other places? + debug only used in dev?
+
+- [ ] unit: pydantic models assertions in place
+- [ ] int: pydantic models assertions in place
+- [ ] int: db assertions
+- [ ] test failed schema, even for locations
+- [ ] test update_user with creds email -> unique violation err
+- [ ] review coverage
+
+- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 
 - [ ] fix GH actions
 - [ ] fix pre-commit
