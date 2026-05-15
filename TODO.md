@@ -38,6 +38,8 @@
 - [x] module docstrings
 - [x] services docstrings
 - [x] psycopg row factory - dataclass / namedtuple / typeddict
+- [x] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
+- [x] terraform fmt as park of make fmt
 
 - [ ] services create/register(email, password) x update(data) + same for location
 - [ ] logging lvl debug in all other places? + debug only used in dev?
@@ -48,8 +50,6 @@
 - [ ] review coverage
 - [ ] test update_user with creds email -> unique violation err
 
-- [ ] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
-- [ ] terraform fmt as park of make fmt
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 - [ ] services logging and docstrings
 - [ ] register_user / create_location (service + models + routers) use hardcoded instead of data dict, update_user / update_location uses data dict (bcs of dynamic update fields)  - unify - either use dynamic or hardcoded fields in both.
