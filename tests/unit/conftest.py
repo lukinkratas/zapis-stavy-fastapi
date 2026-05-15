@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import replace
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock
@@ -61,7 +60,7 @@ def registered_user(mocker: MockerFixture, registered_user_row: UserRow) -> User
 
 @pytest.fixture
 def confirmed_user(mocker: MockerFixture, registered_user: UserRow) -> UserRow:
-    confirmed_user_row = replace(registered_user, confirmed=True)
+    confirmed_user_row = registered_user._replace(confirmed=True)
     mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_row)
     mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row)
     return confirmed_user_row

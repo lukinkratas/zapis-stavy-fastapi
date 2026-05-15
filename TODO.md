@@ -295,10 +295,12 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
     + easy to switch db engine (sql only)
     + handles security
+    - subjective: session abstraction mental model (session.add, commit, rollback)
 
   3. No ORM
 
     + no bloat
+    + SQL-like queries and db cmds (commit, rollback, etc.)
     - security
 
 ### pydantic-settings or python-dotenv
@@ -330,7 +332,7 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
   5. custom typeddict row
 
-  choice: custom dataclass row
+  choice: custom namedtuple row
 
 ### Dockerfile base image
 

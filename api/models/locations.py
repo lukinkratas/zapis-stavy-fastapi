@@ -3,9 +3,8 @@
 
 import logging
 import uuid
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, NamedTuple
 
 from psycopg import AsyncConnection, sql
 from psycopg.rows import class_row
@@ -15,8 +14,7 @@ from ..utils import build_set_clause, format_sql_query, log_async_func
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True, frozen=True)
-class LocationRow:
+class LocationRow(NamedTuple):
     id: uuid.UUID
     created_at: datetime
     user_id: uuid.UUID

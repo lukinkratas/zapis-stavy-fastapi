@@ -1,6 +1,4 @@
 
-from dataclasses import replace
-
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
@@ -68,7 +66,7 @@ class TestUnitLocation:
         access_token: str,
     ) -> None:
         location_id = location_row.id
-        updated_location_row = replace(location_row, **update_location_payload)
+        updated_location_row = location_row._replace(**update_location_payload)
 
         # mock
         mocker.patch.object(LocationsTable, "update", return_value=updated_location_row)
