@@ -1,9 +1,9 @@
-from typing import Any
 
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
+from api.models.users import UserRow
 from api.schemas import Token
 
 
@@ -16,7 +16,7 @@ class TestLogin:
         test_client: AsyncClient,
         mocker: MockerFixture,
         creds: dict[str, str],
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
     ) -> None:
         data = {
             "username": creds["email"],
@@ -37,7 +37,7 @@ class TestConfirm:
         self,
         test_client: AsyncClient,
         mocker: MockerFixture,
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
         confirmation_token: str,
     ) -> None:
         response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")

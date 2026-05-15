@@ -1,6 +1,6 @@
 import uuid
 from datetime import timedelta
-from typing import Any, Callable, Literal
+from typing import Callable, Literal
 
 import jwt
 import pytest
@@ -15,13 +15,12 @@ from api.auth import (
     create_confirmation_token,
     verify_password,
 )
+from api.models.users import UserRow
 
 
 @pytest.mark.asyncio
-async def test_verify_password(
-    creds: dict[str, str], registered_user: dict[str, Any]
-) -> None:
-    verify_password(creds["password"], registered_user["password_hash"])
+async def test_verify_password(creds: dict[str, str], registered_user: UserRow) -> None:
+    verify_password(creds["password"], registered_user.password_hash)
 
 
 @pytest.mark.asyncio

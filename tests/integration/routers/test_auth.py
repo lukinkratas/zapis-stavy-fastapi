@@ -1,10 +1,8 @@
-from typing import Any
-
 import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.models.users import users_table
+from api.models.users import UserRow, users_table
 from api.schemas import Token
 
 
@@ -17,7 +15,7 @@ class TestLogin:
         self,
         test_client: AsyncClient,
         creds: dict[str, str],
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
     ) -> None:
         """Testing expected case."""
         data = {
@@ -40,7 +38,7 @@ class TestLogin:
         self,
         test_client: AsyncClient,
         creds: dict[str, str],
-        confirmed_user: dict[str, Any],
+        confirmed_user: UserRow,
     ) -> None:
         """Testing expected case."""
         data = {
@@ -63,7 +61,7 @@ class TestLogin:
         self,
         test_client: AsyncClient,
         creds: dict[str, str],
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
     ) -> None:
         data = {
             "username": creds["email"],
@@ -101,38 +99,38 @@ class TestConfirm:
     async def test_confirm_user(
         self,
         test_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
         confirmation_token: str,
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        assert registered_user["confirmed"] is False, "User already confirmed."
+        assert registered_user.confirmed is False, "User already confirmed."
 
         response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
 
         assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, registered_user["id"])
-        assert user["confirmed"] is True, "User not confirmed."
+        user = await users_table.select_by_id(db_conn, registered_user.id)
+        assert user.confirmed is True, "User not confirmed."
 
     @pytest.mark.asyncio
     async def test_confirm_confirmed_user(
         self,
         test_client: AsyncClient,
-        confirmed_user: dict[str, Any],
+        confirmed_user: UserRow,
         confirmation_token: str,
         db_conn: AsyncConnection,
     ) -> None:
         response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
 
         assert response.status_code == 200
-        user = await users_table.select_by_id(db_conn, confirmed_user["id"])
-        assert user["confirmed"] is True, "User not confirmed."
+        user = await users_table.select_by_id(db_conn, confirmed_user.id)
+        assert user.confirmed is True, "User not confirmed."
 
     @pytest.mark.asyncio
     async def test_confirm_user_with_expired_confirmation_token(
         self,
         test_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
         expired_confirmation_token: str,
     ) -> None:
         """Testing confirmation token with different encoded exp."""
@@ -145,7 +143,7 @@ class TestConfirm:
     async def test_confirm_user_with_access_token(
         self,
         test_client: AsyncClient,
-        registered_user: dict[str, Any],
+        registered_user: UserRow,
         access_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""

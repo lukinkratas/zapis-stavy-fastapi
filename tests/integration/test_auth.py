@@ -1,10 +1,9 @@
-from typing import Any
-
 import pytest
 from fastapi import HTTPException
 from psycopg import AsyncConnection
 
 from api.auth import authenticate_user, get_current_confirmed_user, get_current_user
+from api.models.users import UserRow
 
 
 @pytest.mark.integration
@@ -12,7 +11,7 @@ from api.auth import authenticate_user, get_current_confirmed_user, get_current_
 async def test_authenticate_user(
     db_conn: AsyncConnection,
     creds: dict[str, str],
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
 ) -> None:
     """Testing expected case."""
     await authenticate_user(db_conn, **creds)
@@ -30,7 +29,7 @@ async def test_authenticate_user_not_registered_email(db_conn: AsyncConnection) 
 async def test_authenticate_user_invalid_password(
     db_conn: AsyncConnection,
     creds: dict[str, str],
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
 ) -> None:
     with pytest.raises(HTTPException):
         await authenticate_user(db_conn, creds["email"], "invalid")
@@ -40,7 +39,7 @@ async def test_authenticate_user_invalid_password(
 @pytest.mark.asyncio
 async def test_get_current_user(
     db_conn: AsyncConnection,
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
     access_token: str,
 ) -> None:
     """Testing expected case."""
@@ -51,7 +50,7 @@ async def test_get_current_user(
 @pytest.mark.asyncio
 async def test_get_current_user_with_expired_access_token(
     db_conn: AsyncConnection,
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
     expired_access_token: str,
 ) -> None:
     """Testing access token with different encoded exp."""
@@ -63,7 +62,7 @@ async def test_get_current_user_with_expired_access_token(
 @pytest.mark.asyncio
 async def test_get_current_user_with_random_user_access_token(
     db_conn: AsyncConnection,
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
     random_user_access_token: str,
 ) -> None:
     """Testing access token with random access token."""
@@ -75,7 +74,7 @@ async def test_get_current_user_with_random_user_access_token(
 @pytest.mark.asyncio
 async def test_get_current_user_with_confirmation_token(
     db_conn: AsyncConnection,
-    registered_user: dict[str, Any],
+    registered_user: UserRow,
     confirmation_token: str,
 ) -> None:
     """Testing access token with different encoded typ."""
@@ -87,7 +86,7 @@ async def test_get_current_user_with_confirmation_token(
 @pytest.mark.asyncio
 async def test_get_current_confirmed_user(
     db_conn: AsyncConnection,
-    confirmed_user: dict[str, Any],
+    confirmed_user: UserRow,
 ) -> None:
     """Testing expected case."""
     assert await get_current_confirmed_user(confirmed_user)
@@ -96,7 +95,7 @@ async def test_get_current_confirmed_user(
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_get_current_confirmed_user_not_confirmed(
-    db_conn: AsyncConnection, registered_user: dict[str, Any]
+    db_conn: AsyncConnection, registered_user: UserRow
 ) -> None:
     with pytest.raises(HTTPException):
         await get_current_confirmed_user(registered_user)

@@ -1,8 +1,9 @@
-"""
-Routers layer for handling users lifecycle - register, update and delete.
+"""Routers layer for handling users lifecycle - register, update and delete.
+
 Pydantic validation is handled in this module.
 Database connection is passed to downstream user service.
 """
+
 import logging
 import os
 from typing import Annotated, Any
@@ -84,12 +85,12 @@ async def register(
 
     response = {
         "detail": "User registered. Please confirm your email.",
-        "id": user["id"],
+        "id": user.id,
     }
-    confirmation_token = create_confirmation_token(user["id"])
+    confirmation_token = create_confirmation_token(user.id)
     background_tasks.add_task(
         _send_confirmation_email,
-        user["email"],
+        user.email,
         confirmation_url=str(request.url_for("confirm", token=confirmation_token)),
     )
 
@@ -119,7 +120,7 @@ async def update(
     """
     try:
         user = await update_user(
-            db_conn, current_user["id"], creds.model_dump(exclude_unset=True)
+            db_conn, current_user.id, creds.model_dump(exclude_unset=True)
         )
 
         if not user:
@@ -143,12 +144,12 @@ async def delete(
         current_user: current authorized user
 
     Returns: response with detail
-        
+
     Raises:
         HTTPException: if user was not found
 
     """
-    user = await delete_user(db_conn, current_user["id"])
+    user = await delete_user(db_conn, current_user.id)
 
     if not user:
         raise user_not_found_exception

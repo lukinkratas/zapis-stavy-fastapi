@@ -1,6 +1,7 @@
 import uuid
+from dataclasses import replace
 from datetime import datetime, timezone
-from typing import Any, AsyncGenerator
+from typing import AsyncGenerator
 from unittest.mock import AsyncMock
 
 import pytest
@@ -11,7 +12,8 @@ from pytest_mock import MockerFixture
 
 from api.db import connect_to_db
 from api.main import app
-from api.models.users import UsersTable
+from api.models.locations import LocationRow
+from api.models.users import UserRow, UsersTable
 from api.security import get_password_hash
 
 
@@ -40,46 +42,36 @@ async def test_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def registered_user_from_db(
-    mocker: MockerFixture, creds: dict[str, str]
-) -> dict[str, Any]:
-    return {
-        "email": creds["email"],
-        "password_hash": get_password_hash(creds["password"]),
-        "id": uuid.uuid4(),
-        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        "confirmed": False,
-    }
-
-
-@pytest.fixture
-def registered_user(
-    mocker: MockerFixture, registered_user_from_db: dict[str, Any]
-) -> dict[str, Any]:
-    mocker.patch.object(
-        UsersTable, "select_by_id", return_value=registered_user_from_db
+def registered_user_row(mocker: MockerFixture, creds: dict[str, str]) -> UserRow:
+    return UserRow(
+        id=uuid.uuid4(),
+        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        email=creds["email"],
+        password_hash=get_password_hash(creds["password"]),
+        confirmed=False,
     )
-    mocker.patch.object(
-        UsersTable, "select_by_email", return_value=registered_user_from_db
+
+
+@pytest.fixture
+def registered_user(mocker: MockerFixture, registered_user_row: UserRow) -> UserRow:
+    mocker.patch.object(UsersTable, "select_by_id", return_value=registered_user_row)
+    mocker.patch.object(UsersTable, "select_by_email", return_value=registered_user_row)
+    return registered_user_row
+
+
+@pytest.fixture
+def confirmed_user(mocker: MockerFixture, registered_user: UserRow) -> UserRow:
+    confirmed_user_row = replace(registered_user, confirmed=True)
+    mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_row)
+    mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row)
+    return confirmed_user_row
+
+
+@pytest.fixture
+def location_row(location_payload: dict[str, str]) -> LocationRow:
+    return LocationRow(
+        id=uuid.uuid4(),
+        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        user_id=uuid.uuid4(),
+        **location_payload,
     )
-    return registered_user_from_db
-
-
-@pytest.fixture
-def confirmed_user(
-    mocker: MockerFixture, registered_user: dict[str, Any]
-) -> dict[str, Any]:
-    confirmed_user_json = registered_user.copy()
-    confirmed_user_json["confirmed"] = True
-    mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_json)
-    mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_json)
-    return confirmed_user_json
-
-
-@pytest.fixture
-def location_from_db(location_payload: dict[str, str]) -> dict[str, Any]:
-    return location_payload | {
-        "id": uuid.uuid4(),
-        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        "user_id": uuid.uuid4(),
-    }

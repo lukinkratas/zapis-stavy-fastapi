@@ -43,7 +43,7 @@ async def authenticate_user(
     """
     user = await select_user_by_email(conn, email)
 
-    if user is None or not verify_password(password, user["password_hash"]):
+    if user is None or not verify_password(password, user.password_hash):
         raise credentials_exception
 
     return user
@@ -159,7 +159,7 @@ async def get_current_confirmed_user(
     Raises:
         HTTPException: if user is not confirmed.
     """
-    if current_user["confirmed"] is not True:
+    if current_user.confirmed is not True:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not confirmed",

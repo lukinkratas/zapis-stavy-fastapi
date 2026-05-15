@@ -1,10 +1,12 @@
-from typing import Any
+
+from dataclasses import replace
 
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.models.locations import LocationsTable
+from api.models.locations import LocationRow, LocationsTable
+from api.models.users import UserRow
 from api.schemas import BaseResponse, ResponseWithId
 
 
@@ -17,12 +19,12 @@ class TestUnitLocation:
         test_client: AsyncClient,
         mocker: MockerFixture,
         location_payload: dict[str, str],
-        location_from_db: dict[str, Any],
-        confirmed_user: dict[str, Any],
+        location_row: LocationRow,
+        confirmed_user: UserRow,
         access_token: str,
     ) -> None:
         # mock
-        mocker.patch.object(LocationsTable, "insert", return_value=location_from_db)
+        mocker.patch.object(LocationsTable, "insert", return_value=location_row)
 
         # create location
         response = await test_client.post(
@@ -38,14 +40,14 @@ class TestUnitLocation:
         self,
         test_client: AsyncClient,
         mocker: MockerFixture,
-        location_from_db: dict[str, Any],
-        confirmed_user: dict[str, Any],
+        location_row: LocationRow,
+        confirmed_user: UserRow,
         access_token: str,
     ) -> None:
-        location_id = location_from_db["id"]
+        location_id = location_row.id
 
         # mock
-        mocker.patch.object(LocationsTable, "delete", return_value=location_from_db)
+        mocker.patch.object(LocationsTable, "delete", return_value=location_row)
 
         # delete created location
         response = await test_client.delete(
@@ -61,17 +63,15 @@ class TestUnitLocation:
         mocker: MockerFixture,
         test_client: AsyncClient,
         update_location_payload: dict[str, str],
-        location_from_db: dict[str, Any],
-        confirmed_user: dict[str, Any],
+        location_row: LocationRow,
+        confirmed_user: UserRow,
         access_token: str,
     ) -> None:
-        location_id = location_from_db["id"]
-        updated_location_from_db = location_from_db | update_location_payload
+        location_id = location_row.id
+        updated_location_row = replace(location_row, **update_location_payload)
 
         # mock
-        mocker.patch.object(
-            LocationsTable, "update", return_value=updated_location_from_db
-        )
+        mocker.patch.object(LocationsTable, "update", return_value=updated_location_row)
 
         # update location
         response = await test_client.put(

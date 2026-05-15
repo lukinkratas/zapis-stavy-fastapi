@@ -1,8 +1,9 @@
-"""
-Routers layer for handling location lifecycle - register, update and delete.
+"""Routers layer for handling location lifecycle - create, update and delete.
+
 Pydantic validation is handled in this module.
 Database connection is passed to downstream user service.
 """
+
 import logging
 import uuid
 from typing import Annotated, Any
@@ -48,7 +49,7 @@ async def create(
     """
     try:
         location = await create_location(
-            db_conn, current_confirmed_user["id"], **location.model_dump()
+            db_conn, current_confirmed_user.id, **location.model_dump()
         )
 
     except UniqueViolation:
@@ -56,7 +57,7 @@ async def create(
 
     return {
         "detail": "Location created.",
-        "id": location["id"],
+        "id": location.id,
     }
 
 
@@ -86,7 +87,7 @@ async def update(
         location = await update_location(
             db_conn,
             id,
-            current_confirmed_user["id"],
+            current_confirmed_user.id,
             location.model_dump(exclude_unset=True),
         )
 
@@ -119,7 +120,7 @@ async def delete(
     Raises:
         HTTPException: if location was not found
     """
-    location = await delete_location(db_conn, id, current_confirmed_user["id"])
+    location = await delete_location(db_conn, id, current_confirmed_user.id)
 
     if not location:
         raise location_not_found_exception

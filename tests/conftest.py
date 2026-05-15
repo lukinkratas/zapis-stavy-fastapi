@@ -1,22 +1,21 @@
+import os
+from pathlib import Path
 from typing import Any, AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
+from psycopg.conninfo import make_conninfo
 from pytest_mock import MockerFixture
+from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_confirmation_token
 from api.main import app
 
-import os
-from pathlib import Path
-
-import pytest_asyncio
-from psycopg.conninfo import make_conninfo
-from testcontainers.postgres import PostgresContainer
-
 ROOT = Path(__file__).parent.parent.resolve()
+
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
@@ -109,9 +108,9 @@ def update_location_payload() -> dict[str, str]:
 
 @pytest.fixture
 def access_token(registered_user: dict[str, Any]) -> str:
-    return create_access_token(registered_user["id"])
+    return create_access_token(registered_user.id)
 
 
 @pytest.fixture
 def confirmation_token(registered_user: dict[str, Any]) -> str:
-    return create_confirmation_token(registered_user["id"])
+    return create_confirmation_token(registered_user.id)

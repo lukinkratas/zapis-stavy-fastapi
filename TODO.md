@@ -36,19 +36,19 @@
 - [x] common.sql not needed?
 - [x] bruno collection
 - [x] module docstrings
+- [x] services docstrings
+- [x] psycopg row factory - dataclass / namedtuple / typeddict
 
-- [ ] services docstrings
-- [ ] services create/regoster(email, password) x update(data) + same for location
+- [ ] services create/register(email, password) x update(data) + same for location
 - [ ] logging lvl debug in all other places? + debug only used in dev?
 - [ ] unit: pydantic models assertions in place
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
-- [ ] dict_row factory -> User / Location factory? -> No, bcs of perf, but use dataclass or namedtuple or typeddict??
+- [ ] review coverage
 
-- [ ] namedtuple_row instead of dict_row? (check annotations) https://www.psycopg.org/psycopg3/docs/advanced/rows.html
-
-- [ ] sqlfluff for sql linting - CI, Makefile?
+- [ ] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
+- [ ] terraform fmt as park of make fmt
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 - [ ] services logging and docstrings
 - [ ] register_user / create_location (service + models + routers) use hardcoded instead of data dict, update_user / update_location uses data dict (bcs of dynamic update fields)  - unify - either use dynamic or hardcoded fields in both.
@@ -260,11 +260,13 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
   1. sqlite
   2. postgresql
 
+  choice: postgresql
+
 ### DB Driver
 
   1. psycopg
 
-    ++ minimal
+    + + minimal
     + sql query sanitation
     + dynamic sql query factory -> used for INSERT queries (build dynamically based on req dict keys)
     + row factory
@@ -273,7 +275,7 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
   2. asyncpg
 
-    ++ even faster, than psycopg
+    + + even faster, than psycopg
     + sql query sanitation
     - pg only
     - async only
@@ -285,7 +287,7 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
     + FastAPI docs recommended
     - async not documented
-    --- db and req/resp validation models coupled
+    - - - db and req/resp validation models coupled
 
   2. SQLAlchemy
 
@@ -299,7 +301,41 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
 ### pydantic-settings or python-dotenv
 
+### Row class returned from db
+
+  1. dict_row
+
+    - too much overhead
+    - dict methods are not really utilized in the api
+    - fields not static typed
+
+  2. namedtuple_row
+
+    - very small overhead
+    - fields not static typed
+
+  3. custom namedtuple row
+
+    + very small overhead
+    + immutable
+
+  4. custom dataclass row
+
+    + extensible
+    + inheritance
+    + mutable/immutable (frozen=True)
+    + way to lower overhead (slots=True)
+
+  5. custom typeddict row
+
+  choice: custom dataclass row
+
 ### Dockerfile base image
 
-  1. alpine - tiny, reducing attack surface and pull times
+  1. alpine
+    + tiny
+    + reducing attack surface and pull times
+  
   2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)
+
+  choice: alpine

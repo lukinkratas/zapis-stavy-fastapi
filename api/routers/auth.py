@@ -1,3 +1,5 @@
+"""Routers layer for handling authentication."""
+
 import logging
 from typing import Annotated
 
@@ -32,7 +34,7 @@ async def login(
         HTTPException: if user not found in the database or password mismatch.
     """
     user = await authenticate_user(db_conn, form_data.username, form_data.password)
-    return Token(access_token=create_access_token(user["id"]), token_type="bearer")
+    return Token(access_token=create_access_token(user.id), token_type="bearer")
 
 
 @router.get("/confirm/{token}")
