@@ -2,11 +2,11 @@ SET timezone = 'Europe/Prague';
 
 CREATE TABLE readings (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    meter_id UUID NOT NULL REFERENCES meters(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    meter_id UUID NOT NULL REFERENCES meters (id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     value DOUBLE PRECISION NOT NULL,
-    PRIMARY key (id)
+    PRIMARY KEY (id)
 );
 
 -- INSERT INTO readings (id, meter_id, value)

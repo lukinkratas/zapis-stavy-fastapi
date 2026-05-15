@@ -12,7 +12,6 @@ from ..db import connect_to_db
 from ..exceptions import token_exception
 from ..schemas import Token
 from ..services.auth import confirm_user
-from ..services.users import select_user_by_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/auth")

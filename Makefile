@@ -1,4 +1,4 @@
-.PHONY: fmt lint lint-fix typechk test test-int test-all clean-up serve-dev
+.PHONY: fmt lint lint-fix typechk test test-int test-all clean-up serve-dev build
 
 help:
 	@echo "Available targets:"
@@ -16,12 +16,15 @@ help:
 
 fmt:
 	uv run --dev ruff format
+	terraform fmt terraform/
 
 lint:
 	uv run --dev ruff check
+	uv run --dev sqlfluff --dialect postgres lint sql/
 
 lint-fix:
 	uv run --dev ruff check --fix
+	uv run --dev sqlfluff --dialect postgres fix sql/
 
 typechk:
 	uv run --dev mypy .

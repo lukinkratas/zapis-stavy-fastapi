@@ -6,12 +6,12 @@
 
 CREATE TABLE users (
     id UUID DEFAULT gen_random_uuid(),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     email TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     confirmed BOOLEAN DEFAULT FALSE,
     -- role public.userrole NOT NULL DEFAULT 'STANDARD',
-    PRIMARY key (id),
+    PRIMARY KEY (id),
     CONSTRAINT unique_users_email UNIQUE (email)
 );
 

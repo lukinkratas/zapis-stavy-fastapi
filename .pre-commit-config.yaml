@@ -14,6 +14,12 @@ repos:
         args: [ --fix ]
       - id: ruff-format
 
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: stable_version
+    hooks:
+    - id: sqlfluff-fix
+      files: ^sql/
+
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.15.0
     hooks:

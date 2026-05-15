@@ -1,10 +1,10 @@
 CREATE TABLE meters (
     id UUID NOT NULL DEFAULT gen_random_uuid(),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     CONSTRAINT unique_meter_name UNIQUE (user_id, name),
-    PRIMARY key (id)
+    PRIMARY KEY (id)
 );
 
 -- INSERT INTO meters (id, user_id, name)
