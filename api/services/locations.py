@@ -19,6 +19,14 @@ logger = logging.getLogger(__name__)
 async def select_location_by_id(
     db_conn: AsyncConnection, location_id: uuid.UUID
 ) -> LocationRow | None:
+    """Select location from the database by id.
+
+    Args:
+        db_conn: database connection
+        location_id: id of the location being selected
+
+    Returns: user row
+    """
     return await locations_table.select_by_id(db_conn, location_id)
 
 

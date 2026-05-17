@@ -24,7 +24,7 @@ async def select_user_by_id(
 
     Args:
         db_conn: database connection
-        user_id: user id to be updated
+        user_id: id of the user being selected
 
     Returns: user row
     """

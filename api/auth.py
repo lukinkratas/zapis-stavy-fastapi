@@ -29,11 +29,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 
 @log_async_func(logger.debug)
 async def authenticate_user(
-    conn: AsyncConnection, email: str, password: str
+    db_conn: AsyncConnection, email: str, password: str
 ) -> dict[str, Any]:
     """Authenticate user.
 
     Args:
+        db_conn: database connection
         email: email to authenticate
         password: password corresponding to the email
 
@@ -42,7 +43,7 @@ async def authenticate_user(
     Raises:
         HTTPException: if user is not found in the database or password mismatch.
     """
-    user = await select_user_by_email(conn, email)
+    user = await select_user_by_email(db_conn, email)
 
     if user is None or not verify_password(password, user.password_hash):
         raise credentials_exception
@@ -120,12 +121,13 @@ def _get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
 
 @log_async_func(logger.debug)
 async def get_current_user(
-    conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> UserRow:
     """Get current user from token.
 
     Args:
+        db_conn: database connection
         token: JWT token with encoded email
 
     Returns: user row
@@ -134,7 +136,7 @@ async def get_current_user(
         HTTPException: if user is not found in the database.
     """
     user_id = _get_sub(token, typ="access")
-    user = await select_user_by_id(conn, user_id)
+    user = await select_user_by_id(db_conn, user_id)
 
     if user is None:
         raise HTTPException(

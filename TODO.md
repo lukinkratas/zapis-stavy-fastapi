@@ -42,6 +42,8 @@
 - [x] terraform fmt as park of make fmt
 - [x] services logging
 
+- [ ] add missing docstrings
+
 - [ ] unit: pydantic models assertions in place
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
@@ -62,7 +64,7 @@
     if invalid:
         raise ValueError(f"Invalid fields: {invalid}")
   ```
-  
+
 - [ ] fix GH actions
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch

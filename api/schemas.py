@@ -16,6 +16,13 @@ class ResponseWithId(BaseResponse):
     confirmation_token: str | None = None
 
 
+class Token(BaseModel):
+    """Response token model for validation."""
+
+    access_token: str
+    token_type: str
+
+
 class RegisterCreds(BaseModel):
     """Register user credentials request model for validation."""
 
@@ -28,11 +35,6 @@ class UpdateCreds(BaseModel):
 
     email: str | None = None
     password: str | None = None
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
 
 class CreateProps(BaseModel):

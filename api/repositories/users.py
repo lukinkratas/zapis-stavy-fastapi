@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class UserRow(NamedTuple):
+    """User row database model."""
+
     id: uuid.UUID
     created_at: datetime
     email: str
@@ -22,7 +24,7 @@ class UserRow(NamedTuple):
 
 
 class UsersTable:
-    """User database model."""
+    """User database table."""
 
     def __init__(self) -> None:
         self.table_name = "users"

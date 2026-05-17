@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class LocationRow(NamedTuple):
+    """Location row database model."""
+
     id: uuid.UUID
     created_at: datetime
     user_id: uuid.UUID
@@ -21,7 +23,7 @@ class LocationRow(NamedTuple):
 
 
 class LocationsTable:
-    """Location database model."""
+    """Location database table."""
 
     def __init__(self) -> None:
         self.table_name = "locations"
