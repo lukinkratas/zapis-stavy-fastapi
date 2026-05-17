@@ -1,5 +1,4 @@
-"""Databse models layer for handling location lifecycle - insert, update and delete.
-"""
+"""Database tables layer for handling location lifecycle - insert, update and delete."""
 
 import logging
 import uuid
@@ -52,30 +51,6 @@ class LocationsTable:
             return await cur.fetchone()
 
     @log_async_func(logger.debug)
-    async def delete(
-        self, db_conn: AsyncConnection, location_id: uuid.UUID, user_id: uuid.UUID
-    ) -> LocationRow | None:
-        """Delete location record from db.
-
-        Args:
-            db_conn: database connection
-            location_id: location id to be deleted
-            user_id: location owner's user id
-
-        Returns: location row
-        """
-        query = sql.SQL("""
-            DELETE FROM {table}
-            WHERE id = %(location_id)s AND user_id = %(user_id)s
-            RETURNING *;
-        """).format(table=sql.Identifier(self.table_name))
-        logger.debug(f"SQL query: {format_sql_query(query)}")
-
-        async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
-            await cur.execute(query, {"location_id": location_id, "user_id": user_id})
-            return await cur.fetchone()
-
-    @log_async_func(logger.debug)
     async def update(
         self,
         db_conn: AsyncConnection,
@@ -106,8 +81,32 @@ class LocationsTable:
 
         async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
             await cur.execute(
-                query, data | {"location_id": location_id, "user_id": user_id}
+                query, data | dict(location_id=location_id, user_id=user_id)
             )
+            return await cur.fetchone()
+
+    @log_async_func(logger.debug)
+    async def delete(
+        self, db_conn: AsyncConnection, location_id: uuid.UUID, user_id: uuid.UUID
+    ) -> LocationRow | None:
+        """Delete location record from db.
+
+        Args:
+            db_conn: database connection
+            location_id: location id to be deleted
+            user_id: location owner's user id
+
+        Returns: location row
+        """
+        query = sql.SQL("""
+            DELETE FROM {table}
+            WHERE id = %(location_id)s AND user_id = %(user_id)s
+            RETURNING *;
+        """).format(table=sql.Identifier(self.table_name))
+        logger.debug(f"SQL query: {format_sql_query(query)}")
+
+        async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
+            await cur.execute(query, {"location_id": location_id, "user_id": user_id})
             return await cur.fetchone()
 
     @log_async_func(logger.debug)

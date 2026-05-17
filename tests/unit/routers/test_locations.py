@@ -1,10 +1,9 @@
-
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.models.locations import LocationRow, LocationsTable
-from api.models.users import UserRow
+from api.repositories.locations import LocationRow, LocationsTable
+from api.repositories.users import UserRow
 from api.schemas import BaseResponse, ResponseWithId
 
 

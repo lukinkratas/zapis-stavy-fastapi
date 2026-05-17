@@ -5,11 +5,11 @@ Database transaction is handled in this module.
 
 import logging
 import uuid
-from typing import Any
 
 from psycopg import AsyncConnection
 
-from ..models.locations import LocationRow, locations_table
+from ..repositories.locations import LocationRow, locations_table
+from ..schemas import CreateProps, UpdateProps
 from ..utils import log_async_func
 
 logger = logging.getLogger(__name__)
@@ -24,19 +24,21 @@ async def select_location_by_id(
 
 @log_async_func(logger.debug)
 async def create_location(
-    db_conn: AsyncConnection, user_id: uuid.UUID, name: str
+    db_conn: AsyncConnection, user_id: uuid.UUID, props: CreateProps
 ) -> LocationRow | None:
     """Add new location into the database.
 
     Args:
         db_conn: database connection
         user_id: location owner's user id
-        name: name of the location being created
+        props: create location properties request payload from client
 
     Returns: location row
     """
     async with db_conn.transaction():
-        return await locations_table.insert(db_conn, user_id, name)
+        return await locations_table.insert(
+            db_conn, user_id, **props.model_dump(exclude_unset=True)
+        )
 
 
 @log_async_func(logger.debug)
@@ -44,7 +46,7 @@ async def update_location(
     db_conn: AsyncConnection,
     location_id: uuid.UUID,
     user_id: uuid.UUID,
-    data: dict[str, Any],
+    props: UpdateProps,
 ) -> LocationRow | None:
     """Update a location in the database.
 
@@ -52,12 +54,14 @@ async def update_location(
         db_conn: database connection
         location_id: location id to be updated
         user_id: location owner's user id
-        data: field-value pairs to be updated
+        props: update location properties request payload from client
 
     Returns: location row
     """
     async with db_conn.transaction():
-        return await locations_table.update(db_conn, location_id, user_id, data)
+        return await locations_table.update(
+            db_conn, location_id, user_id, props.model_dump(exclude_unset=True)
+        )
 
 
 @log_async_func(logger.debug)

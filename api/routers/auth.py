@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg import AsyncConnection
 
-from ..auth import _get_sub, authenticate_user, create_access_token, token_exception
+from ..auth import _get_sub, authenticate_user, create_access_token
 from ..db import connect_to_db
 from ..exceptions import token_exception
 from ..schemas import Token

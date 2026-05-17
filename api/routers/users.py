@@ -6,7 +6,7 @@ Database connection is passed to downstream user service.
 
 import logging
 import os
-from typing import Annotated, Any
+from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
@@ -17,6 +17,7 @@ from ..auth import create_confirmation_token, get_current_user
 from ..aws import ses_send_email
 from ..db import connect_to_db
 from ..exceptions import user_exists_exception, user_not_found_exception
+from ..repositories.users import UserRow
 from ..schemas import BaseResponse, RegisterCreds, ResponseWithId, UpdateCreds
 from ..services.users import delete_user, register_user, update_user
 
@@ -67,7 +68,7 @@ async def register(
 
     Args:
         request: FastAPI request object (used for accessing headers, client info, etc.).
-        user: user create request payload from client
+        creds: register credentials payload from client
         db_conn: database connection
         background_tasks: FastAPI's background que for tasks
 
@@ -75,10 +76,9 @@ async def register(
 
     Raises:
         HTTPException: if user already exists
-
     """
     try:
-        user = await register_user(db_conn, **creds.model_dump())
+        user = await register_user(db_conn, creds)
 
     except UniqueViolation:
         raise user_exists_exception
@@ -104,24 +104,22 @@ async def register(
 async def update(
     creds: UpdateCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_user: Annotated[UserRow, Depends(get_current_user)],
 ) -> dict[str, str]:
     """Update a user.
 
     Args:
-        user: user update request payload from client
+        creds: credentials update payload from client
         db_conn: database connection
         current_user: current authorized user
 
     Returns: response with detail
+
     Raises:
         HTTPException: if user was not found or email already exists.
-
     """
     try:
-        user = await update_user(
-            db_conn, current_user.id, creds.model_dump(exclude_unset=True)
-        )
+        user = await update_user(db_conn, current_user.id, creds)
 
         if not user:
             raise user_not_found_exception
@@ -135,7 +133,7 @@ async def update(
 @router.delete("", response_model=BaseResponse)
 async def delete(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_user: Annotated[UserRow, Depends(get_current_user)],
 ) -> dict[str, str]:
     """Delete a user.
 

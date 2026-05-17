@@ -8,8 +8,9 @@ import pytest_asyncio
 from psycopg import AsyncConnection
 
 from api.auth import create_access_token, create_confirmation_token
-from api.models.locations import LocationRow
-from api.models.users import UserRow
+from api.repositories.locations import LocationRow
+from api.repositories.users import UserRow
+from api.schemas import CreateProps, RegisterCreds
 from api.services.auth import confirm_user
 from api.services.locations import create_location, delete_location
 from api.services.users import delete_user, register_user
@@ -19,7 +20,7 @@ from api.services.users import delete_user, register_user
 async def registered_user(
     db_conn: AsyncConnection, creds: dict[str, str], mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
-    user = await register_user(db_conn, **creds)
+    user = await register_user(db_conn, RegisterCreds(**creds))
     yield user
     await delete_user(db_conn, user.id)
 
@@ -34,7 +35,7 @@ async def other_user(
     db_conn: AsyncConnection, mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
     other_creds = {"email": "other@test.net", "password": "password"}
-    user = await register_user(db_conn, **other_creds)
+    user = await register_user(db_conn, RegisterCreds(**other_creds))
     user = await confirm_user(db_conn, user.id)
     yield user
     await delete_user(db_conn, user.id)
@@ -46,7 +47,9 @@ async def created_location(
     confirmed_user: UserRow,
     location_payload: dict[str, str],
 ) -> AsyncGenerator[LocationRow, None]:
-    location = await create_location(db_conn, confirmed_user.id, **location_payload)
+    location = await create_location(
+        db_conn, confirmed_user.id, CreateProps(**location_payload)
+    )
     yield location
     await delete_location(db_conn, location.id, confirmed_user.id)
 

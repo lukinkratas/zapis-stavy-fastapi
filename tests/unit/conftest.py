@@ -11,8 +11,8 @@ from pytest_mock import MockerFixture
 
 from api.db import connect_to_db
 from api.main import app
-from api.models.locations import LocationRow
-from api.models.users import UserRow, UsersTable
+from api.repositories.locations import LocationRow
+from api.repositories.users import UserRow, UsersTable
 from api.security import get_password_hash
 
 

@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.models.users import UserRow, UsersTable
+from api.repositories.users import UserRow, UsersTable
 from api.schemas import BaseResponse, ResponseWithId
 from api.security import get_password_hash
 

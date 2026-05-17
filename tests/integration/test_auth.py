@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from psycopg import AsyncConnection
 
 from api.auth import authenticate_user, get_current_confirmed_user, get_current_user
-from api.models.users import UserRow
+from api.repositories.users import UserRow
 
 
 @pytest.mark.integration

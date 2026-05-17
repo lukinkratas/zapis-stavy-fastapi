@@ -15,7 +15,7 @@ from api.auth import (
     create_confirmation_token,
     verify_password,
 )
-from api.models.users import UserRow
+from api.repositories.users import UserRow
 
 
 @pytest.mark.asyncio

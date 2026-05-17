@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.models.users import UserRow, users_table
+from api.repositories.users import UserRow, users_table
 from api.schemas import Token
 
 

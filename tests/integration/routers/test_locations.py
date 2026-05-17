@@ -4,8 +4,8 @@ import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.models.locations import LocationRow
-from api.models.users import UserRow
+from api.repositories.locations import LocationRow
+from api.repositories.users import UserRow
 from api.schemas import BaseResponse, ResponseWithId
 from api.services.locations import (
     delete_location,

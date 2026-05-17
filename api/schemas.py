@@ -17,14 +17,14 @@ class ResponseWithId(BaseResponse):
 
 
 class RegisterCreds(BaseModel):
-    """User create request model for validation."""
+    """Register user credentials request model for validation."""
 
     email: str
     password: str
 
 
 class UpdateCreds(BaseModel):
-    """User update request model for validation."""
+    """Update user credentials request model for validation."""
 
     email: str | None = None
     password: str | None = None
@@ -35,13 +35,13 @@ class Token(BaseModel):
     token_type: str
 
 
-class LocationCreateRequest(BaseModel):
-    """Location create request model for validation."""
+class CreateProps(BaseModel):
+    """Create location properties request model for validation."""
 
     name: str
 
 
-class LocationUpdateRequest(BaseModel):
-    """Location update request model for validation."""
+class UpdateProps(BaseModel):
+    """Update location properties request model for validation."""
 
     name: str | None = None

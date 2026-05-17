@@ -13,6 +13,7 @@ from psycopg import AsyncConnection
 
 from .db import connect_to_db
 from .exceptions import credentials_exception, token_exception
+from .repositories.users import UserRow
 from .security import verify_password
 from .services.users import select_user_by_email, select_user_by_id
 from .utils import log_async_func, log_func
@@ -121,13 +122,13 @@ def _get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
 async def get_current_user(
     conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
-) -> dict[str, Any]:
+) -> UserRow:
     """Get current user from token.
 
     Args:
         token: JWT token with encoded email
 
-    Returns: user dict
+    Returns: user row
 
     Raises:
         HTTPException: if user is not found in the database.
@@ -146,14 +147,14 @@ async def get_current_user(
 
 @log_async_func(logger.debug)
 async def get_current_confirmed_user(
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+    current_user: Annotated[UserRow, Depends(get_current_user)],
 ) -> dict[str, Any]:
     """Get current user from token.
 
     Args:
         current_user: current authorized user
 
-    Returns: user dict
+    Returns: user row
 
 
     Raises:

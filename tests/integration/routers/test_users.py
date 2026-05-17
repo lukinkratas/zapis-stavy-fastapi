@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
-from api.models.users import UserRow
+from api.repositories.users import UserRow
 from api.schemas import BaseResponse, ResponseWithId
 from api.services.users import delete_user, select_user_by_id
 

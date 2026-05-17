@@ -15,12 +15,7 @@ from psycopg.errors import UniqueViolation
 from ..auth import get_current_confirmed_user
 from ..db import connect_to_db
 from ..exceptions import location_exists_exception, location_not_found_exception
-from ..schemas import (
-    BaseResponse,
-    LocationCreateRequest,
-    LocationUpdateRequest,
-    ResponseWithId,
-)
+from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
 from ..services.locations import create_location, delete_location, update_location
 
 logger = logging.getLogger(__name__)
@@ -29,7 +24,7 @@ router = APIRouter(prefix="/v1/location")
 
 @router.post("", status_code=201, response_model=ResponseWithId)
 async def create(
-    location: LocationCreateRequest,
+    props: CreateProps,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
@@ -38,7 +33,7 @@ async def create(
     """Create new location.
 
     Args:
-        location: location create request payload from client
+        props: create location properties request payload from client
         db_conn: database connection
         current_confirmed_user: current authorized and confirmed user
 
@@ -48,9 +43,7 @@ async def create(
         HTTPException: if location already exists
     """
     try:
-        location = await create_location(
-            db_conn, current_confirmed_user.id, **location.model_dump()
-        )
+        location = await create_location(db_conn, current_confirmed_user.id, props)
 
     except UniqueViolation:
         raise location_exists_exception
@@ -64,7 +57,7 @@ async def create(
 @router.put("/{id}", response_model=BaseResponse)
 async def update(
     id: uuid.UUID,
-    location: LocationUpdateRequest,
+    props: UpdateProps,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
@@ -74,7 +67,7 @@ async def update(
 
     Args:
         id: uuid of location
-        location: location update request payload from client
+        props: update location properties request payload from client
         db_conn: database connection
         current_confirmed_user: current authorized and confirmed user
 
@@ -84,12 +77,7 @@ async def update(
         HTTPException: if location was not found or name already exists.
     """
     try:
-        location = await update_location(
-            db_conn,
-            id,
-            current_confirmed_user.id,
-            location.model_dump(exclude_unset=True),
-        )
+        location = await update_location(db_conn, id, current_confirmed_user.id, props)
 
         if not location:
             raise location_not_found_exception

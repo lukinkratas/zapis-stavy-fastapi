@@ -1,9 +1,8 @@
-
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
-from api.models.users import UserRow
+from api.repositories.users import UserRow
 from api.schemas import Token
 
 

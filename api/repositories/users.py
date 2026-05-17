@@ -1,5 +1,4 @@
-"""Databse models layer for handling users lifecycle - insert, update and delete.
-"""
+"""Database tables layer for handling users lifecycle - insert, update and delete."""
 
 import logging
 import uuid
@@ -53,6 +52,34 @@ class UsersTable:
             return await cur.fetchone()
 
     @log_async_func(logger.debug)
+    async def update(
+        self, db_conn: AsyncConnection, user_id: uuid.UUID, data: dict[str, Any]
+    ) -> UserRow | None:
+        """Update user record in db.
+
+        Args:
+            db_conn: database connection
+            user_id: user id to be updated
+            data: field-value pairs to be updated
+
+        Returns: user row
+        """
+        query = sql.SQL("""
+            UPDATE {table}
+            SET {set_clause}
+            WHERE id = %(user_id)s
+            RETURNING *;
+        """).format(
+            table=sql.Identifier(self.table_name),
+            set_clause=build_set_clause(data.keys()),
+        )
+        logger.debug(f"SQL query: {format_sql_query(query)}")
+
+        async with db_conn.cursor(row_factory=class_row(UserRow)) as cur:
+            await cur.execute(query, data | dict(user_id=user_id))
+            return await cur.fetchone()
+
+    @log_async_func(logger.debug)
     async def delete(
         self, db_conn: AsyncConnection, user_id: uuid.UUID
     ) -> UserRow | None:
@@ -73,34 +100,6 @@ class UsersTable:
 
         async with db_conn.cursor(row_factory=class_row(UserRow)) as cur:
             await cur.execute(query, dict(user_id=user_id))
-            return await cur.fetchone()
-
-    @log_async_func(logger.debug)
-    async def update(
-        self, db_conn: AsyncConnection, user_id: uuid.UUID, data: dict[str, Any]
-    ) -> UserRow | None:
-        """Update user record in db.
-
-        Args:
-            db_conn: database connection
-            user_id: user id to be updated
-            data: field-value pairs to be updated
-
-        Returns: user row
-        """
-        query = sql.SQL("""
-            UPDATE {table}
-            SET {set_clause}
-            WHERE id = %(user_id)s
-            RETURNING *;
-        """).format(
-            table=sql.Identifier(self.table_name),
-            set_clause=build_set_clause(data),
-        )
-        logger.debug(f"SQL query: {format_sql_query(query)}")
-
-        async with db_conn.cursor(row_factory=class_row(UserRow)) as cur:
-            await cur.execute(query, data | dict(user_id=user_id))
             return await cur.fetchone()
 
     @log_async_func(logger.debug)
