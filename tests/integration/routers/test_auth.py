@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.repositories.users import UserRow, users_table
-from api.schemas import Token
+from api.schemas import TokenResponse
 
 
 class TestLogin:
@@ -28,9 +28,7 @@ class TestLogin:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
+        assert TokenResponse.model_validate(response.json())
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -51,9 +49,7 @@ class TestLogin:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
+        assert TokenResponse.model_validate(response.json())
 
     @pytest.mark.integration
     @pytest.mark.asyncio

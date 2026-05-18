@@ -42,9 +42,6 @@
 - [x] terraform fmt as park of make fmt
 - [x] services logging
 
-- [ ] add missing docstrings
-
-- [ ] unit: pydantic models assertions in place
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations

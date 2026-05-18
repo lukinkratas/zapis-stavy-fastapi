@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.repositories.users import UserRow
-from api.schemas import Token
+from api.schemas import TokenResponse, BaseResponse
 
 
 class TestLogin:
@@ -23,9 +23,7 @@ class TestLogin:
         }
         response = await test_client.post("/v1/auth/token", data=data)
         assert response.status_code == 200
-
-        token = response.json()
-        assert Token.model_validate(token)
+        assert TokenResponse.model_validate(response.json())
 
 
 class TestConfirm:
@@ -41,3 +39,4 @@ class TestConfirm:
     ) -> None:
         response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
         assert response.status_code == 200
+        assert BaseResponse.model_validate(response.json())

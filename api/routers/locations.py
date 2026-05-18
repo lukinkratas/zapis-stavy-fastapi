@@ -29,7 +29,7 @@ async def create(
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
-) -> dict[str, Any] | None:
+) -> ResponseWithId:
     """Create new location.
 
     Args:
@@ -48,10 +48,7 @@ async def create(
     except UniqueViolation:
         raise location_exists_exception
 
-    return {
-        "detail": "Location created.",
-        "id": location.id,
-    }
+    return {"detail": "Location created.", "id": location.id}
 
 
 @router.put("/{id}", response_model=BaseResponse)
@@ -62,7 +59,7 @@ async def update(
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
-) -> dict[str, Any]:
+) -> BaseResponse:
     """Update a location.
 
     Args:
@@ -95,7 +92,7 @@ async def delete(
     current_confirmed_user: Annotated[
         dict[str, Any], Depends(get_current_confirmed_user)
     ],
-) -> None:
+) -> BaseResponse:
     """Delete a location.
 
     Args:

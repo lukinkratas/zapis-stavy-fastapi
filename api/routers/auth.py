@@ -10,18 +10,18 @@ from psycopg import AsyncConnection
 from ..auth import _get_sub, authenticate_user, create_access_token
 from ..db import connect_to_db
 from ..exceptions import token_exception
-from ..schemas import Token
+from ..schemas import TokenResponse, BaseResponse
 from ..services.auth import confirm_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/auth")
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token", response_model=TokenResponse)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-) -> Token:
+) -> TokenResponse:
     """Authenticate user.
 
     Args:
@@ -34,14 +34,14 @@ async def login(
         HTTPException: if user not found in the database or password mismatch.
     """
     user = await authenticate_user(db_conn, form_data.username, form_data.password)
-    return Token(access_token=create_access_token(user.id), token_type="bearer")
+    return TokenResponse(access_token=create_access_token(user.id), token_type="bearer")
 
 
-@router.get("/confirm/{token}")
+@router.get("/confirm/{token}", response_model=BaseResponse)
 async def confirm(
     token: str,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-) -> dict[str, str]:
+) -> BaseResponse:
     """Update user to confirmed = True based on email from token.
 
     Args:

@@ -63,7 +63,7 @@ async def register(
     creds: RegisterCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     background_tasks: BackgroundTasks,
-) -> dict[str, str]:
+) -> ResponseWithId:
     """Register new user.
 
     Args:
@@ -105,7 +105,7 @@ async def update(
     creds: UpdateCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[UserRow, Depends(get_current_user)],
-) -> dict[str, str]:
+) -> BaseResponse:
     """Update a user.
 
     Args:
@@ -134,7 +134,7 @@ async def update(
 async def delete(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[UserRow, Depends(get_current_user)],
-) -> dict[str, str]:
+) -> BaseResponse:
     """Delete a user.
 
     Args:

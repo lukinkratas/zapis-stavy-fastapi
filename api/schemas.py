@@ -16,7 +16,7 @@ class ResponseWithId(BaseResponse):
     confirmation_token: str | None = None
 
 
-class Token(BaseModel):
+class TokenResponse(BaseModel):
     """Response token model for validation."""
 
     access_token: str
