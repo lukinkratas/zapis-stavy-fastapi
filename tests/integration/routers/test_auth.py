@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.repositories.users import UserRow, users_table
-from api.schemas import TokenResponse
+from api.schemas import TokenResponse, BaseResponse
 
 
 class TestLogin:
@@ -105,6 +105,8 @@ class TestConfirm:
         response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
 
         assert response.status_code == 200
+        assert BaseResponse.model_validate(response.json())
+
         user = await users_table.select_by_id(db_conn, registered_user.id)
         assert user.confirmed is True, "User not confirmed."
 

@@ -43,7 +43,6 @@
 - [x] services logging
 - [x] use uuid v7
 
-- [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
 - [ ] test update_user with creds email -> unique violation err
@@ -76,6 +75,8 @@
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
+
+- [ ] test with sqlalchemy
 
 - [x] switch from meters to locations
 - [x] use confirmation token
@@ -190,8 +191,6 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
     + SQL-like queries and db cmds (commit, rollback, etc.)
     - security
 
-### pydantic-settings or python-dotenv
-
 ### Dockerfile base image
 
   1. alpine
@@ -258,3 +257,14 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
     + UUID v7
 
   choice: v18
+
+### ENV vars config
+
+  1. python-dotenv
+
+  2. pydantic-settings
+
+    + variables validation
+    + type validation
+    + centralized
+    + nested configs
