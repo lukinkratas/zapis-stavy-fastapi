@@ -30,16 +30,9 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
 
 @pytest_asyncio.fixture(scope="session")
 def test_db():
-    with (
-        PostgresContainer("postgres:14")
-        .with_volume_mapping(
-            str(ROOT / "scripts" / "init-db.sh"),
-            "/docker-entrypoint-initdb.d/init-db.sh",
-        )
-        .with_volume_mapping(
-            str(ROOT / "sql"), "/docker-entrypoint-initdb.d/sql/"
-        ) as postgres
-    ):
+    with PostgresContainer("postgres:18").with_volume_mapping(
+        str(ROOT / "init.sql"), "/docker-entrypoint-initdb.d/init.sql"
+    ) as postgres:
         os.environ["DB_NAME"] = postgres.dbname
         os.environ["DB_USERNAME"] = postgres.username
         os.environ["DB_PASSWORD"] = postgres.password
