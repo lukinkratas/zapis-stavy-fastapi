@@ -41,8 +41,7 @@
 - [x] sqlfluff for sql linting - CI, Makefile? as part of make lint, make fmt
 - [x] terraform fmt as park of make fmt
 - [x] services logging
-
-- [ ] use uuid v7
+- [x] use uuid v7
 
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
