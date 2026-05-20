@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.repositories.users import UserRow, users_table
-from api.schemas import TokenResponse, BaseResponse
+from api.schemas import BaseResponse, TokenResponse
 
 
 class TestLogin:

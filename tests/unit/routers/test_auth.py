@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api.repositories.users import UserRow
-from api.schemas import TokenResponse, BaseResponse
+from api.schemas import BaseResponse, TokenResponse
 
 
 class TestLogin:

@@ -10,14 +10,14 @@ from psycopg import AsyncConnection
 from ..auth import _get_sub, authenticate_user, create_access_token
 from ..db import connect_to_db
 from ..exceptions import token_exception
-from ..schemas import TokenResponse, BaseResponse
+from ..schemas import BaseResponse, TokenResponse
 from ..services.auth import confirm_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/auth")
 
 
-@router.post("/token", response_model=TokenResponse)
+@router.post("/token")
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
@@ -37,7 +37,7 @@ async def login(
     return TokenResponse(access_token=create_access_token(user.id), token_type="bearer")
 
 
-@router.get("/confirm/{token}", response_model=BaseResponse)
+@router.get("/confirm/{token}")
 async def confirm(
     token: str,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
@@ -56,4 +56,4 @@ async def confirm(
     if user is None:
         raise token_exception
 
-    return {"detail": "User confirmed."}
+    return BaseResponse(detail="User confirmed.")

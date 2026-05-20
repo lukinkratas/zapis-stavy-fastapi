@@ -42,6 +42,8 @@
 - [x] terraform fmt as park of make fmt
 - [x] services logging
 - [x] use uuid v7
+- [x] return pydantic models
+- [x] prod: remove confirmation url from register response json
 
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
@@ -69,7 +71,6 @@
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 
-- [ ] prod: remove confirmation url from register response json
 - [ ] prod: no file logging (diff between dev and prod)
 
 - [ ] upload pic

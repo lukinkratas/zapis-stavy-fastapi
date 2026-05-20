@@ -57,7 +57,7 @@ def _send_confirmation_email(email: str, confirmation_url: str) -> None:
     ses_send_email(email, message)
 
 
-@router.post("/register", status_code=201, response_model=ResponseWithId)
+@router.post("/register", status_code=201)
 async def register(
     request: Request,
     creds: RegisterCreds,
@@ -83,24 +83,20 @@ async def register(
     except UniqueViolation:
         raise user_exists_exception
 
-    response = {
-        "detail": "User registered. Please confirm your email.",
-        "id": user.id,
-    }
     confirmation_token = create_confirmation_token(user.id)
+    logger.debug(f"{confirmation_token=}")
     background_tasks.add_task(
         _send_confirmation_email,
         user.email,
         confirmation_url=str(request.url_for("confirm", token=confirmation_token)),
     )
 
-    if ENV == "dev":
-        response["confirmation_token"] = confirmation_token
+    return ResponseWithId(
+        detail="User registered. Please confirm your email.", id=user.id
+    )
 
-    return response
 
-
-@router.put("", response_model=BaseResponse)
+@router.put("")
 async def update(
     creds: UpdateCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
@@ -127,10 +123,10 @@ async def update(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="Email already in use")
 
-    return {"detail": "User updated"}
+    return BaseResponse(detail="User updated")
 
 
-@router.delete("", response_model=BaseResponse)
+@router.delete("")
 async def delete(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[UserRow, Depends(get_current_user)],
@@ -145,11 +141,10 @@ async def delete(
 
     Raises:
         HTTPException: if user was not found
-
     """
     user = await delete_user(db_conn, current_user.id)
 
     if not user:
         raise user_not_found_exception
 
-    return {"detail": "User deleted"}
+    return BaseResponse(detail="User updated")

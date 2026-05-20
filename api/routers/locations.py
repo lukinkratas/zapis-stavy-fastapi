@@ -6,7 +6,7 @@ Database connection is passed to downstream user service.
 
 import logging
 import uuid
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
@@ -15,6 +15,7 @@ from psycopg.errors import UniqueViolation
 from ..auth import get_current_confirmed_user
 from ..db import connect_to_db
 from ..exceptions import location_exists_exception, location_not_found_exception
+from ..repositories.users import UserRow
 from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
 from ..services.locations import create_location, delete_location, update_location
 
@@ -22,13 +23,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/location")
 
 
-@router.post("", status_code=201, response_model=ResponseWithId)
+@router.post("", status_code=201)
 async def create(
     props: CreateProps,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[
-        dict[str, Any], Depends(get_current_confirmed_user)
-    ],
+    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
 ) -> ResponseWithId:
     """Create new location.
 
@@ -48,17 +47,15 @@ async def create(
     except UniqueViolation:
         raise location_exists_exception
 
-    return {"detail": "Location created.", "id": location.id}
+    return ResponseWithId(detail="Location created.", id=location.id)
 
 
-@router.put("/{id}", response_model=BaseResponse)
+@router.put("/{id}")
 async def update(
     id: uuid.UUID,
     props: UpdateProps,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[
-        dict[str, Any], Depends(get_current_confirmed_user)
-    ],
+    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
 ) -> BaseResponse:
     """Update a location.
 
@@ -82,16 +79,14 @@ async def update(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="Name already in use")
 
-    return {"detail": "Location updated"}
+    return BaseResponse(detail="Location updated.")
 
 
-@router.delete("/{id}", response_model=BaseResponse)
+@router.delete("/{id}")
 async def delete(
     id: uuid.UUID,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[
-        dict[str, Any], Depends(get_current_confirmed_user)
-    ],
+    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
 ) -> BaseResponse:
     """Delete a location.
 
@@ -110,4 +105,4 @@ async def delete(
     if not location:
         raise location_not_found_exception
 
-    return {"detail": "Location deleted"}
+    return BaseResponse(detail="Location deleted.")

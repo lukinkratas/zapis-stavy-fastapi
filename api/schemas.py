@@ -13,7 +13,6 @@ class ResponseWithId(BaseResponse):
     """Response with id json model for validation."""
 
     id: uuid.UUID
-    confirmation_token: str | None = None
 
 
 class TokenResponse(BaseModel):
