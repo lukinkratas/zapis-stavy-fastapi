@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class BaseResponse(BaseModel):
@@ -26,14 +26,14 @@ class TokenResponse(BaseModel):
 class RegisterCreds(BaseModel):
     """Register user credentials request model for validation."""
 
-    email: str
+    email: EmailStr
     password: str
 
 
 class UpdateCreds(BaseModel):
     """Update user credentials request model for validation."""
 
-    email: str | None = None
+    email: EmailStr | None = None
     password: str | None = None
 
 
