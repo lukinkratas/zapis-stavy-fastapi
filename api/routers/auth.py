@@ -56,4 +56,4 @@ async def confirm(
     if user is None:
         raise token_exception
 
-    return BaseResponse(detail="User confirmed.")
+    return BaseResponse(detail="User confirmed")

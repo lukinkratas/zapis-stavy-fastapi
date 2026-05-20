@@ -91,9 +91,7 @@ async def register(
         confirmation_url=str(request.url_for("confirm", token=confirmation_token)),
     )
 
-    return ResponseWithId(
-        detail="User registered. Please confirm your email.", id=user.id
-    )
+    return ResponseWithId(detail="User registered. Please confirm your email.", id=user.id)
 
 
 @router.put("")
@@ -147,4 +145,4 @@ async def delete(
     if not user:
         raise user_not_found_exception
 
-    return BaseResponse(detail="User updated")
+    return BaseResponse(detail="User deleted")

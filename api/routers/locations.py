@@ -47,7 +47,7 @@ async def create(
     except UniqueViolation:
         raise location_exists_exception
 
-    return ResponseWithId(detail="Location created.", id=location.id)
+    return ResponseWithId(detail="Location created", id=location.id)
 
 
 @router.put("/{id}")
@@ -79,7 +79,7 @@ async def update(
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="Name already in use")
 
-    return BaseResponse(detail="Location updated.")
+    return BaseResponse(detail="Location updated")
 
 
 @router.delete("/{id}")
@@ -105,4 +105,4 @@ async def delete(
     if not location:
         raise location_not_found_exception
 
-    return BaseResponse(detail="Location deleted.")
+    return BaseResponse(detail="Location deleted")
