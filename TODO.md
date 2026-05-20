@@ -42,6 +42,8 @@
 - [x] terraform fmt as park of make fmt
 - [x] services logging
 
+- [ ] use uuid v7
+
 - [ ] int: pydantic models assertions in place
 - [ ] int: db assertions
 - [ ] test failed schema, even for locations
@@ -191,6 +193,16 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
 ### pydantic-settings or python-dotenv
 
+### Dockerfile base image
+
+  1. alpine
+    + tiny
+    + reducing attack surface and pull times
+  
+  2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)
+
+  choice: alpine
+
 ### Row class returned from db
 
   1. dict_row
@@ -220,12 +232,30 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
   choice: custom namedtuple row
 
-### Dockerfile base image
+### DB ID
 
-  1. alpine
-    + tiny
-    + reducing attack surface and pull times
+  1. incerement ID
   
-  2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)
+    + appending record into page does not need to re-index
+    - insecure direct object reference
+    - servers attempting to insert record with the same ID
 
-  choice: alpine
+  2. UUID v4
+
+    + random
+    - "page split" - need to re-index, when new record is inserted
+
+  3. UUID v7
+
+    + random
+    + first half is unix timestamp - avoids page splits
+    - need to update database to pg18
+
+### Postgres version
+
+  1. v14 - initial
+  2. v18
+
+    + UUID v7
+
+  choice: v18

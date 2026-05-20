@@ -5,14 +5,12 @@
 -- );
 
 CREATE TABLE users (
-    id UUID DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    confirmed BOOLEAN DEFAULT FALSE,
+    confirmed BOOLEAN NOT NULL DEFAULT FALSE
     -- role public.userrole NOT NULL DEFAULT 'STANDARD',
-    PRIMARY KEY (id),
-    CONSTRAINT unique_users_email UNIQUE (email)
 );
 
 -- automatically created by the unique constraint
@@ -26,3 +24,11 @@ CREATE TABLE users (
 -- );
 
 -- SELECT * FROM users;
+
+CREATE TABLE locations (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    CONSTRAINT unique_location_name UNIQUE (user_id, name)
+);

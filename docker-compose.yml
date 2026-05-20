@@ -14,8 +14,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres:14
-    restart: on-failure
+    image: postgres:18
     container_name: db
     env_file:
       - .env
@@ -26,9 +25,8 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-      - ./sql/:/docker-entrypoint-initdb.d/sql/
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 volumes:
   db-data:
