@@ -251,9 +251,11 @@ class TestUpdate:
         update_location_payload: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
+        db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
         location_id = created_location.id
+        location_pre = await select_location_by_id(db_conn, location_id)
         response = await test_client.put(
             f"/v1/location/{location_id}",
             json=update_location_payload,
@@ -261,6 +263,9 @@ class TestUpdate:
         )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
+
+        location_post = await select_location_by_id(db_conn, location_id)
+        assert location_pre != location_post, "Location was not updated."
 
     @pytest.mark.integration
     @pytest.mark.asyncio

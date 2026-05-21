@@ -181,7 +181,7 @@ class TestUpdate:
         assert BaseResponse.model_validate(response.json())
 
         user_post = await select_user_by_id(db_conn, registered_user.id)
-        assert user_pre != user_post, "User was not updated"
+        assert user_pre != user_post, "User was not updated."
 
     @pytest.mark.integration
     @pytest.mark.asyncio
