@@ -61,6 +61,23 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
+    async def test_create_location_invalid_schema(
+        self,
+        test_client: AsyncClient,
+        confirmed_user: UserRow,
+        access_token: str,
+    ) -> None:
+        # name spelled wrong
+        location_payload = {"nam": "test"}
+        response = await test_client.post(
+            "/v1/location",
+            json=location_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 422
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
     async def test_create_location_by_registered_user(
         self,
         test_client: AsyncClient,
@@ -266,6 +283,27 @@ class TestUpdate:
 
         location_post = await select_location_by_id(db_conn, location_id)
         assert location_pre != location_post, "Location was not updated."
+
+    pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_update_location_invalid_schema(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        update_location_payload: dict[str, str],
+        confirmed_user: UserRow,
+        access_token: str,
+    ) -> None:
+        """Testing expected case."""
+        location_id = created_location.id
+        # name spelled wrong
+        update_location_payload = {"nam": "update"}
+        response = await test_client.put(
+            f"/v1/location/{location_id}",
+            json=update_location_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 422
 
     @pytest.mark.integration
     @pytest.mark.asyncio

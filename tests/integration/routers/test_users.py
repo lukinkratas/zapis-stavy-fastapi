@@ -57,7 +57,7 @@ class TestRegister:
         ],
     )
     @pytest.mark.asyncio
-    async def test_register_invalid_schema(
+    async def test_register_user_invalid_schema(
         self, test_client: AsyncClient, creds: dict[str, str]
     ) -> None:
         response = await test_client.post("/v1/user/register", json=creds)
@@ -182,6 +182,19 @@ class TestUpdate:
 
         user_post = await select_user_by_id(db_conn, registered_user.id)
         assert user_pre != user_post, "User was not updated."
+
+    @pytest.mark.asyncio
+    async def test_update_user_invalid_schema(
+        self, test_client: AsyncClient, access_token: str,
+    ) -> None:
+        # username instead of email
+        update_user_payload = {"username": "update@test.net"}
+        response = await test_client.put(
+            "/v1/user",
+            json=update_user_payload,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 422
 
     @pytest.mark.integration
     @pytest.mark.asyncio

@@ -45,7 +45,6 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 
-- [ ] test failed schema, even for locations
 - [ ] test update_user with creds email -> unique violation err
 - [ ] review coverage
 
