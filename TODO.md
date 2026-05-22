@@ -45,11 +45,6 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 
-- [x] review coverage
-- [x] test location unique violation
-- [x] test confirm user return none
-- [x] rename location payload to props and user payload to creds
-
 - [ ] pydantic-settings?
 
 - [ ] logging lvl debug in all other places? + debug only used in dev?
