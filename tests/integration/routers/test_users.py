@@ -36,7 +36,7 @@ class TestRegister:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_register_already_registered_user(
+    async def test_register_user_conmflict(
         self,
         test_client: AsyncClient,
         creds: dict[str, str],
@@ -165,7 +165,7 @@ class TestUpdate:
     async def test_update_user(
         self,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user: UserRow,
         access_token: str,
         db_conn: AsyncConnection,
@@ -174,7 +174,7 @@ class TestUpdate:
         user_pre = await select_user_by_id(db_conn, registered_user.id)
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -183,15 +183,34 @@ class TestUpdate:
         user_post = await select_user_by_id(db_conn, registered_user.id)
         assert user_pre != user_post, "User was not updated."
 
+    @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_update_user_invalid_schema(
-        self, test_client: AsyncClient, access_token: str,
+    async def test_update_user_conflict(
+        self,
+        test_client: AsyncClient,
+        update_creds: dict[str, str],
+        registered_user: UserRow,
+        other_user: UserRow,
+        access_token: str,
     ) -> None:
-        # username instead of email
-        update_user_payload = {"username": "update@test.net"}
+        """Testing expected case."""
+        update_creds = {"email": other_user.email}
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_update_user_invalid_schema(
+        self,
+        test_client: AsyncClient,
+        access_token: str,
+    ) -> None:
+        response = await test_client.put(
+            "/v1/user",
+            json={"username": "update@test.net"}, # username instead of email
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422
@@ -201,14 +220,14 @@ class TestUpdate:
     async def test_update_user_with_expired_access_token(
         self,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user: UserRow,
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -218,7 +237,7 @@ class TestUpdate:
     async def test_update_user_with_other_user_access_token(
         self,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user: UserRow,
         other_user_access_token: str,
         db_conn: AsyncConnection,
@@ -228,7 +247,7 @@ class TestUpdate:
 
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
 
@@ -241,14 +260,14 @@ class TestUpdate:
     async def test_update_user_with_random_user_access_token(
         self,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user: UserRow,
         random_user_access_token: str,
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -258,14 +277,14 @@ class TestUpdate:
     async def test_update_user_with_confirmation_token(
         self,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user: UserRow,
         confirmation_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401

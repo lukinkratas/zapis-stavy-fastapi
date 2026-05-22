@@ -15,9 +15,9 @@ class TestEndToEnd:
         self,
         test_client: AsyncClient,
         creds: dict[str, str],
-        update_user_payload: dict[str, str],
-        location_payload: dict[str, str],
-        update_location_payload: dict[str, str],
+        update_creds: dict[str, str],
+        props: dict[str, str],
+        update_props: dict[str, str],
         mock_send_email: MagicMock,
     ) -> None:
         # register user
@@ -47,7 +47,7 @@ class TestEndToEnd:
         # update user
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -55,7 +55,7 @@ class TestEndToEnd:
         # create location
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
@@ -66,7 +66,7 @@ class TestEndToEnd:
         # update location
         response = await test_client.put(
             f"/v1/location/{location_id}",
-            json=update_location_payload,
+            json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

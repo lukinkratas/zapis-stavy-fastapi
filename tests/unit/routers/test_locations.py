@@ -15,7 +15,7 @@ class TestUnitLocation:
         self,
         test_client: AsyncClient,
         mocker: MockerFixture,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         location_row: LocationRow,
         confirmed_user: UserRow,
         access_token: str,
@@ -26,7 +26,7 @@ class TestUnitLocation:
         # create location
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
@@ -59,13 +59,13 @@ class TestUnitLocation:
         self,
         mocker: MockerFixture,
         test_client: AsyncClient,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         location_row: LocationRow,
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
         location_id = location_row.id
-        updated_location_row = location_row._replace(**update_location_payload)
+        updated_location_row = location_row._replace(**update_props)
 
         # mock
         mocker.patch.object(LocationsTable, "update", return_value=updated_location_row)
@@ -73,7 +73,7 @@ class TestUnitLocation:
         # update location
         response = await test_client.put(
             f"/v1/location/{location_id}",
-            json=update_location_payload,
+            json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

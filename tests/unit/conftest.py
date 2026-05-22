@@ -67,10 +67,10 @@ def confirmed_user(mocker: MockerFixture, registered_user: UserRow) -> UserRow:
 
 
 @pytest.fixture
-def location_row(location_payload: dict[str, str]) -> LocationRow:
+def location_row(props: dict[str, str]) -> LocationRow:
     return LocationRow(
         id=uuid.uuid4(),
         created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         user_id=uuid.uuid4(),
-        **location_payload,
+        **props,
     )

@@ -138,6 +138,19 @@ class TestConfirm:
         assert response.status_code == 401
 
     @pytest.mark.asyncio
+    async def test_confirm_user_with_random_user_confirmation_token(
+        self,
+        test_client: AsyncClient,
+        registered_user: UserRow,
+        random_user_confirmation_token: str,
+    ) -> None:
+        """Testing confirmation token with different encoded exp."""
+        response = await test_client.get(
+            f"/v1/auth/confirm/{random_user_confirmation_token}"
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio
     async def test_confirm_user_with_access_token(
         self,
         test_client: AsyncClient,

@@ -45,8 +45,12 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 
-- [ ] test update_user with creds email -> unique violation err
-- [ ] review coverage
+- [x] review coverage
+- [x] test location unique violation
+- [x] test confirm user return none
+- [x] rename location payload to props and user payload to creds
+
+- [ ] pydantic-settings?
 
 - [ ] logging lvl debug in all other places? + debug only used in dev?
 
@@ -65,7 +69,6 @@
 - [ ] fix GH actions
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
-- [ ] pydantic-settings?
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 

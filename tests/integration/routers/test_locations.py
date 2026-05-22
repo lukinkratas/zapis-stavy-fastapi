@@ -8,9 +8,11 @@ from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
 from api.schemas import BaseResponse, ResponseWithId
 from api.services.locations import (
+    create_location,
     delete_location,
     select_location_by_id,
 )
+from api.schemas import UpdateProps
 
 
 class TestCreate:
@@ -21,7 +23,7 @@ class TestCreate:
     async def test_create_location(
         self,
         test_client: AsyncClient,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
         db_conn: AsyncConnection,
@@ -29,7 +31,7 @@ class TestCreate:
         """Testing expected case."""
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 201
@@ -44,17 +46,17 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_create_already_created_location(
+    async def test_create_location_conflict(
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 409
@@ -67,11 +69,9 @@ class TestCreate:
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
-        # name spelled wrong
-        location_payload = {"nam": "test"}
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json={"nam": "test"}, # name spelled wrong
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422
@@ -81,13 +81,13 @@ class TestCreate:
     async def test_create_location_by_registered_user(
         self,
         test_client: AsyncClient,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         registered_user: UserRow,
         access_token: str,
     ) -> None:
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 401
@@ -97,7 +97,7 @@ class TestCreate:
     async def test_create_location_with_expired_access_token(
         self,
         test_client: AsyncClient,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         confirmed_user: UserRow,
         expired_access_token: str,
         db_conn: AsyncConnection,
@@ -105,7 +105,7 @@ class TestCreate:
         """Testing access token with different encoded exp."""
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -115,7 +115,7 @@ class TestCreate:
     async def test_create_location_with_random_user_access_token(
         self,
         test_client: AsyncClient,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         confirmed_user: UserRow,
         random_user_access_token: str,
         db_conn: AsyncConnection,
@@ -123,7 +123,7 @@ class TestCreate:
         """Testing access token with random access token."""
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -133,7 +133,7 @@ class TestCreate:
     async def test_create_location_with_confirmation_token(
         self,
         test_client: AsyncClient,
-        location_payload: dict[str, str],
+        props: dict[str, str],
         confirmed_user: UserRow,
         confirmation_token: str,
         db_conn: AsyncConnection,
@@ -141,7 +141,7 @@ class TestCreate:
         """Testing access token with different encoded typ."""
         response = await test_client.post(
             "/v1/location",
-            json=location_payload,
+            json=props,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
@@ -161,15 +161,14 @@ class TestDelete:
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        location_id = created_location.id
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{created_location.id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
 
-        location_from_db = await select_location_by_id(db_conn, location_id)
+        location_from_db = await select_location_by_id(db_conn, created_location.id)
         assert location_from_db is None, "Location still exists in db."
 
     @pytest.mark.integration
@@ -180,9 +179,8 @@ class TestDelete:
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
-        location_id = uuid.uuid4()
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
@@ -197,9 +195,8 @@ class TestDelete:
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
-        location_id = created_location.id
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{created_location.id}",
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -214,9 +211,8 @@ class TestDelete:
         other_user_access_token: str,
     ) -> None:
         """Testing access token with different encoded sub."""
-        location_id = created_location.id
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{created_location.id}",
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 404
@@ -231,9 +227,8 @@ class TestDelete:
         random_user_access_token: str,
     ) -> None:
         """Testing access token with random access token."""
-        location_id = created_location.id
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{created_location.id}",
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -248,9 +243,8 @@ class TestDelete:
         confirmation_token: str,
     ) -> None:
         """Testing access token with random access token."""
-        location_id = created_location.id
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/v1/location/{created_location.id}",
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
@@ -265,42 +259,57 @@ class TestUpdate:
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        location_id = created_location.id
-        location_pre = await select_location_by_id(db_conn, location_id)
+        location_pre = await select_location_by_id(db_conn, created_location.id)
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
 
-        location_post = await select_location_by_id(db_conn, location_id)
+        location_post = await select_location_by_id(db_conn, created_location.id)
         assert location_pre != location_post, "Location was not updated."
 
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_update_location_conflict(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        access_token: str,
+        db_conn: AsyncConnection,
+    ) -> None:
+        location = await create_location(db_conn, confirmed_user.id, props=UpdateProps(name="new"))
+        response = await test_client.put(
+            f"/v1/location/{location.id}",
+            json={"name": created_location.name},
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 409
+
     pytest.mark.integration
+
     @pytest.mark.asyncio
     async def test_update_location_invalid_schema(
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
         """Testing expected case."""
-        location_id = created_location.id
-        # name spelled wrong
-        update_location_payload = {"nam": "update"}
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json={"nam": "update"}, # name spelled wrong
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422
@@ -310,14 +319,13 @@ class TestUpdate:
     async def test_update_non_existing_location(
         self,
         test_client: AsyncClient,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         access_token: str,
     ) -> None:
-        location_id = str(uuid.uuid4())
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{uuid.uuid4()}",
+            json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
@@ -331,15 +339,14 @@ class TestUpdate:
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         expired_access_token: str,
     ) -> None:
         """Testing access token with different encoded exp."""
-        location_id = created_location.id
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json=update_props,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -350,15 +357,14 @@ class TestUpdate:
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         other_user_access_token: str,
     ) -> None:
         """Testing access token with different encoded sub."""
-        location_id = created_location.id
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json=update_props,
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 404
@@ -369,15 +375,14 @@ class TestUpdate:
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         random_user_access_token: str,
     ) -> None:
         """Testing access token with random access token."""
-        location_id = created_location.id
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json=update_props,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -388,15 +393,14 @@ class TestUpdate:
         self,
         test_client: AsyncClient,
         created_location: LocationRow,
-        update_location_payload: dict[str, str],
+        update_props: dict[str, str],
         confirmed_user: UserRow,
         confirmation_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
-        location_id = created_location.id
         response = await test_client.put(
-            f"/v1/location/{location_id}",
-            json=update_location_payload,
+            f"/v1/location/{created_location.id}",
+            json=update_props,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401

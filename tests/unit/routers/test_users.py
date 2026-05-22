@@ -63,14 +63,14 @@ class TestUpdate:
         self,
         mocker: MockerFixture,
         test_client: AsyncClient,
-        update_user_payload: dict[str, str],
+        update_creds: dict[str, str],
         registered_user_row: UserRow,
         access_token: str,
     ) -> None:
         updated_user_from_db = {
-            "email": update_user_payload.get("email") or registered_user_row.email,
-            "password_hash": get_password_hash(update_user_payload["password"])
-            if update_user_payload.get("password") is not None
+            "email": update_creds.get("email") or registered_user_row.email,
+            "password_hash": get_password_hash(update_creds["password"])
+            if update_creds.get("password") is not None
             else registered_user_row.password_hash,
             "id": str(uuid.uuid4()),
             "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
@@ -82,7 +82,7 @@ class TestUpdate:
         # update user
         response = await test_client.put(
             "/v1/user",
-            json=update_user_payload,
+            json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

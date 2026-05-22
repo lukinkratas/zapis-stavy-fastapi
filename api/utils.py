@@ -19,12 +19,7 @@ def build_set_clause(columns: Iterable[str]) -> sql.SQL:
         columns: columns: iterable of column names
 
     Returns: SET clause as SQL query object
-
-    Raises: ValueError, if data iterable is empty
     """
-    if not columns:
-        raise ValueError("At least one column required")
-
     return sql.SQL(", ").join(
         sql.SQL("{columns} = {value_placeholder}").format(
             columns=sql.Identifier(col),

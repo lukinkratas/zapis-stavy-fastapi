@@ -82,19 +82,19 @@ def creds() -> dict[str, str]:
         pytest.param({"password": "update"}, id="password only"),
     ]
 )
-def update_user_payload(request: pytest.FixtureRequest) -> dict[str, str]:
+def update_creds(request: pytest.FixtureRequest) -> dict[str, str]:
     """Used in unit and integration user/update tests."""
     return request.param
 
 
 @pytest.fixture
-def location_payload() -> dict[str, str]:
+def props() -> dict[str, str]:
     """Used in unit and integration location/create tests."""
     return {"name": "test"}
 
 
 @pytest.fixture
-def update_location_payload() -> dict[str, str]:
+def update_props() -> dict[str, str]:
     """Used in unit and integration location/update tests."""
     return {"name": "update"}
 

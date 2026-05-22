@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class BaseResponse(BaseModel):
@@ -24,6 +24,7 @@ class TokenResponse(BaseModel):
 
 class RegisterCreds(BaseModel):
     """Register user credentials request model for validation."""
+
     model_config = ConfigDict(extra="forbid")
     email: EmailStr
     password: str
@@ -31,6 +32,7 @@ class RegisterCreds(BaseModel):
 
 class UpdateCreds(BaseModel):
     """Update user credentials request model for validation."""
+
     model_config = ConfigDict(extra="forbid")
     email: EmailStr | None = None
     password: str | None = None
@@ -38,11 +40,13 @@ class UpdateCreds(BaseModel):
 
 class CreateProps(BaseModel):
     """Create location properties request model for validation."""
+
     model_config = ConfigDict(extra="forbid")
     name: str
 
 
 class UpdateProps(BaseModel):
     """Update location properties request model for validation."""
+
     model_config = ConfigDict(extra="forbid")
     name: str | None = None

@@ -45,23 +45,21 @@ async def other_user(
 async def created_location(
     db_conn: AsyncConnection,
     confirmed_user: UserRow,
-    location_payload: dict[str, str],
+    props: dict[str, str],
 ) -> AsyncGenerator[LocationRow, None]:
-    location = await create_location(
-        db_conn, confirmed_user.id, CreateProps(**location_payload)
-    )
+    location = await create_location(db_conn, confirmed_user.id, CreateProps(**props))
     yield location
     await delete_location(db_conn, location.id, confirmed_user.id)
 
 
 @pytest.fixture
 def expired_access_token(registered_user: UserRow) -> str:
-    return create_access_token(registered_user, expires_delta=timedelta(-1))
+    return create_access_token(registered_user.id, expires_delta=timedelta(-1))
 
 
 @pytest.fixture
 def expired_confirmation_token(registered_user: UserRow) -> str:
-    return create_confirmation_token(registered_user, expires_delta=timedelta(-1))
+    return create_confirmation_token(registered_user.id, expires_delta=timedelta(-1))
 
 
 @pytest.fixture
