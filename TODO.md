@@ -45,8 +45,6 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 
-- [ ] pydantic-settings?
-
 - [ ] logging lvl debug in all other places? + debug only used in dev?
 
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
@@ -73,7 +71,8 @@
 - [ ] LLM advisory + langfuse observability
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
 
-- [ ] test with sqlalchemy
+- [ ] test branch with sqlalchemy
+- [x] test branch with pydantic-settings
 
 - [x] switch from meters to locations
 - [x] use confirmation token
@@ -257,11 +256,16 @@ Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-pytho
 
 ### ENV vars config
 
-  1. python-dotenv
+  1. pydantic-settings
 
-  2. pydantic-settings
-
-    + variables validation
-    + type validation
     + centralized
-    + nested configs
+    + variables validation, unless extra=ignore
+    + type validation - not really utilized in this backend
+    - nested configs - not really usable, required __
+    + lru_cached get_settings in theory works great with FastAPI's dependency injection system, however for example for db settings, this cannot be cleanly utilized in combination with psycopg connection pool (not an endpoint dependency -> no auto execution -> has to be mocked anyway and not dependency overriden)
+
+  2. python-dotenv
+
+    + also centralized
+
+  choice: python-dotenv
