@@ -21,8 +21,8 @@ from .utils import log_async_func, log_func
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-SECRET_KEY = os.environ["SECRET_KEY"]
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+SECRET_KEY = os.environ["JWT_SECRET_KEY"]
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 
