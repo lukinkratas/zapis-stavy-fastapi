@@ -25,13 +25,13 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Setup and teardown of the app."""
     configure_logging()
-    logger.info("Setup")
+    logger.info("API setup")
 
     async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
         app.state.pool = pool
         yield
 
-    logger.info("Teardown")
+    logger.info("API teardown")
 
 
 app = FastAPI(

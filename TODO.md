@@ -45,8 +45,6 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 
-- [ ] logging lvl debug in all other places? + debug only used in dev?
-
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 
 - [ ] services and models create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
