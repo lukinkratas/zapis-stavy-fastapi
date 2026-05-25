@@ -5,14 +5,14 @@ from typing import Any, Iterable
 from psycopg import sql
 
 
-def format_sql_query(sql_query: sql.SQL) -> str:
+def format_sql_query(sql_query: sql.Composed) -> str:
     """Format SQL for logs."""
     sql_query_str = sql.as_string(sql_query)
     sql_query_lines = sql_query_str.split("\n")
     return " ".join([query_line.strip() for query_line in sql_query_lines])
 
 
-def build_set_clause(columns: Iterable[str]) -> sql.SQL:
+def build_set_clause(columns: Iterable[str]) -> sql.Composed:
     """Build comma delimited SET clause: col = %(col)s from columns for UPDATE query.
 
     Args:

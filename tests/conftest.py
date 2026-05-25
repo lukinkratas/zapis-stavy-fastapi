@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, AsyncGenerator
+from typing import AsyncGenerator, Generator
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,6 +13,7 @@ from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_confirmation_token
 from api.main import app
+from api.repositories.users import UserRow
 
 ROOT = Path(__file__).parent.parent.resolve()
 
@@ -28,8 +29,8 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
     )
 
 
-@pytest_asyncio.fixture(scope="session")
-def test_db():
+@pytest.fixture(scope="session")
+def test_db() -> Generator[PostgresContainer, None, None]:
     with PostgresContainer("postgres:18").with_volume_mapping(
         str(ROOT / "sql" / "init.sql"), "/docker-entrypoint-initdb.d/init.sql"
     ) as postgres:
@@ -100,10 +101,10 @@ def update_props() -> dict[str, str]:
 
 
 @pytest.fixture
-def access_token(registered_user: dict[str, Any]) -> str:
+def access_token(registered_user: UserRow) -> str:
     return create_access_token(registered_user.id)
 
 
 @pytest.fixture
-def confirmation_token(registered_user: dict[str, Any]) -> str:
+def confirmation_token(registered_user: UserRow) -> str:
     return create_confirmation_token(registered_user.id)

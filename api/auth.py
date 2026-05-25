@@ -150,14 +150,13 @@ async def get_current_user(
 @log_async_func(logger.debug)
 async def get_current_confirmed_user(
     current_user: Annotated[UserRow, Depends(get_current_user)],
-) -> dict[str, Any]:
+) -> UserRow:
     """Get current user from token.
 
     Args:
         current_user: current authorized user
 
     Returns: user row
-
 
     Raises:
         HTTPException: if user is not confirmed.

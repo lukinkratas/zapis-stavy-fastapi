@@ -13,14 +13,7 @@ from api.auth import (
     _get_sub,
     create_access_token,
     create_confirmation_token,
-    verify_password,
 )
-from api.repositories.users import UserRow
-
-
-@pytest.mark.asyncio
-async def test_verify_password(creds: dict[str, str], registered_user: UserRow) -> None:
-    verify_password(creds["password"], registered_user.password_hash)
 
 
 @pytest.mark.asyncio

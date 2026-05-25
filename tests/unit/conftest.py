@@ -44,7 +44,7 @@ async def test_client() -> AsyncGenerator[AsyncClient, None]:
 def registered_user_row(mocker: MockerFixture, creds: dict[str, str]) -> UserRow:
     return UserRow(
         id=uuid.uuid4(),
-        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        created_at=datetime.now(timezone.utc),
         email=creds["email"],
         password_hash=get_password_hash(creds["password"]),
         confirmed=False,
@@ -70,7 +70,7 @@ def confirmed_user(mocker: MockerFixture, registered_user: UserRow) -> UserRow:
 def location_row(props: dict[str, str]) -> LocationRow:
     return LocationRow(
         id=uuid.uuid4(),
-        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+        created_at=datetime.now(timezone.utc),
         user_id=uuid.uuid4(),
         **props,
     )

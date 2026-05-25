@@ -65,7 +65,7 @@ class TestUnitLocation:
         access_token: str,
     ) -> None:
         location_id = location_row.id
-        updated_location_row = location_row._replace(**update_props)
+        updated_location_row = location_row._replace(**update_props)  # type: ignore [arg-type]
 
         # mock
         mocker.patch.object(LocationsTable, "update", return_value=updated_location_row)
