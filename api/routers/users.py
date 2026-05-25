@@ -9,7 +9,7 @@ import os
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
@@ -121,7 +121,7 @@ async def update(
             raise user_not_found_exception
 
     except UniqueViolation:
-        raise user_exists_exception
+        raise HTTPException(status_code=409, detail="Email already in use")
 
     return BaseResponse(detail="User updated")
 

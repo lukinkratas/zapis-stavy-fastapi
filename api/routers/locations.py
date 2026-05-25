@@ -8,7 +8,7 @@ import logging
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
@@ -74,7 +74,7 @@ async def update(
         location = await update_location(db_conn, id, current_confirmed_user.id, props)
 
         if not location:
-            raise location_not_found_exception
+            raise HTTPException(status_code=409, detail="Name already in use")
 
     except UniqueViolation:
         raise location_exists_exception
