@@ -8,16 +8,16 @@ import logging
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from psycopg import AsyncConnection
-from psycopg.errors import UniqueViolation
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from ..auth import get_current_confirmed_user
-from ..db import connect_to_db
 from ..exceptions import location_exists_exception, location_not_found_exception
-from ..repositories.users import UserRow
 from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
 from ..services.locations import create_location, delete_location, update_location
+from ..db import get_db_session
+from ..models import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/location")
@@ -26,8 +26,8 @@ router = APIRouter(prefix="/v1/location")
 @router.post("", status_code=201)
 async def create(
     props: CreateProps,
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    current_confirmed_user: Annotated[User, Depends(get_current_confirmed_user)],
 ) -> ResponseWithId:
     """Create new location.
 
@@ -42,9 +42,10 @@ async def create(
         HTTPException: if location already exists
     """
     try:
-        location = await create_location(db_conn, current_confirmed_user.id, props)
+        location = await create_location(db_session, current_confirmed_user.id, location)
 
-    except UniqueViolation:
+    except IntegrityError:
+        await db_session.rollback()
         raise location_exists_exception
 
     return ResponseWithId(detail="Location created", id=location.id)
@@ -54,8 +55,8 @@ async def create(
 async def update(
     id: uuid.UUID,
     props: UpdateProps,
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    current_confirmed_user: Annotated[User, Depends(get_current_confirmed_user)],
 ) -> BaseResponse:
     """Update a location.
 
@@ -71,13 +72,14 @@ async def update(
         HTTPException: if location was not found or name already exists.
     """
     try:
-        location = await update_location(db_conn, id, current_confirmed_user.id, props)
+        location = await update_location(db_session, id, current_confirmed_user.id, location)
 
         if not location:
             raise location_not_found_exception
 
-    except UniqueViolation:
-        raise HTTPException(status_code=409, detail="Name already in use")
+    except IntegrityError:
+        await db_session.rollback()
+        raise location_exists_exception
 
     return BaseResponse(detail="Location updated")
 
@@ -85,8 +87,8 @@ async def update(
 @router.delete("/{id}")
 async def delete(
     id: uuid.UUID,
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    current_confirmed_user: Annotated[User, Depends(get_current_confirmed_user)],
 ) -> BaseResponse:
     """Delete a location.
 
@@ -100,9 +102,9 @@ async def delete(
     Raises:
         HTTPException: if location was not found
     """
-    location = await delete_location(db_conn, id, current_confirmed_user.id)
+    deleted = await delete_location(db_session, id, current_confirmed_user.id)
 
-    if not location:
+    if not deleted:
         raise location_not_found_exception
 
     return BaseResponse(detail="Location deleted")

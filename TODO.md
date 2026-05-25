@@ -69,8 +69,8 @@
 - [ ] LLM advisory + langfuse observability
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
 
-- [ ] test branch with sqlalchemy
 - [x] test branch with pydantic-settings
+- [x] test branch with sqlalchemy
 
 - [x] switch from meters to locations
 - [x] use confirmation token

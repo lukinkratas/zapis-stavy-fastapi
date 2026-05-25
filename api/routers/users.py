@@ -9,17 +9,17 @@ import os
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from psycopg import AsyncConnection
-from psycopg.errors import UniqueViolation
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import create_confirmation_token, get_current_user
 from ..aws import ses_send_email
-from ..db import connect_to_db
 from ..exceptions import user_exists_exception, user_not_found_exception
-from ..repositories.users import UserRow
 from ..schemas import BaseResponse, RegisterCreds, ResponseWithId, UpdateCreds
 from ..services.users import delete_user, register_user, update_user
+from ..db import get_db_session
+from ..models import User
 
 ENV = os.getenv("ENV", "dev")
 
@@ -61,7 +61,7 @@ def _send_confirmation_email(email: str, confirmation_url: str) -> None:
 async def register(
     request: Request,
     creds: RegisterCreds,
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     background_tasks: BackgroundTasks,
 ) -> ResponseWithId:
     """Register new user.
@@ -78,9 +78,11 @@ async def register(
         HTTPException: if user already exists
     """
     try:
-        user = await register_user(db_conn, creds)
+        user = await register_user(db_session, creds)
+        await db_session.commit()
 
-    except UniqueViolation:
+    except IntegrityError:
+        await db_session.rollback()
         raise user_exists_exception
 
     confirmation_token = create_confirmation_token(user.id)
@@ -99,8 +101,8 @@ async def register(
 @router.put("")
 async def update(
     creds: UpdateCreds,
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[UserRow, Depends(get_current_user)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> BaseResponse:
     """Update a user.
 
@@ -115,21 +117,24 @@ async def update(
         HTTPException: if user was not found or email already exists.
     """
     try:
-        user = await update_user(db_conn, current_user.id, creds)
+        user = await update_user(db_session, current_user.id, creds)
 
         if not user:
             raise user_not_found_exception
 
-    except UniqueViolation:
-        raise HTTPException(status_code=409, detail="Email already in use")
+        await db_session.commit()
+
+    except IntegrityError:
+        await db_session.rollback()
+        raise user_exists_exception
 
     return BaseResponse(detail="User updated")
 
 
 @router.delete("")
 async def delete(
-    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    current_user: Annotated[UserRow, Depends(get_current_user)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> BaseResponse:
     """Delete a user.
 
@@ -142,9 +147,11 @@ async def delete(
     Raises:
         HTTPException: if user was not found
     """
-    user = await delete_user(db_conn, current_user.id)
+    deleted = await delete_user(db_session, current_user.id)
 
-    if not user:
+    if not deleted:
         raise user_not_found_exception
+
+    await db_session.commit()
 
     return BaseResponse(detail="User deleted")
