@@ -6,13 +6,12 @@ from psycopg import AsyncConnection
 
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
-from api.schemas import BaseResponse, ResponseWithId
+from api.schemas import BaseResponse, ResponseWithId, UpdateProps
 from api.services.locations import (
     create_location,
     delete_location,
     select_location_by_id,
 )
-from api.schemas import UpdateProps
 
 
 class TestCreate:
@@ -71,7 +70,7 @@ class TestCreate:
     ) -> None:
         response = await test_client.post(
             "/v1/location",
-            json={"nam": "test"}, # name spelled wrong
+            json={"nam": "test"},  # name spelled wrong
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422
@@ -287,7 +286,9 @@ class TestUpdate:
         access_token: str,
         db_conn: AsyncConnection,
     ) -> None:
-        location = await create_location(db_conn, confirmed_user.id, props=UpdateProps(name="new"))
+        location = await create_location(
+            db_conn, confirmed_user.id, props=UpdateProps(name="new")
+        )
         response = await test_client.put(
             f"/v1/location/{location.id}",
             json={"name": created_location.name},
@@ -309,7 +310,7 @@ class TestUpdate:
         """Testing expected case."""
         response = await test_client.put(
             f"/v1/location/{created_location.id}",
-            json={"nam": "update"}, # name spelled wrong
+            json={"nam": "update"},  # name spelled wrong
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422

@@ -210,7 +210,7 @@ class TestUpdate:
     ) -> None:
         response = await test_client.put(
             "/v1/user",
-            json={"username": "update@test.net"}, # username instead of email
+            json={"username": "update@test.net"},  # username instead of email
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 422
