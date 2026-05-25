@@ -9,7 +9,7 @@ import os
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
