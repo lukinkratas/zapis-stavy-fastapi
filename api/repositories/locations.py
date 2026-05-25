@@ -19,7 +19,7 @@ class LocationRow(NamedTuple):
     id: uuid.UUID
     created_at: datetime
     user_id: uuid.UUID
-    name: str
+    location_name: str
 
 
 class LocationsTable:
@@ -30,26 +30,26 @@ class LocationsTable:
 
     @log_async_func(logger.debug)
     async def insert(
-        self, db_conn: AsyncConnection, user_id: uuid.UUID, name: str
+        self, db_conn: AsyncConnection, user_id: uuid.UUID, location_name: str
     ) -> LocationRow | None:
         """Insert new location record into db.
 
         Args:
             db_conn: database connection
             user_id: location owner's user id
-            name: name of the location being inserted
+            location_name: name of the location being inserted
 
         Returns: location row
         """
         query = sql.SQL("""
-            INSERT INTO {table} (user_id, name)
-            VALUES (%(user_id)s, %(name)s)
+            INSERT INTO {table} (user_id, location_name)
+            VALUES (%(user_id)s, %(location_name)s)
             RETURNING *;
         """).format(table=sql.Identifier(self.table_name))
         logger.debug(f"SQL query: {format_sql_query(query)}")
 
         async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
-            await cur.execute(query, dict(user_id=user_id, name=name))
+            await cur.execute(query, dict(user_id=user_id, location_name=location_name))
             return await cur.fetchone()
 
     @log_async_func(logger.debug)

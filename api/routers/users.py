@@ -121,7 +121,7 @@ async def update(
             raise user_not_found_exception
 
     except UniqueViolation:
-        raise HTTPException(status_code=409, detail="Email already in use")
+        raise HTTPException(status_code=409, detail="User email already in use")
 
     return BaseResponse(detail="User updated")
 

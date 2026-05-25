@@ -31,7 +31,7 @@ def mock_send_email(mocker: MockerFixture) -> MagicMock:
 @pytest_asyncio.fixture(scope="session")
 def test_db():
     with PostgresContainer("postgres:18").with_volume_mapping(
-        str(ROOT / "init.sql"), "/docker-entrypoint-initdb.d/init.sql"
+        str(ROOT / "sql" / "init.sql"), "/docker-entrypoint-initdb.d/init.sql"
     ) as postgres:
         os.environ["DB_NAME"] = postgres.dbname
         os.environ["DB_USERNAME"] = postgres.username
@@ -90,13 +90,13 @@ def update_creds(request: pytest.FixtureRequest) -> dict[str, str]:
 @pytest.fixture
 def props() -> dict[str, str]:
     """Used in unit and integration location/create tests."""
-    return {"name": "test"}
+    return {"location_name": "test"}
 
 
 @pytest.fixture
 def update_props() -> dict[str, str]:
     """Used in unit and integration location/update tests."""
-    return {"name": "update"}
+    return {"location_name": "update"}
 
 
 @pytest.fixture

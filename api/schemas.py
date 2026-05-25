@@ -42,11 +42,11 @@ class CreateProps(BaseModel):
     """Create location properties request model for validation."""
 
     model_config = ConfigDict(extra="forbid")
-    name: str
+    location_name: str
 
 
 class UpdateProps(BaseModel):
     """Update location properties request model for validation."""
 
     model_config = ConfigDict(extra="forbid")
-    name: str | None = None
+    location_name: str | None = None

@@ -74,10 +74,10 @@ async def update(
         location = await update_location(db_conn, id, current_confirmed_user.id, props)
 
         if not location:
-            raise HTTPException(status_code=409, detail="Name already in use")
+            raise location_not_found_exception
 
     except UniqueViolation:
-        raise location_exists_exception
+        raise HTTPException(status_code=409, detail="Location name already in use")
 
     return BaseResponse(detail="Location updated")
 
