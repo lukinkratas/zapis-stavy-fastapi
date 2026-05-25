@@ -93,7 +93,7 @@ def configure_logging() -> None:
         },
         "loggers": {
             "api": {
-                "handlers": ["stdout", "rotating_file", "watchtower"],
+                "handlers": ["stdout", "rotating_file"] if ENV == "dev" else ["stdout", "watchtower"],
                 "level": "DEBUG" if ENV == "dev" else "INFO",
                 "propagate": False,
             },

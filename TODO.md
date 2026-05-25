@@ -44,6 +44,7 @@
 - [x] use uuid v7
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
+- [x] prod: no file logging (diff between dev and prod)
 
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 
@@ -62,8 +63,6 @@
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
-
-- [ ] prod: no file logging (diff between dev and prod)
 
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
