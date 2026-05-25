@@ -6,7 +6,7 @@ from psycopg import AsyncConnection
 
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
-from api.schemas import BaseResponse, ResponseWithId, CreateProps
+from api.schemas import BaseResponse, CreateProps, ResponseWithId
 from api.services.locations import (
     create_location,
     delete_location,
