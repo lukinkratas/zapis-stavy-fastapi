@@ -45,37 +45,18 @@
 - [x] return pydantic models
 - [x] prod: remove confirmation url from register response json
 - [x] prod: no file logging (diff between dev and prod)
-
-- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
-
-- [ ] services and models create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
-  - [ ] if dynamic fields: allowed fields in models
-  ```
-    ALLOWED_UPDATE_FIELDS = {"email", "password"}
-
-    invalid = set(data) - ALLOWED_UPDATE_FIELDS
-    if invalid:
-        raise ValueError(f"Invalid fields: {invalid}")
-  ```
-
-- [ ] fix GH actions
-- [ ] fix pre-commit
-- [ ] CICD - dev/test/prod branches + make test-cov in test branch
-- [ ] CORS middleware?
-- [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
-
-- [ ] upload pic
-- [ ] LLM advisory + langfuse observability
-- [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
-
+- [x] add user auth
+- [x] add api version into url
+- [x] add health check
+- [x] rate limiting
+- [x] error handling
+- [x] test coverage 95%+
 - [x] test branch with sqlalchemy
 - [x] test branch with pydantic-settings
-
 - [x] switch from meters to locations
 - [x] use confirmation token
 - [x] testcontainers for integration tests
 - [x] id as sub for access token and confirmation token -> confirmation token update table without get_user middle step, be careful with get_uset + authenticate user (comes with email from web form)
-
 - [x] limiting
 - [x] routers prefixes
 - [x] auth separetely
@@ -92,16 +73,30 @@ move invalid and expired token into unit tests?
 - [x] split dbmodels, models and routes
 - [x] pre-commit switch to make cmds
 - [x] pyjwt vs jose jwt: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
-- [ ] respond with {entity, detail?}
-- [ ] get request refactor - move return and success msg from try block to end of func
+- [x] respond with {entity, detail?}
 
-- [x] add user auth
-- [ ] add api version into url
-- [x] add health check
-- [x] rate limiting
-- [ ] error handling
-- [x] test coverage 95%+
-- [ ] add prometheus ?
+- [ ] fix GH actions
+- [ ] fix pre-commit
+- [ ] CICD - dev/test/prod branches + make test-cov in test branch
+- [ ] CORS middleware?
+- [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
+
+- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
+
+- [ ] services and models create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
+  - [ ] if dynamic fields: allowed fields in models
+  ```
+    ALLOWED_UPDATE_FIELDS = {"email", "password"}
+
+    invalid = set(data) - ALLOWED_UPDATE_FIELDS
+    if invalid:
+        raise ValueError(f"Invalid fields: {invalid}")
+  ```
+
+- [ ] upload pic
+- [ ] LLM advisory + langfuse observability
+- [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
+- [ ] prod: add prometheus ?
 
 better stack / logtail cloud logging: https://betterstack.com/community/guides/logging/logging-with-fastapi/
 
@@ -135,134 +130,3 @@ test sync x async performance
 https://www.youtube.com/watch?v=cmnPiUVlIsM
 
 Dockerfile https://github.com/ArjanCodes/examples/blob/main/2025/efficient-python-dockerfile/Dockerfile.10_final
-
-## Decisions Log
-
-### DB
-
-  1. sqlite
-  2. postgresql
-
-  choice: postgresql
-
-### DB Driver
-
-  1. psycopg
-
-    + + minimal
-    + sql query sanitation
-    + dynamic sql query factory -> used for INSERT queries (build dynamically based on req dict keys)
-    + row factory
-    + sync and async
-    - pg only
-
-  2. asyncpg
-
-    + + even faster, than psycopg
-    + sql query sanitation
-    - pg only
-    - async only
-
-
-### ORM or not
-
-  1. sqlmodel (=pydantic + sql alchemy wrapper)
-
-    + FastAPI docs recommended
-    - async not documented
-    - - - db and req/resp validation models coupled
-
-  2. SQLAlchemy
-
-    + easy to switch db engine (sql only)
-    + handles security
-    - subjective: session abstraction mental model (session.add, commit, rollback)
-
-  3. No ORM
-
-    + no bloat
-    + SQL-like queries and db cmds (commit, rollback, etc.)
-    - security
-
-### Dockerfile base image
-
-  1. alpine
-    + tiny
-    + reducing attack surface and pull times
-  
-  2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)
-
-  choice: alpine
-
-### Row class returned from db
-
-  1. dict_row
-
-    - too much overhead
-    - dict methods are not really utilized in the api
-    - fields not static typed
-
-  2. namedtuple_row
-
-    - very small overhead
-    - fields not static typed
-
-  3. custom namedtuple row
-
-    + very small overhead
-    + immutable
-
-  4. custom dataclass row
-
-    + extensible
-    + inheritance
-    + mutable/immutable (frozen=True)
-    + way to lower overhead (slots=True)
-
-  5. custom typeddict row
-
-  choice: custom namedtuple row
-
-### DB ID
-
-  1. incerement ID
-  
-    + appending record into page does not need to re-index
-    - insecure direct object reference
-    - servers attempting to insert record with the same ID
-
-  2. UUID v4
-
-    + random
-    - "page split" - need to re-index, when new record is inserted
-
-  3. UUID v7
-
-    + random
-    + first half is unix timestamp - avoids page splits
-    - need to update database to pg18
-
-### Postgres version
-
-  1. v14 - initial
-  2. v18
-
-    + UUID v7
-
-  choice: v18
-
-### ENV vars config
-
-  1. pydantic-settings
-
-    + centralized
-    + variables validation, unless extra=ignore
-    + type validation - not really utilized in this backend
-    - nested configs - not really usable, required __
-    + lru_cached get_settings in theory works great with FastAPI's dependency injection system, however for example for db settings, this cannot be cleanly utilized in combination with psycopg connection pool (not an endpoint dependency -> no auto execution -> has to be mocked anyway and not dependency overriden)
-
-  2. python-dotenv
-
-    + also centralized
-
-  choice: python-dotenv
