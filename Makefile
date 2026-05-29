@@ -1,10 +1,11 @@
-.PHONY: fmt lint lint-fix typechk test test-int test-all clean-up serve-dev build
+.PHONY: fmt fmtchk lint lintchk typechk test test-int test-all clean-up serve-dev build
 
 help:
 	@echo "Available targets:"
-	@echo "  fmt              - Format the code using Ruff"
-	@echo "  lint             - Check linting of the code using Ruff"
-	@echo "  lint-fix         - Check and fix linting if the code using Ruff"
+	@echo "  fmt              - Format the code using Ruff and Terraform"
+	@echo "  fmtchk           - Check formatting using Ruff and Terraform"
+	@echo "  lint             - Lint the code using Ruff and sqlfluff"
+	@echo "  lintchk          - Check linting using Ruff and sqlfluff"
 	@echo "  typechk          - Type check the code using mypy"
 	@echo "  clean-up         - Clean up"
 	@echo "  test             - Run unit tests"
@@ -18,13 +19,18 @@ fmt:
 	uv run --dev ruff format
 	terraform fmt terraform/
 
+fmtchk:
+	uv run --dev ruff format --check
+	terraform fmt -check terraform/
+
 lint:
+	uv run --dev ruff check --fix
+	uv run --dev sqlfluff fix --dialect postgres  sql/
+
+lintchk:
 	uv run --dev ruff check
 	uv run --dev sqlfluff lint --dialect postgres sql/
 
-lint-fix:
-	uv run --dev ruff check --fix
-	uv run --dev sqlfluff fix --dialect postgres  sql/
 
 typechk:
 	uv run --dev mypy .

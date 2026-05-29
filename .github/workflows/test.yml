@@ -26,13 +26,13 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
-      - name: Format
-        run: make fmt
+      - name: Format check
+        run: make fmtchk
 
-      - name: Lint
-        run: make lint
+      - name: Lint check
+        run: make lintchk
 
-      - name: Typecheck
+      - name: Type check
         run: make typechk
 
       - name: Run unit tests
