@@ -76,6 +76,8 @@ move invalid and expired token into unit tests?
 - [x] respond with {entity, detail?}
 - [x] tf gh action
 
+- [ ] settings for tests mocked - AWS creds, DB settings, JWT settings are not really needed
+
 - [ ] fix GH actions
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
