@@ -9,7 +9,7 @@ from .aws import get_logs_client
 
 load_dotenv()
 
-ENV = os.getenv("ENV", "dev")
+ENV = os.environ["ENV"]
 LOG_DIR = Path("logs")
 
 
