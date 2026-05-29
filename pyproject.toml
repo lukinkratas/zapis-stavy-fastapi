@@ -37,6 +37,11 @@ dev = [
 line-length = 88
 indent-width = 4
 
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
 [tool.ruff.lint]
 extend-select = [
     "E501", # line too long
@@ -63,9 +68,6 @@ ignore = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.ruff.format]
-indent-style = "space"
 
 [tool.mypy]
 strict = true
