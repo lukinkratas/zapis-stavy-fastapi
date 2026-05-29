@@ -1,4 +1,4 @@
 locals {
-  project_name  = "zapis-stavy"
-  policy_suffix = "ZapisStavy"
+  project_name        = "zapis-stavy"
+  project_name_prefix = "ZapisStavy"
 }

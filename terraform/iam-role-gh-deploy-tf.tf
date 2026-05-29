@@ -1,5 +1,5 @@
 resource "aws_iam_role" "gh_deploy_tf" {
-  name = "${local.project_name}-gh-deploy-tf"
+  name = "${local.project_name_prefix}GHAction"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{

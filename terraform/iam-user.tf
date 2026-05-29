@@ -1,5 +1,5 @@
 resource "aws_iam_user" "api" {
-  name = "${local.project_name}-api"
+  name = "${local.project_name_prefix}API"
   path = "/${local.project_name}/"
   tags = aws_servicecatalogappregistry_application.app.application_tag
 }
