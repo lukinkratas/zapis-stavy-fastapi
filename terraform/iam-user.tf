@@ -1,11 +1,11 @@
 resource "aws_iam_user" "api" {
-  name = "${local.project_name_prefix}API"
+  name = "${local.project_name}-api"
   path = "/${local.project_name}/"
   tags = aws_servicecatalogappregistry_application.app.application_tag
 }
 
 resource "aws_iam_user_policy" "ses" {
-  name = "SESSendMail"
+  name = "ses-sendmail"
   user = aws_iam_user.api.name
   policy = jsonencode({
     Version = "2012-10-17"
@@ -18,7 +18,7 @@ resource "aws_iam_user_policy" "ses" {
 }
 
 resource "aws_iam_user_policy" "logs" {
-  name = "CloudWatchLogs"
+  name = "logs"
   user = aws_iam_user.api.name
   policy = jsonencode({
     Version = "2012-10-17"

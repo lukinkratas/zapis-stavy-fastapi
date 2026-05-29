@@ -1,5 +1,6 @@
 resource "aws_iam_role" "gh_deploy_tf" {
-  name = "${local.project_name_prefix}GHAction"
+  name = "${local.project_name}-gh-action"
+  path = "/${local.project_name}/"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -20,7 +21,7 @@ resource "aws_iam_role" "gh_deploy_tf" {
 }
 
 resource "aws_iam_role_policy" "s3_tf_state" {
-  name = "S3TfState"
+  name = "s3-tf-state"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -52,7 +53,7 @@ resource "aws_iam_role_policy" "s3_tf_state" {
 }
 
 resource "aws_iam_role_policy" "app" {
-  name = "ServiceCatalogApplication"
+  name = "app"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -74,7 +75,7 @@ resource "aws_iam_role_policy" "app" {
 }
 
 resource "aws_iam_role_policy" "resource_group" {
-  name = "ResourceGroup"
+  name = "resource-group"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -101,7 +102,7 @@ resource "aws_iam_role_policy" "resource_group" {
 }
 
 resource "aws_iam_role_policy" "ses" {
-  name = "SES"
+  name = "ses"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -118,7 +119,7 @@ resource "aws_iam_role_policy" "ses" {
 }
 
 resource "aws_iam_role_policy" "logs" {
-  name = "Logs"
+  name = "logs"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -139,8 +140,8 @@ resource "aws_iam_role_policy" "logs" {
   })
 }
 
-resource "aws_iam_role_policy" "iam" {
-  name = "IAM"
+resource "aws_iam_role_policy" "iam_api_user" {
+  name = "iam-api-user"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -151,21 +152,8 @@ resource "aws_iam_role_policy" "iam" {
           "iam:CreateUser",
           "iam:CreateRole",
         ],
-        Resource = [
-          "arn:aws:iam::*:user/${local.project_name}/*",
-          "arn:aws:iam::*:role/${local.project_name}/*",
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "iam_api_user" {
-  name = "IAMApiUser"
-  role = aws_iam_role.gh_deploy_tf.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+        Resource = "arn:aws:iam::*:user/${local.project_name}/*"
+      },
       {
         Effect = "Allow"
         Action = [
@@ -187,11 +175,19 @@ resource "aws_iam_role_policy" "iam_api_user" {
 }
 
 resource "aws_iam_role_policy" "iam_self" {
-  name = "IAMSelf"
+  name = "iam-self"
   role = aws_iam_role.gh_deploy_tf.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreateUser",
+          "iam:CreateRole",
+        ],
+        Resource = "arn:aws:iam::*:role/${local.project_name}/*"
+      },
       {
         Effect = "Allow"
         Action = [
