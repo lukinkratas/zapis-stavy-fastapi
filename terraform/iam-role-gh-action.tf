@@ -1,4 +1,4 @@
-resource "aws_iam_role" "gh_deploy_tf" {
+resource "aws_iam_role" "gh_action" {
   name = "${local.project_name}-gh-action"
   path = "/${local.project_name}/"
   assume_role_policy = jsonencode({
@@ -22,7 +22,7 @@ resource "aws_iam_role" "gh_deploy_tf" {
 
 resource "aws_iam_role_policy" "s3_tf_state" {
   name = "s3-tf-state"
-  role = aws_iam_role.gh_deploy_tf.id
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -54,13 +54,13 @@ resource "aws_iam_role_policy" "s3_tf_state" {
 
 resource "aws_iam_role_policy" "app" {
   name = "app"
-  role = aws_iam_role.gh_deploy_tf.id
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow",
-        "Action" : [
+        Action = [
           "servicecatalog:CreateApplication",
           "servicecatalog:DeleteApplication",
           "servicecatalog:GetApplication",
@@ -76,13 +76,13 @@ resource "aws_iam_role_policy" "app" {
 
 resource "aws_iam_role_policy" "resource_group" {
   name = "resource-group"
-  role = aws_iam_role.gh_deploy_tf.id
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow",
-        "Action" : [
+        Action = [
           "resource-groups:CreateGroup",
           "resource-groups:DeleteGroup",
           "resource-groups:GetGroup",
@@ -103,7 +103,7 @@ resource "aws_iam_role_policy" "resource_group" {
 
 resource "aws_iam_role_policy" "ses" {
   name = "ses"
-  role = aws_iam_role.gh_deploy_tf.id
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -120,7 +120,7 @@ resource "aws_iam_role_policy" "ses" {
 
 resource "aws_iam_role_policy" "logs" {
   name = "logs"
-  role = aws_iam_role.gh_deploy_tf.id
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -140,18 +140,52 @@ resource "aws_iam_role_policy" "logs" {
   })
 }
 
-resource "aws_iam_role_policy" "iam_api_user" {
-  name = "iam-api-user"
-  role = aws_iam_role.gh_deploy_tf.id
+resource "aws_iam_role_policy" "iam_self" {
+  name = "iam-self"
+  role = aws_iam_role.gh_action.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow",
+        Action = "iam:CreateRole"
+        Resource = "arn:aws:iam::*:role/${local.project_name}/*"
+      },
+      {
+        Effect = "Allow"
         Action = [
-          "iam:CreateUser",
-          "iam:CreateRole",
-        ],
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListRolePolicies",
+        ]
+        Resource = aws_iam_role.gh_action.arn
+      },
+      {
+        Effect = "Deny"
+        Action = [
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:SetDefaultPolicyVersion",
+        ]
+        Resource = aws_iam_role.gh_action.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "iam_api_user" {
+  name = "iam-api-user"
+  role = aws_iam_role.gh_action.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "iam:CreateUser"
         Resource = "arn:aws:iam::*:user/${local.project_name}/*"
       },
       {
@@ -169,46 +203,6 @@ resource "aws_iam_role_policy" "iam_api_user" {
           "iam:UntagUser",
         ]
         Resource = aws_iam_user.api.arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "iam_self" {
-  name = "iam-self"
-  role = aws_iam_role.gh_deploy_tf.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "iam:CreateUser",
-          "iam:CreateRole",
-        ],
-        Resource = "arn:aws:iam::*:role/${local.project_name}/*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:GetRole",
-          "iam:GetRolePolicy",
-          "iam:ListAttachedRolePolicies",
-          "iam:ListRolePolicies",
-        ]
-        Resource = aws_iam_role.gh_deploy_tf.arn
-      },
-      {
-        Effect = "Deny"
-        Action = [
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
-          "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:CreatePolicyVersion",
-          "iam:SetDefaultPolicyVersion",
-        ]
-        Resource = aws_iam_role.gh_deploy_tf.arn
       }
     ]
   })
