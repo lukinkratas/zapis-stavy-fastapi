@@ -74,10 +74,7 @@ move invalid and expired token into unit tests?
 - [x] pre-commit switch to make cmds
 - [x] pyjwt vs jose jwt: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 - [x] respond with {entity, detail?}
-
-- [x] tf gh action?
-- [x] rename tf user to api?
-- [x] narrow down gh action perms
+- [x] tf gh action
 
 - [ ] fix GH actions
 - [ ] fix pre-commit
