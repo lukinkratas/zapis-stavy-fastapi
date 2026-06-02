@@ -11,17 +11,18 @@ from psycopg.conninfo import make_conninfo
 from pytest_mock import MockerFixture
 from testcontainers.postgres import PostgresContainer
 
+from api.auth import create_access_token, create_confirmation_token
+from api.main import app
+from api.repositories.users import UserRow
+
+ROOT = Path(__file__).parent.parent.resolve()
+
 os.environ["ENV"] = "dev"
 os.environ["JWT_SECRET_KEY"] = "random"
 os.environ["AWS_ACCESS_KEY_ID"] = "random"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "random"
 os.environ["AWS_REGION_NAME"] = "random"
 
-from api.auth import create_access_token, create_confirmation_token
-from api.main import app
-from api.repositories.users import UserRow
-
-ROOT = Path(__file__).parent.parent.resolve()
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
