@@ -46,6 +46,12 @@ def test_db() -> Generator[PostgresContainer, None, None]:
 async def test_client(test_db: PostgresContainer) -> AsyncGenerator[AsyncClient, None]:
     app.state.limiter.enabled = False
 
+    os.environ["ENV"] = "dev"
+    os.environ["JWT_SECRET_KEY"] = "random"
+    os.environ["AWS_ACCESS_KEY_ID"] = "random"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "random"
+    os.environ["AWS_REGION_NAME"] = "random"
+
     async with app.router.lifespan_context(app):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"

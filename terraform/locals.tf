@@ -1,1 +1,1 @@
-locals {project_name = "zapis-stavy"}
+locals { project_name = "zapis-stavy" }

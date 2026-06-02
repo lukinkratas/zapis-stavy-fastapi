@@ -147,8 +147,8 @@ resource "aws_iam_role_policy" "iam_self" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
-        Action = "iam:CreateRole"
+        Effect   = "Allow",
+        Action   = "iam:CreateRole"
         Resource = "arn:aws:iam::*:role/${local.project_name}/*"
       },
       {
@@ -184,8 +184,8 @@ resource "aws_iam_role_policy" "iam_api_user" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
-        Action = "iam:CreateUser"
+        Effect   = "Allow",
+        Action   = "iam:CreateUser"
         Resource = "arn:aws:iam::*:user/${local.project_name}/*"
       },
       {
