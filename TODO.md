@@ -76,9 +76,7 @@ move invalid and expired token into unit tests?
 - [x] respond with {entity, detail?}
 - [x] tf gh action
 - [x] settings for tests mocked - AWS creds, DB settings, JWT settings are not really needed
-
-- [ ] implement ENV = test: logging_config
-
+- [x] implement ENV = test: logging_config
 
 - [ ] pydantic-settings + dependency overriden in tests
   - [ ] Settings - ENV
