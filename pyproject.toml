@@ -87,3 +87,6 @@ asyncio_default_test_loop_scope = "session"
 [tool.pytest_env]
 ENV = "dev"
 JWT_SECRET_KEY = "secret"
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
+AWS_REGION_NAME = ""
