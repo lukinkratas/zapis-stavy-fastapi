@@ -75,6 +75,7 @@ strict = true
 explicit_package_bases = true
 ignore_missing_imports = true
 disable_error_code = ["no-any-return", "union-attr", "misc"]
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 markers = [

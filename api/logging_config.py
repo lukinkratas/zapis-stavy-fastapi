@@ -2,6 +2,7 @@ import os
 import socket
 from logging.config import dictConfig
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -15,8 +16,7 @@ LOG_DIR = Path("logs")
 
 def configure_logging() -> None:
     """Configure logging."""
-
-    filters = {
+    filters: dict[str, Any] = {
         "correlation_id": {
             "()": "asgi_correlation_id.CorrelationIdFilter",
             "uuid_length": 8 if ENV == "dev" else 32,
@@ -24,7 +24,7 @@ def configure_logging() -> None:
         },
     }
 
-    formatters = {
+    formatters: dict[str, Any] = {
         "simple": {
             "class": "logging.Formatter",
             "datefmt": "%Y-%m-%dT%H:%M:%SZ",
@@ -63,7 +63,7 @@ def configure_logging() -> None:
         },
     }
 
-    handlers = {
+    handlers: dict[str, Any] = {
         "stdout": {
             "class": "logging.StreamHandler",
             "level": "DEBUG",
