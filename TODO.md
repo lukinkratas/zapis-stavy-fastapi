@@ -75,8 +75,10 @@ move invalid and expired token into unit tests?
 - [x] pyjwt vs jose jwt: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 - [x] respond with {entity, detail?}
 - [x] tf gh action
+- [x] settings for tests mocked - AWS creds, DB settings, JWT settings are not really needed
 
-- [ ] settings for tests mocked - AWS creds, DB settings, JWT settings are not really needed
+- [ ] implement ENV = test: logging_config
+
 
 - [ ] pydantic-settings + dependency overriden in tests
   - [ ] Settings - ENV

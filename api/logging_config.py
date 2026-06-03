@@ -87,7 +87,10 @@ def configure_logging() -> None:
         active_handlers.append("rotating_file")
         log_level = "DEBUG"
 
-    else:
+    elif ENV == "test":
+        log_level = "DEBUG"
+
+    elif ENV == "prod":
         handlers["watchtower"] = {
             "class": "watchtower.CloudWatchLogHandler",
             "boto3_client": get_logs_client(),
