@@ -133,19 +133,21 @@ docker compose up -d
 
 ### ENV vars config
 
-  1. pydantic-settings
+  1. python-dotenv
+
+    + centralized
+    - ENV vars missing in test GH action -> add them manually via os.environ -> linting issue (env vars have to be set prior to imports)
+
+  2. pydantic-settings
 
     + centralized
     + variables validation, unless extra=ignore
     + type validation - not really utilized in this backend
-    - nested configs - not really usable, required __
-    + lru_cached get_settings in theory works great with FastAPI's dependency injection system, however for example for db settings, this cannot be cleanly utilized in combination with psycopg connection pool (not an endpoint dependency -> no auto execution -> has to be mocked anyway and not dependency overriden)
+    + configs split - db, aws, jwt, etc.
+    + lru_cached get_settings functions complement with FastAPI's dependency injection system
+    - nested configs - not really usable - require __ in env var names
 
-  2. python-dotenv
-
-    + also centralized
-
-  choice: python-dotenv - totally sufficient, can be changed to pydantic-settings, once it's relly utilized
+  choice: 
 
 ## Resources
 

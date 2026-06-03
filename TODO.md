@@ -78,6 +78,23 @@ move invalid and expired token into unit tests?
 
 - [ ] settings for tests mocked - AWS creds, DB settings, JWT settings are not really needed
 
+- [ ] pydantic-settings + dependency overriden in tests
+  - [ ] Settings - ENV
+  - [ ] DbSettings - DB_NAME, DB_USERNAME, DB_PASSWORD
+    - api.db.get_conn_info
+  - [ ] JwtSettings - JWT_SECRET_KEY
+    - api.auth._create_jwt_token
+      -> create_access_token -> /auth/login
+      -> create_confirmation_token -> /users/register
+    - api.auth._get_sub
+      -> get_current_user > /users/update and /users/delete
+      -> /auth/confirm
+  - [ ] AwsSettings - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME
+    - ap.aws.session
+      -> ses_send_email -> routers.users._send_confirmation_email -> /users/register
+
+- [ ] _get_sub -> get_sub
+
 - [ ] fix GH actions
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch

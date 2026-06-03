@@ -30,6 +30,7 @@ dev = [
     "httpx>=0.28.1",
     "testcontainers[postgres]>=4.14.2",
     "sqlfluff>=4.2.1",
+    "pytest-env>=1.5.1",
 ]
 
 
@@ -82,3 +83,7 @@ markers = [
 ]
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
+
+[tool.pytest_env]
+ENV = "dev"
+JWT_SECRET_KEY = "secret"
