@@ -136,7 +136,7 @@ docker compose up -d
   1. python-dotenv
 
     + centralized
-    - ENV vars missing in test GH action -> add them manually via os.environ -> linting issue (env vars have to be set prior to imports)
+    - ENV vars missing in test GH action -> add them manually via os.environ -> linting issue (env vars have to be set prior to imports) -> pytest-env
 
   2. pydantic-settings
 
