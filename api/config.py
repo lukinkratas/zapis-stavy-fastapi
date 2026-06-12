@@ -11,6 +11,18 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
+class DbSettings(BaseSettings):
+    """Database settings."""
+
+    name: str
+    username: str
+    password: str
+    host: str = "postgres"
+    port: int = 5432
+
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="DB_", extra="ignore")
+
+
 class JwtSettings(BaseSettings):
     """Auth settings."""
 
@@ -38,6 +50,12 @@ class AwsSettings(BaseSettings):
 def get_settings() -> Settings:
     """Lazy init app settings."""
     return Settings()
+
+
+@lru_cache
+def get_db_settings() -> DbSettings:
+    """Lazy init database settings."""
+    return DbSettings()
 
 
 @lru_cache
