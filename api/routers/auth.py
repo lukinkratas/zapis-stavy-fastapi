@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg import AsyncConnection
 
-from ..auth import _get_sub, authenticate_user, create_access_token
+from ..auth import authenticate_user, create_access_token, get_sub
 from ..db import connect_to_db
 from ..exceptions import token_exception
 from ..schemas import BaseResponse, TokenResponse
@@ -50,7 +50,7 @@ async def confirm(
 
     Returns: dict with detail message
     """
-    user_id = _get_sub(token, typ="confirmation")
+    user_id = get_sub(token, typ="confirmation")
     user = await confirm_user(db_conn, user_id)
 
     if user is None:

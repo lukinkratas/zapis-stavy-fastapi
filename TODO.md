@@ -91,8 +91,7 @@ move invalid and expired token into unit tests?
       -> ses_send_email -> routers.users._send_confirmation_email -> /users/register
   - [x] DbSettings - DB_NAME, DB_USERNAME, DB_PASSWORD
     - api.db.get_conn_info
-
-- [ ] _get_sub -> get_sub
+- [x] _get_sub -> get_sub
 - [ ] add /api/ in the app
 
 - [ ] fix GH actions
