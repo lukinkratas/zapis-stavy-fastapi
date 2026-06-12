@@ -149,7 +149,7 @@ docker compose up -d
     + lru_cached get_settings functions complement with FastAPI's dependency injection system
     - nested configs - not really usable - require __ in env var names
 
-  choice: 
+  choice: pydantic-settings - to be PROD grade and acc. to fastapi docs
 
 ## Resources
 
