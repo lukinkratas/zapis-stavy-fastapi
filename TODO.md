@@ -95,8 +95,9 @@ move invalid and expired token into unit tests?
 - [x] add /api/ in the app
 - [x] use from unittest.mock import patch instead of pytest_mock
 - [x] mock DbSettings in conftest
+- [x] fix GH actions
+- [x] add integration tests GH action
 
-- [ ] fix GH actions
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] CORS middleware?
