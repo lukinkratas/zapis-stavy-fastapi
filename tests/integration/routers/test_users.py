@@ -119,7 +119,8 @@ class TestDelete:
         )
 
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {other_user_access_token}"}
+            "/api/v1/user",
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 200
 
@@ -138,7 +139,8 @@ class TestDelete:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {random_user_access_token}"}
+            "/api/v1/user",
+            headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
 
