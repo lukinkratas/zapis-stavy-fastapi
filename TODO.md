@@ -115,6 +115,8 @@ move invalid and expired token into unit tests?
         raise ValueError(f"Invalid fields: {invalid}")
   ```
 
+- [ ] bug: test GH action did not fail on failed coverage !
+
 - [ ] upload pic
 - [ ] LLM advisory + langfuse observability
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
