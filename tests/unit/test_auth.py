@@ -7,29 +7,44 @@ import pytest
 from fastapi import HTTPException
 
 from api.auth import (
-    ALGORITHM,
-    SECRET_KEY,
     _create_jwt_token,
     _get_sub,
     create_access_token,
     create_confirmation_token,
+    _create_jwt_token,
 )
+from api.config import get_jwt_settings, JwtSettings
 
+@pytest.fixture
+def jwt_settings() -> JwtSettings:
+    return get_jwt_settings()
 
 @pytest.mark.asyncio
-async def test_create_access_token() -> None:
+async def test_create_jwt_token(jwt_settings: JwtSettings) -> None:
+    token = _create_jwt_token({"random": "random"}, expires_delta=timedelta(minutes=1))
+    decoded_token = jwt.decode(
+        token, key=jwt_settings.secret_key, algorithms=[jwt_settings.algorithm]
+    )
+    assert decoded_token["random"] == "random"
+
+@pytest.mark.asyncio
+async def test_create_access_token(jwt_settings: JwtSettings) -> None:
     user_id = uuid.uuid4()
     token = create_access_token(user_id)
-    decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+    decoded_token = jwt.decode(
+        token, key=jwt_settings.secret_key, algorithms=[jwt_settings.algorithm]
+    )
     assert decoded_token["sub"] == str(user_id)
     assert decoded_token["type"] == "access"
 
 
 @pytest.mark.asyncio
-async def test_create_confirmation_token() -> None:
+async def test_create_confirmation_token(jwt_settings: JwtSettings) -> None:
     user_id = uuid.uuid4()
     token = create_confirmation_token(user_id)
-    decoded_token = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+    decoded_token = jwt.decode(
+        token, key=jwt_settings.secret_key, algorithms=[jwt_settings.algorithm]
+    )
     assert decoded_token["sub"] == str(user_id)
     assert decoded_token["type"] == "confirmation"
 
@@ -47,7 +62,7 @@ def test_get_sub(
 ) -> None:
     user_id = uuid.uuid4()
     token = create_token_func(user_id)
-    assert _get_sub(token, typ=typ) == str(user_id)
+    assert _get_sub(token, typ) == str(user_id)
 
 
 def test_get_sub_invalid() -> None:

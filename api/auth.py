@@ -1,29 +1,24 @@
 import logging
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any, Literal
 
 import jwt
-from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from psycopg import AsyncConnection
 
+from .config import get_jwt_settings
 from .db import connect_to_db
 from .exceptions import credentials_exception, token_exception
 from .repositories.users import UserRow
 from .security import verify_password
 from .services.users import select_user_by_email, select_user_by_id
 from .utils import log_async_func, log_func
+from .config import JwtSettings
 
-load_dotenv()
 logger = logging.getLogger(__name__)
-
-SECRET_KEY = os.environ["JWT_SECRET_KEY"]
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 
 
@@ -60,8 +55,13 @@ def _create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
 
     Returns: encoded JWT token
     """
+    jwt_settings = get_jwt_settings()
     expire = datetime.now(timezone.utc) + expires_delta
-    return jwt.encode(data | {"exp": expire}, key=SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        data | {"exp": expire},
+        key=jwt_settings.secret_key,
+        algorithm=jwt_settings.algorithm,
+    )
 
 
 @log_func(logger.debug)
@@ -105,8 +105,11 @@ def _get_sub(token: str, typ: Literal["access", "confirmation"]) -> str:
 
     Returns: decoded user id
     """
+    jwt_settings = get_jwt_settings()
     try:
-        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, key=jwt_settings.secret_key, algorithms=[jwt_settings.algorithm]
+        )
 
     except InvalidTokenError as e:
         raise token_exception from e
