@@ -20,7 +20,7 @@ from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
 from ..services.locations import create_location, delete_location, update_location
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/v1/location")
+router = APIRouter(prefix="/api/v1/location")
 
 
 @router.post("", status_code=201)

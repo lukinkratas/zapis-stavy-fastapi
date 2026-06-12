@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://127.0.0.1:8080/v1/auth/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiMDE5ZTQ3MjQtY2VmYi03NTZiLTgyY2ItODRiODYwZDMyYTgyIiwiZXhwIjoxNzc5Mzk2NDU1fQ.temBm2VvIWlRrj1UPASSUPrJY23yp9UKsMSvuTWodoE
+  url: http://127.0.0.1:8080/api/v1/auth/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiY29uZmlybWF0aW9uIiwic3ViIjoiMDE5ZTQ3MjQtY2VmYi03NTZiLTgyY2ItODRiODYwZDMyYTgyIiwiZXhwIjoxNzc5Mzk2NDU1fQ.temBm2VvIWlRrj1UPASSUPrJY23yp9UKsMSvuTWodoE
   body:
     type: json
     data: ""

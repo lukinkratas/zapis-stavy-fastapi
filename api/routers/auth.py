@@ -14,7 +14,7 @@ from ..schemas import BaseResponse, TokenResponse
 from ..services.auth import confirm_user
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/v1/auth")
+router = APIRouter(prefix="/api/v1/auth")
 
 
 @router.post("/token")

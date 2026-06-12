@@ -21,7 +21,7 @@ class TestLogin:
             "username": creds["email"],
             "password": creds["password"],  # plain password
         }
-        response = await test_client.post("/v1/auth/token", data=data)
+        response = await test_client.post("/api/v1/auth/token", data=data)
         assert response.status_code == 200
         assert TokenResponse.model_validate(response.json())
 
@@ -37,6 +37,6 @@ class TestConfirm:
         registered_user: UserRow,
         confirmation_token: str,
     ) -> None:
-        response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
+        response = await test_client.get(f"/api/v1/auth/confirm/{confirmation_token}")
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())

@@ -27,7 +27,7 @@ class TestRegister:
         mocker.patch.object(UsersTable, "insert", return_value=registered_user_row)
 
         # register user
-        response = await test_client.post("/v1/user/register", json=creds)
+        response = await test_client.post("/api/v1/user/register", json=creds)
         assert response.status_code == 201
         assert ResponseWithId.model_validate(response.json())
         mock_send_email.assert_called_once()
@@ -49,7 +49,7 @@ class TestDelete:
 
         # delete registered user
         response = await test_client.delete(
-            "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
@@ -81,7 +81,7 @@ class TestUpdate:
 
         # update user
         response = await test_client.put(
-            "/v1/user",
+            "/api/v1/user",
             json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )

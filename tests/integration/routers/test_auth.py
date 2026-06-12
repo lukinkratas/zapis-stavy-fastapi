@@ -23,7 +23,7 @@ class TestLogin:
             "password": creds["password"],  # plain password
         }
         response = await test_client.post(
-            "/v1/auth/token",
+            "/api/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -44,7 +44,7 @@ class TestLogin:
             "password": creds["password"],  # plain password
         }
         response = await test_client.post(
-            "/v1/auth/token",
+            "/api/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -64,7 +64,7 @@ class TestLogin:
             "password": "invalid",  # plain password
         }
         response = await test_client.post(
-            "/v1/auth/token",
+            "/api/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -81,7 +81,7 @@ class TestLogin:
             "password": "password",  # plain password
         }
         response = await test_client.post(
-            "/v1/auth/token",
+            "/api/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -102,7 +102,7 @@ class TestConfirm:
         """Testing expected case."""
         assert registered_user.confirmed is False, "User already confirmed."
 
-        response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
+        response = await test_client.get(f"/api/v1/auth/confirm/{confirmation_token}")
 
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
@@ -118,7 +118,7 @@ class TestConfirm:
         confirmation_token: str,
         db_conn: AsyncConnection,
     ) -> None:
-        response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
+        response = await test_client.get(f"/api/v1/auth/confirm/{confirmation_token}")
 
         assert response.status_code == 200
         user = await users_table.select_by_id(db_conn, confirmed_user.id)
@@ -133,7 +133,7 @@ class TestConfirm:
     ) -> None:
         """Testing confirmation token with different encoded exp."""
         response = await test_client.get(
-            f"/v1/auth/confirm/{expired_confirmation_token}"
+            f"/api/v1/auth/confirm/{expired_confirmation_token}"
         )
         assert response.status_code == 401
 
@@ -146,7 +146,7 @@ class TestConfirm:
     ) -> None:
         """Testing confirmation token with different encoded exp."""
         response = await test_client.get(
-            f"/v1/auth/confirm/{random_user_confirmation_token}"
+            f"/api/v1/auth/confirm/{random_user_confirmation_token}"
         )
         assert response.status_code == 401
 
@@ -158,5 +158,5 @@ class TestConfirm:
         access_token: str,
     ) -> None:
         """Testing access token with different encoded typ."""
-        response = await test_client.get(f"/v1/auth/confirm/{access_token}")
+        response = await test_client.get(f"/api/v1/auth/confirm/{access_token}")
         assert response.status_code == 401

@@ -25,7 +25,7 @@ class TestUnitLocation:
 
         # create location
         response = await test_client.post(
-            "/v1/location",
+            "/api/v1/location",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -48,7 +48,7 @@ class TestUnitLocation:
 
         # delete created location
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/api/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -72,7 +72,7 @@ class TestUnitLocation:
 
         # update location
         response = await test_client.put(
-            f"/v1/location/{location_id}",
+            f"/api/v1/location/{location_id}",
             json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )

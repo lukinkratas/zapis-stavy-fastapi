@@ -25,7 +25,7 @@ ENV = os.getenv("ENV", "dev")
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=True)
-router = APIRouter(prefix="/v1/user")
+router = APIRouter(prefix="/api/v1/user")
 
 
 def _send_confirmation_email(email: str, confirmation_url: str) -> None:

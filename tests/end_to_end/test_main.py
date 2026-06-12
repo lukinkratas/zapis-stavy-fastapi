@@ -21,13 +21,13 @@ class TestEndToEnd:
         mock_send_email: MagicMock,
     ) -> None:
         # register user
-        response = await test_client.post("/v1/user/register", json=creds)
+        response = await test_client.post("/api/v1/user/register", json=creds)
         assert response.status_code == 201
 
         # confirm user
         user_id = response.json()["id"]
         confirmation_token = create_confirmation_token(user_id)
-        response = await test_client.get(f"/v1/auth/confirm/{confirmation_token}")
+        response = await test_client.get(f"/api/v1/auth/confirm/{confirmation_token}")
         assert response.status_code == 200
 
         # login / get access token
@@ -46,7 +46,7 @@ class TestEndToEnd:
 
         # update user
         response = await test_client.put(
-            "/v1/user",
+            "/api/v1/user",
             json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -54,7 +54,7 @@ class TestEndToEnd:
 
         # create location
         response = await test_client.post(
-            "/v1/location",
+            "/api/v1/location",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -65,7 +65,7 @@ class TestEndToEnd:
 
         # update location
         response = await test_client.put(
-            f"/v1/location/{location_id}",
+            f"/api/v1/location/{location_id}",
             json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -73,13 +73,13 @@ class TestEndToEnd:
 
         # delete created location
         response = await test_client.delete(
-            f"/v1/location/{location_id}",
+            f"/api/v1/location/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
 
         # delete registered user
         response = await test_client.delete(
-            "/v1/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200

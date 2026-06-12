@@ -92,7 +92,9 @@ move invalid and expired token into unit tests?
   - [x] DbSettings - DB_NAME, DB_USERNAME, DB_PASSWORD
     - api.db.get_conn_info
 - [x] _get_sub -> get_sub
-- [ ] add /api/ in the app
+- [x] add /api/ in the app
+
+- [ ] use DbSettings in conftest ?
 
 - [ ] fix GH actions
 - [ ] fix pre-commit
