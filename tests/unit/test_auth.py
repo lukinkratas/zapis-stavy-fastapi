@@ -11,13 +11,14 @@ from api.auth import (
     _get_sub,
     create_access_token,
     create_confirmation_token,
-    _create_jwt_token,
 )
-from api.config import get_jwt_settings, JwtSettings
+from api.config import JwtSettings, get_jwt_settings
+
 
 @pytest.fixture
 def jwt_settings() -> JwtSettings:
     return get_jwt_settings()
+
 
 @pytest.mark.asyncio
 async def test_create_jwt_token(jwt_settings: JwtSettings) -> None:
@@ -26,6 +27,7 @@ async def test_create_jwt_token(jwt_settings: JwtSettings) -> None:
         token, key=jwt_settings.secret_key, algorithms=[jwt_settings.algorithm]
     )
     assert decoded_token["random"] == "random"
+
 
 @pytest.mark.asyncio
 async def test_create_access_token(jwt_settings: JwtSettings) -> None:

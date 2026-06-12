@@ -16,7 +16,6 @@ from .repositories.users import UserRow
 from .security import verify_password
 from .services.users import select_user_by_email, select_user_by_id
 from .utils import log_async_func, log_func
-from .config import JwtSettings
 
 logger = logging.getLogger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
