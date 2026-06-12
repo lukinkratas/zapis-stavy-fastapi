@@ -10,7 +10,7 @@ from psycopg.conninfo import make_conninfo
 from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_confirmation_token
-from api.config import DbSettings, get_db_settings
+from api.config import DbSettings
 from api.main import app
 from api.repositories.users import UserRow
 
@@ -38,10 +38,7 @@ def test_db() -> Generator[PostgresContainer, None, None]:
 
 
 @pytest.fixture(scope="session")
-def mock_get_db_settings(
-    test_db: PostgresContainer,
-) -> Generator[MagicMock, None, None]:
-    get_db_settings.cache_clear()
+def mock_db_settings(test_db: PostgresContainer) -> Generator[MagicMock, None, None]:
     db_settings = DbSettings(
         name=test_db.dbname,
         username=test_db.username,
@@ -54,9 +51,7 @@ def mock_get_db_settings(
 
 
 @pytest_asyncio.fixture(scope="session")
-async def test_client(
-    mock_get_db_settings: MagicMock,
-) -> AsyncGenerator[AsyncClient, None]:
+async def test_client(mock_db_settings: MagicMock) -> AsyncGenerator[AsyncClient, None]:
     app.state.limiter.enabled = False
 
     async with app.router.lifespan_context(app):
