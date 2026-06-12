@@ -98,8 +98,6 @@ move invalid and expired token into unit tests?
 - [x] fix GH actions
 - [x] add integration tests GH action
 
-- [ ] review test coverage
-
 - [ ] fix pre-commit
 - [ ] CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] CORS middleware?
