@@ -1,34 +1,39 @@
 import logging
-import os
 from functools import lru_cache
 from typing import Any, Callable
 
 from boto3 import Session
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
-from dotenv import load_dotenv
 
+from .config import get_aws_settings
 from .utils import log_func
 
 logger = logging.getLogger(__name__)
-load_dotenv()
 
-session = Session(
-    aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-    region_name=os.environ["AWS_REGION_NAME"],
-)
+
+@lru_cache
+def get_session() -> BaseClient:
+    """Lazy init session."""
+    aws_settings = get_aws_settings()
+    return Session(
+        aws_access_key_id=aws_settings.access_key_id,
+        aws_secret_access_key=aws_settings.secret_access_key,
+        region_name=aws_settings.region_name,
+    )
 
 
 @lru_cache
 def get_ses_client() -> BaseClient:
     """Lazy init ses client."""
+    session = get_session()
     return session.client("ses")
 
 
 @lru_cache
 def get_logs_client() -> BaseClient:
     """Lazy init cloudwatch logs client."""
+    session = get_session()
     return session.client("logs")
 
 

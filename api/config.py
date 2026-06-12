@@ -22,6 +22,18 @@ class JwtSettings(BaseSettings):
     )
 
 
+class AwsSettings(BaseSettings):
+    """AWS settings."""
+
+    access_key_id: str
+    secret_access_key: str
+    region_name: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="AWS_", extra="ignore"
+    )
+
+
 @lru_cache
 def get_settings() -> Settings:
     """Lazy init app settings."""
@@ -32,3 +44,9 @@ def get_settings() -> Settings:
 def get_jwt_settings() -> JwtSettings:
     """Lazy init auth settings."""
     return JwtSettings()
+
+
+@lru_cache
+def get_aws_settings() -> AwsSettings:
+    """Lazy init aws settings."""
+    return AwsSettings()
