@@ -36,7 +36,7 @@ class TestEndToEnd:
             "password": creds["password"],  # plain password
         }
         response = await test_client.post(
-            "/v1/auth/token",
+            "/api/v1/auth/token",
             data=data,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
