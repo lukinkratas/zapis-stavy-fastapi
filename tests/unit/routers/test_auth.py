@@ -1,6 +1,5 @@
 import pytest
 from httpx import AsyncClient
-from pytest_mock import MockerFixture
 
 from api.repositories.users import UserRow
 from api.schemas import BaseResponse, TokenResponse
@@ -13,7 +12,6 @@ class TestLogin:
     async def test_login_registered_user(
         self,
         test_client: AsyncClient,
-        mocker: MockerFixture,
         creds: dict[str, str],
         registered_user: UserRow,
     ) -> None:
@@ -33,7 +31,6 @@ class TestConfirm:
     async def test_confirm_registered_user(
         self,
         test_client: AsyncClient,
-        mocker: MockerFixture,
         registered_user: UserRow,
         confirmation_token: str,
     ) -> None:
