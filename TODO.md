@@ -94,6 +94,7 @@ move invalid and expired token into unit tests?
       -> ses_send_email -> routers.users._send_confirmation_email -> /users/register
 
 - [ ] _get_sub -> get_sub
+- [ ] add /api/ in the app
 
 - [ ] fix GH actions
 - [ ] fix pre-commit

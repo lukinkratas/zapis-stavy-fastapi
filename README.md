@@ -37,6 +37,8 @@ docker compose up -d
     - pg only
     - async only
 
+  choice: psycopg
+
 
 ### ORM or not
 
