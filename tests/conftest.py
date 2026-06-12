@@ -17,12 +17,6 @@ from api.repositories.users import UserRow
 
 ROOT = Path(__file__).parent.parent.resolve()
 
-os.environ["ENV"] = "dev"
-os.environ["JWT_SECRET_KEY"] = "random"
-os.environ["AWS_ACCESS_KEY_ID"] = "random"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "random"
-os.environ["AWS_REGION_NAME"] = "random"
-
 
 @pytest.fixture
 def mock_send_email(mocker: MockerFixture) -> MagicMock:
