@@ -80,6 +80,6 @@ class TestUpdate:
                 json=update_creds,
                 headers={"Authorization": f"Bearer {access_token}"},
             )
-        
+
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())

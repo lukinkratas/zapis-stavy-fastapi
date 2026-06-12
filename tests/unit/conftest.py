@@ -1,8 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Generator
-from unittest.mock import AsyncMock
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -55,7 +54,7 @@ def registered_user_row(creds: dict[str, str]) -> UserRow:
 def registered_user(registered_user_row: UserRow) -> Generator[UserRow, None, None]:
     with (
         patch.object(UsersTable, "select_by_id", return_value=registered_user_row),
-        patch.object(UsersTable, "select_by_email", return_value=registered_user_row)
+        patch.object(UsersTable, "select_by_email", return_value=registered_user_row),
     ):
         yield registered_user_row
 
@@ -65,7 +64,7 @@ def confirmed_user(registered_user: UserRow) -> Generator[UserRow, None, None]:
     confirmed_user_row = registered_user._replace(confirmed=True)
     with (
         patch.object(UsersTable, "select_by_id", return_value=confirmed_user_row),
-        patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row)
+        patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row),
     ):
         yield confirmed_user_row
 

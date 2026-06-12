@@ -1,6 +1,7 @@
+from unittest.mock import patch
+
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch
 
 from api.repositories.locations import LocationRow, LocationsTable
 from api.repositories.users import UserRow
@@ -65,7 +66,6 @@ class TestUnitLocation:
 
         # mock
         with patch.object(LocationsTable, "update", return_value=updated_location_row):
-
             # update location
             response = await test_client.put(
                 f"/api/v1/location/{location_id}",
