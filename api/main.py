@@ -65,7 +65,7 @@ async def http_exception_handle_logging(
     return await http_exception_handler(request, exc)
 
 
-@app.get("/v1/health")
+@app.get("/api/v1/health")
 async def healthcheck() -> BaseResponse:
     """Check the server is up and running."""
     return BaseResponse(detail="Server is running")

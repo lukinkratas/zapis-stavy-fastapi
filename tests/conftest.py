@@ -1,32 +1,30 @@
-import os
 from pathlib import Path
 from typing import AsyncGenerator, Generator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
 from psycopg.conninfo import make_conninfo
-from pytest_mock import MockerFixture
 from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_confirmation_token
 from api.main import app
 from api.repositories.users import UserRow
+from api.config import DbSettings, get_db_settings
 
 ROOT = Path(__file__).parent.parent.resolve()
 
 
 @pytest.fixture
-def mock_send_email(mocker: MockerFixture) -> MagicMock:
-    return mocker.patch(
-        "api.routers.users.ses_send_email",
-        return_value={
-            "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee-000000",
-            "ResponseMetadata": {},
-        },
-    )
+def mock_send_email() -> Generator[MagicMock, None, None]:
+    msg = {
+        "MessageId": "EXAMPLE78603177f-7a5433e7-8edb-42ae-af10-f0181f34d6ee-000000",
+        "ResponseMetadata": {},
+    },
+    with patch("api.routers.users.ses_send_email", return_value=msg) as mock:
+        yield mock
 
 
 @pytest.fixture(scope="session")
@@ -34,16 +32,25 @@ def test_db() -> Generator[PostgresContainer, None, None]:
     with PostgresContainer("postgres:18").with_volume_mapping(
         str(ROOT / "sql" / "init.sql"), "/docker-entrypoint-initdb.d/init.sql"
     ) as postgres:
-        os.environ["DB_NAME"] = postgres.dbname
-        os.environ["DB_USERNAME"] = postgres.username
-        os.environ["DB_PASSWORD"] = postgres.password
-        os.environ["DB_PORT"] = str(postgres.get_exposed_port(5432))
-        os.environ["DB_HOST"] = postgres.get_container_host_ip()
         yield postgres
 
 
+@pytest.fixture(scope="session")
+def mock_get_db_settings(test_db: PostgresContainer) -> Generator[MagicMock, None, None]:
+    get_db_settings.cache_clear()
+    db_settings = DbSettings(
+        name = test_db.dbname,
+        username= test_db.username,
+        password = test_db.password,
+        port = str(test_db.get_exposed_port(5432)),
+        host = test_db.get_container_host_ip()
+    )
+    with patch("api.db.get_db_settings", return_value=db_settings) as mock:
+        yield mock
+
+
 @pytest_asyncio.fixture(scope="session")
-async def test_client(test_db: PostgresContainer) -> AsyncGenerator[AsyncClient, None]:
+async def test_client(mock_get_db_settings: MagicMock) -> AsyncGenerator[AsyncClient, None]:
     app.state.limiter.enabled = False
 
     async with app.router.lifespan_context(app):

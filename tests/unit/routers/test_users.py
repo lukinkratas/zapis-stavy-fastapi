@@ -1,10 +1,9 @@
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
-from pytest_mock import MockerFixture
 
 from api.repositories.users import UserRow, UsersTable
 from api.schemas import BaseResponse, ResponseWithId
@@ -18,16 +17,15 @@ class TestRegister:
     async def test_register_user(
         self,
         test_client: AsyncClient,
-        mocker: MockerFixture,
         creds: dict[str, str],
         registered_user_row: UserRow,
         mock_send_email: MagicMock,
     ) -> None:
         # mock
-        mocker.patch.object(UsersTable, "insert", return_value=registered_user_row)
+        with patch.object(UsersTable, "insert", return_value=registered_user_row):
+            # register user
+            response = await test_client.post("/api/v1/user/register", json=creds)
 
-        # register user
-        response = await test_client.post("/api/v1/user/register", json=creds)
         assert response.status_code == 201
         assert ResponseWithId.model_validate(response.json())
         mock_send_email.assert_called_once()
@@ -40,17 +38,16 @@ class TestDelete:
     async def test_delete_user(
         self,
         test_client: AsyncClient,
-        mocker: MockerFixture,
         registered_user_row: UserRow,
         access_token: str,
     ) -> None:
         # mock
-        mocker.patch.object(UsersTable, "delete", return_value=registered_user_row)
+        with patch.object(UsersTable, "delete", return_value=registered_user_row):
+            # delete registered user
+            response = await test_client.delete(
+                "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
+            )
 
-        # delete registered user
-        response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
-        )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
 
@@ -61,7 +58,6 @@ class TestUpdate:
     @pytest.mark.asyncio
     async def test_update_user(
         self,
-        mocker: MockerFixture,
         test_client: AsyncClient,
         update_creds: dict[str, str],
         registered_user_row: UserRow,
@@ -77,13 +73,13 @@ class TestUpdate:
         }
 
         # mock
-        mocker.patch.object(UsersTable, "update", return_value=updated_user_from_db)
-
-        # update user
-        response = await test_client.put(
-            "/api/v1/user",
-            json=update_creds,
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+        with patch.object(UsersTable, "update", return_value=updated_user_from_db):
+            # update user
+            response = await test_client.put(
+                "/api/v1/user",
+                json=update_creds,
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+        
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())

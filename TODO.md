@@ -93,8 +93,8 @@ move invalid and expired token into unit tests?
     - api.db.get_conn_info
 - [x] _get_sub -> get_sub
 - [x] add /api/ in the app
-
-- [ ] use DbSettings in conftest ?
+- [x] use from unittest.mock import patch instead of pytest_mock
+- [x] mock DbSettings in conftest
 
 - [ ] fix GH actions
 - [ ] fix pre-commit

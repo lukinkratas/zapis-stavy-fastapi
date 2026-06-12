@@ -1,13 +1,13 @@
 import uuid
 from datetime import datetime, timezone
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Generator
 from unittest.mock import AsyncMock
+from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
-from pytest_mock import MockerFixture
 
 from api.db import connect_to_db
 from api.main import app
@@ -41,7 +41,7 @@ async def test_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def registered_user_row(mocker: MockerFixture, creds: dict[str, str]) -> UserRow:
+def registered_user_row(creds: dict[str, str]) -> UserRow:
     return UserRow(
         id=uuid.uuid4(),
         created_at=datetime.now(timezone.utc),
@@ -52,18 +52,22 @@ def registered_user_row(mocker: MockerFixture, creds: dict[str, str]) -> UserRow
 
 
 @pytest.fixture
-def registered_user(mocker: MockerFixture, registered_user_row: UserRow) -> UserRow:
-    mocker.patch.object(UsersTable, "select_by_id", return_value=registered_user_row)
-    mocker.patch.object(UsersTable, "select_by_email", return_value=registered_user_row)
-    return registered_user_row
+def registered_user(registered_user_row: UserRow) -> Generator[UserRow, None, None]:
+    with (
+        patch.object(UsersTable, "select_by_id", return_value=registered_user_row),
+        patch.object(UsersTable, "select_by_email", return_value=registered_user_row)
+    ):
+        yield registered_user_row
 
 
 @pytest.fixture
-def confirmed_user(mocker: MockerFixture, registered_user: UserRow) -> UserRow:
+def confirmed_user(registered_user: UserRow) -> Generator[UserRow, None, None]:
     confirmed_user_row = registered_user._replace(confirmed=True)
-    mocker.patch.object(UsersTable, "select_by_id", return_value=confirmed_user_row)
-    mocker.patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row)
-    return confirmed_user_row
+    with (
+        patch.object(UsersTable, "select_by_id", return_value=confirmed_user_row),
+        patch.object(UsersTable, "select_by_email", return_value=confirmed_user_row)
+    ):
+        yield confirmed_user_row
 
 
 @pytest.fixture
