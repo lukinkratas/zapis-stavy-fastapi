@@ -3,8 +3,16 @@ from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class Settings(BaseSettings):
+    """App settings."""
+
+    env: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
 class JwtSettings(BaseSettings):
-    """Settings for auth."""
+    """Auth settings."""
 
     secret_key: str
     algorithm: str = "HS256"
@@ -15,6 +23,12 @@ class JwtSettings(BaseSettings):
 
 
 @lru_cache
+def get_settings() -> Settings:
+    """Lazy init app settings."""
+    return Settings()
+
+
+@lru_cache
 def get_jwt_settings() -> JwtSettings:
-    """Lazy init settings for auth."""
+    """Lazy init auth settings."""
     return JwtSettings()

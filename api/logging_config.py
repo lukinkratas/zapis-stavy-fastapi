@@ -1,25 +1,21 @@
-import os
 import socket
 from logging.config import dictConfig
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-
 from .aws import get_logs_client
+from .config import get_settings
 
-load_dotenv()
-
-ENV = os.environ["ENV"]
 LOG_DIR = Path("logs")
 
 
 def configure_logging() -> None:
     """Configure logging."""
+    settings = get_settings()
     filters: dict[str, Any] = {
         "correlation_id": {
             "()": "asgi_correlation_id.CorrelationIdFilter",
-            "uuid_length": 8 if ENV == "dev" else 32,
+            "uuid_length": 8 if settings.env == "dev" else 32,
             "default_value": "-",
         },
     }
@@ -73,7 +69,7 @@ def configure_logging() -> None:
     }
     active_handlers = ["stdout"]
 
-    if ENV == "dev":
+    if settings.env == "dev":
         handlers["rotating_file"] = {
             "class": "logging.handlers.RotatingFileHandler",
             "filename": str(LOG_DIR / "api.log"),
@@ -87,15 +83,15 @@ def configure_logging() -> None:
         active_handlers.append("rotating_file")
         log_level = "DEBUG"
 
-    elif ENV == "test":
+    elif settings.env == "test":
         log_level = "DEBUG"
 
-    elif ENV == "prod":
+    elif settings.env == "prod":
         handlers["watchtower"] = {
             "class": "watchtower.CloudWatchLogHandler",
             "boto3_client": get_logs_client(),
             "log_group_name": "zapis-stavy",
-            "log_stream_name": f"{ENV}-{socket.gethostname()}",
+            "log_stream_name": f"{settings.env}-{socket.gethostname()}",
             "create_log_group": False,  # terraform managed
             "level": "INFO",
             "filters": ["correlation_id"],
