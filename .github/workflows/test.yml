@@ -46,8 +46,8 @@ jobs:
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
-      
-      - name: Setup Docker
+
+      - name: Setup docker
         uses: docker/setup-docker-action@v5
 
       - name: Run all tests

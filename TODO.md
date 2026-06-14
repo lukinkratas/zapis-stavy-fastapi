@@ -97,9 +97,7 @@ move invalid and expired token into unit tests?
 - [x] mock DbSettings in conftest
 - [x] fix GH actions
 - [x] add integration tests GH action
-
-- [ ] fix pre-commit
-- [ ] CICD - dev/test/prod branches + make test-cov in test branch
+- [x] fix pre-commit
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 
@@ -121,3 +119,4 @@ move invalid and expired token into unit tests?
 - [ ] LLM advisory + langfuse observability
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
 - [ ] prod: add prometheus ?
+- [ ] prod: CICD - dev/test/prod branches + make test-cov in test branch

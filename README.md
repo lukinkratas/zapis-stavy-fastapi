@@ -68,7 +68,7 @@ docker compose up -d
 
     + tiny
     + reducing attack surface and pull times
-  
+
   2. slim-trixie - use if glibc is needed (numpy, pandas, psycopg2, alpine uses musl libc)
 
   choice: alpine - bcs of its' benefits and glibc not being used
@@ -105,7 +105,7 @@ docker compose up -d
 ### DB ID
 
   1. incerement ID
-  
+
     + appending record into page does not need to re-index
     - insecure direct object reference
     - servers attempting to insert record with the same ID
