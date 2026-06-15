@@ -25,7 +25,7 @@ def mock_send_email() -> Generator[MagicMock, None, None]:
             "ResponseMetadata": {},
         },
     )
-    with patch("api.routers.users.ses_send_email", return_value=msg) as mock:
+    with patch("api.routers.auth.ses_send_email", return_value=msg) as mock:
         yield mock
 
 

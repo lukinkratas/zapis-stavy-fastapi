@@ -11,9 +11,9 @@ from api.auth import create_access_token, create_confirmation_token
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
 from api.schemas import CreateProps, RegisterCreds
-from api.services.auth import confirm_user
+from api.services.auth import confirm_user, register_user
 from api.services.locations import create_location, delete_location
-from api.services.users import delete_user, register_user
+from api.services.users import delete_user
 
 
 @pytest_asyncio.fixture

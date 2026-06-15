@@ -99,8 +99,8 @@ move invalid and expired token into unit tests?
 - [x] add integration tests GH action
 - [x] fix pre-commit
 - [x] plural in API naming - /locations
+- [x] move register user endpoint to auth.py router
 - [ ] rename users.py to user.py (/user endpoint)
-- [ ] move register user endpoint to auth.py router
 - [ ] /user or /users/me endpoint?
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?

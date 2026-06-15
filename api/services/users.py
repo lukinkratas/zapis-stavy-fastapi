@@ -9,7 +9,7 @@ import uuid
 from psycopg import AsyncConnection
 
 from ..repositories.users import UserRow, users_table
-from ..schemas import RegisterCreds, UpdateCreds
+from ..schemas import UpdateCreds
 from ..security import get_password_hash
 from ..utils import log_async_func
 
@@ -42,26 +42,6 @@ async def select_user_by_email(db_conn: AsyncConnection, email: str) -> UserRow 
     Returns: user row
     """
     return await users_table.select_by_email(db_conn, email)
-
-
-@log_async_func(logger.debug)
-async def register_user(
-    db_conn: AsyncConnection, creds: RegisterCreds
-) -> UserRow | None:
-    """Add new user into the database.
-
-    Args:
-        db_conn: database connection
-        creds: register credentials payload from router
-
-    Returns: user row
-    """
-    data = creds.model_dump(exclude_unset=True)
-    password = data.pop("password")
-    data["password_hash"] = get_password_hash(password)
-
-    async with db_conn.transaction():
-        return await users_table.insert(db_conn, **data)
 
 
 @log_async_func(logger.debug)

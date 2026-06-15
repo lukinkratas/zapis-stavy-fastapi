@@ -21,7 +21,7 @@ class TestEndToEnd:
         mock_send_email: MagicMock,
     ) -> None:
         # register user
-        response = await test_client.post("/api/v1/user/register", json=creds)
+        response = await test_client.post("/api/v1/auth/register", json=creds)
         assert response.status_code == 201
 
         # confirm user

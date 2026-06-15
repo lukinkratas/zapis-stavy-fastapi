@@ -1,9 +1,12 @@
+from unittest.mock import MagicMock
+
 import pytest
 from httpx import AsyncClient
 from psycopg import AsyncConnection
 
 from api.repositories.users import UserRow, users_table
-from api.schemas import BaseResponse, TokenResponse
+from api.schemas import BaseResponse, ResponseWithId, TokenResponse
+from api.services.users import delete_user, select_user_by_id
 
 
 class TestLogin:
@@ -86,6 +89,61 @@ class TestLogin:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == 401
+
+
+class TestRegister:
+    """Integration tests for create user endpoints."""
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_register_user(
+        self,
+        test_client: AsyncClient,
+        creds: dict[str, str],
+        mock_send_email: MagicMock,
+        db_conn: AsyncConnection,
+    ) -> None:
+        """Testing expected case."""
+        response = await test_client.post("/api/v1/auth/register", json=creds)
+        assert response.status_code == 201
+        mock_send_email.assert_called_once()
+        assert ResponseWithId.model_validate(response.json())
+
+        user_id = response.json()["id"]
+        user = await select_user_by_id(db_conn, user_id)
+        assert user is not None, "User does not exist in db."
+
+        # clean-up
+        await delete_user(db_conn, user.id)
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_register_user_conmflict(
+        self,
+        test_client: AsyncClient,
+        creds: dict[str, str],
+        registered_user: UserRow,
+    ) -> None:
+        response = await test_client.post("/api/v1/auth/register", json=creds)
+        assert response.status_code == 409
+
+    @pytest.mark.parametrize(
+        "creds",
+        [
+            pytest.param({"email": "test@test.net"}, id="missing password"),
+            pytest.param({"password": "password"}, id="missing email"),
+            pytest.param(
+                {"username": "test@test.net", "password": "password"},
+                id="username instead of email",
+            ),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_register_user_invalid_schema(
+        self, test_client: AsyncClient, creds: dict[str, str]
+    ) -> None:
+        response = await test_client.post("/api/v1/auth/register", json=creds)
+        assert response.status_code == 422
 
 
 class TestConfirm:
