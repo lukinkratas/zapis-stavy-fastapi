@@ -54,7 +54,7 @@ class TestEndToEnd:
 
         # create location
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -65,7 +65,7 @@ class TestEndToEnd:
 
         # update location
         response = await test_client.put(
-            f"/api/v1/location/{location_id}",
+            f"/api/v1/locations/{location_id}",
             json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -73,7 +73,7 @@ class TestEndToEnd:
 
         # delete created location
         response = await test_client.delete(
-            f"/api/v1/location/{location_id}",
+            f"/api/v1/locations/{location_id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200

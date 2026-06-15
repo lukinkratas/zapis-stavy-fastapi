@@ -29,7 +29,7 @@ class TestCreate:
     ) -> None:
         """Testing expected case."""
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -54,7 +54,7 @@ class TestCreate:
         access_token: str,
     ) -> None:
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -69,7 +69,7 @@ class TestCreate:
         access_token: str,
     ) -> None:
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json={"name": "test"},
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -85,7 +85,7 @@ class TestCreate:
         access_token: str,
     ) -> None:
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -103,7 +103,7 @@ class TestCreate:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -121,7 +121,7 @@ class TestCreate:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
@@ -139,7 +139,7 @@ class TestCreate:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.post(
-            "/api/v1/location",
+            "/api/v1/locations",
             json=props,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
@@ -161,7 +161,7 @@ class TestDelete:
     ) -> None:
         """Testing expected case."""
         response = await test_client.delete(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 200
@@ -179,7 +179,7 @@ class TestDelete:
         access_token: str,
     ) -> None:
         response = await test_client.delete(
-            f"/api/v1/location/{uuid.uuid4()}",
+            f"/api/v1/locations/{uuid.uuid4()}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         assert response.status_code == 404
@@ -195,7 +195,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.delete(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
@@ -211,7 +211,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded sub."""
         response = await test_client.delete(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 404
@@ -227,7 +227,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.delete(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -243,7 +243,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.delete(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
@@ -266,7 +266,7 @@ class TestUpdate:
         """Testing expected case."""
         location_pre = await select_location_by_id(db_conn, created_location.id)
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -290,7 +290,7 @@ class TestUpdate:
             db_conn, confirmed_user.id, props=CreateProps(location_name="new")
         )
         response = await test_client.put(
-            f"/api/v1/location/{location.id}",
+            f"/api/v1/locations/{location.id}",
             json={"location_name": created_location.location_name},
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -309,7 +309,7 @@ class TestUpdate:
     ) -> None:
         """Testing expected case."""
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json={"name": "update"},
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -325,7 +325,7 @@ class TestUpdate:
         access_token: str,
     ) -> None:
         response = await test_client.put(
-            f"/api/v1/location/{uuid.uuid4()}",
+            f"/api/v1/locations/{uuid.uuid4()}",
             json=update_props,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -346,7 +346,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json=update_props,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -364,7 +364,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded sub."""
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json=update_props,
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
@@ -382,7 +382,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json=update_props,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
@@ -400,7 +400,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.put(
-            f"/api/v1/location/{created_location.id}",
+            f"/api/v1/locations/{created_location.id}",
             json=update_props,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )

@@ -24,7 +24,7 @@ class TestUnitLocation:
         with patch.object(LocationsTable, "insert", return_value=location_row):
             # create location
             response = await test_client.post(
-                "/api/v1/location",
+                "/api/v1/locations",
                 json=props,
                 headers={"Authorization": f"Bearer {access_token}"},
             )
@@ -45,7 +45,7 @@ class TestUnitLocation:
         with patch.object(LocationsTable, "delete", return_value=location_row):
             # delete created location
             response = await test_client.delete(
-                f"/api/v1/location/{location_id}",
+                f"/api/v1/locations/{location_id}",
                 headers={"Authorization": f"Bearer {access_token}"},
             )
 
@@ -68,7 +68,7 @@ class TestUnitLocation:
         with patch.object(LocationsTable, "update", return_value=updated_location_row):
             # update location
             response = await test_client.put(
-                f"/api/v1/location/{location_id}",
+                f"/api/v1/locations/{location_id}",
                 json=update_props,
                 headers={"Authorization": f"Bearer {access_token}"},
             )

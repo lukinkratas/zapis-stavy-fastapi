@@ -98,6 +98,10 @@ move invalid and expired token into unit tests?
 - [x] fix GH actions
 - [x] add integration tests GH action
 - [x] fix pre-commit
+- [x] plural in API naming - /locations
+- [ ] rename users.py to user.py (/user endpoint)
+- [ ] move register user endpoint to auth.py router
+- [ ] /user or /users/me endpoint?
 - [ ] CORS middleware?
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 
@@ -120,3 +124,5 @@ move invalid and expired token into unit tests?
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
 - [ ] prod: add prometheus ?
 - [ ] prod: CICD - dev/test/prod branches + make test-cov in test branch
+- [ ] prod: tf server infra
+- [ ] prod: pagination / query params for locations - limit, offset for GET endpoints
