@@ -151,6 +151,10 @@ docker compose up -d
 
   choice: pydantic-settings - to be PROD grade and acc. to fastapi docs
 
+### FastAPI.users for user management
+
+  Cannot be used -> requires SQLAlchemy.
+
 ## Resources
 
 better stack / logtail cloud logging: https://betterstack.com/community/guides/logging/logging-with-fastapi/
@@ -183,7 +187,7 @@ SQLAlchemy sync: https://youtu.be/XlnmN4BfCxw?si=tuJ2S9PpxMOhF-pM
 
 SQLAlchemy sync: https://github.com/ArjanCodes/examples/tree/main/2023/fastapi-router
 
-SQLAlchemy async: https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
+SQLAlchemy async (+FastAPI.users): https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
 
 SQLAlchemy async: https://github.com/techwithtim/FastAPIPhotoVideoSharing
 
