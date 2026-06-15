@@ -118,11 +118,11 @@ move invalid and expired token into unit tests?
 
 - [ ] bug: test GH action did not fail on failed coverage !
 
-- [ ] upload pic
-- [ ] LLM advisory + langfuse observability
-- [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
-- [ ] prod: add prometheus ?
-- [ ] prod: CICD - dev/test/prod branches + make test-cov in test branch
+- [ ] upload reading pic
+- [ ] LLM advisory + langfuse observability - cache for current loation table
 - [ ] prod: tf server infra
 - [ ] prod: pagination / query params for locations - limit, offset for GET endpoints
 - [ ] prod: reset_password, forgot password, logout
+- [ ] prod: add prometheus ?
+- [ ] prod: CICD - dev/test/prod branches + make test-cov in test branch
+- [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
