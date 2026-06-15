@@ -21,7 +21,7 @@ class TestDelete:
     ) -> None:
         """Testing expected case."""
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
@@ -39,7 +39,8 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {expired_access_token}"}
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {expired_access_token}"},
         )
         assert response.status_code == 401
 
@@ -62,7 +63,7 @@ class TestDelete:
         )
 
         response = await test_client.delete(
-            "/api/v1/user",
+            "/api/v1/users/me",
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
         assert response.status_code == 200
@@ -82,7 +83,7 @@ class TestDelete:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.delete(
-            "/api/v1/user",
+            "/api/v1/users/me",
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
         assert response.status_code == 401
@@ -97,7 +98,8 @@ class TestDelete:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {confirmation_token}"}
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401
 
@@ -118,7 +120,7 @@ class TestUpdate:
         """Testing expected case."""
         user_pre = await select_user_by_id(db_conn, registered_user.id)
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -141,7 +143,7 @@ class TestUpdate:
         """Testing expected case."""
         update_creds = {"email": other_user.email}
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -154,7 +156,7 @@ class TestUpdate:
         access_token: str,
     ) -> None:
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json={"username": "update@test.net"},  # username instead of email
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -171,7 +173,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded exp."""
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {expired_access_token}"},
         )
@@ -191,7 +193,7 @@ class TestUpdate:
         user_pre = await select_user_by_id(db_conn, registered_user.id)
 
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {other_user_access_token}"},
         )
@@ -211,7 +213,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with random access token."""
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {random_user_access_token}"},
         )
@@ -228,7 +230,7 @@ class TestUpdate:
     ) -> None:
         """Testing access token with different encoded typ."""
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )

@@ -46,7 +46,7 @@ class TestEndToEnd:
 
         # update user
         response = await test_client.put(
-            "/api/v1/user",
+            "/api/v1/users/me",
             json=update_creds,
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -80,6 +80,6 @@ class TestEndToEnd:
 
         # delete registered user
         response = await test_client.delete(
-            "/api/v1/user", headers={"Authorization": f"Bearer {access_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == 200

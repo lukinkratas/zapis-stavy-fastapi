@@ -19,10 +19,10 @@ from ..schemas import BaseResponse, UpdateCreds
 from ..services.users import delete_user, update_user
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/api/v1/user")
+router = APIRouter(prefix="/api/v1/users")
 
 
-@router.put("")
+@router.put("/me")
 async def update(
     creds: UpdateCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
@@ -52,7 +52,7 @@ async def update(
     return BaseResponse(detail="User updated")
 
 
-@router.delete("")
+@router.delete("/me")
 async def delete(
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[UserRow, Depends(get_current_user)],
