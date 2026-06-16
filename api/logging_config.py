@@ -81,10 +81,6 @@ def configure_logging() -> None:
             "formatter": "json",
         }
         active_handlers.append("rotating_file")
-        log_level = "DEBUG"
-
-    elif settings.env == "test":
-        log_level = "DEBUG"
 
     elif settings.env == "prod":
         handlers["watchtower"] = {
@@ -98,7 +94,8 @@ def configure_logging() -> None:
             "formatter": "simple",
         }
         active_handlers.append("watchtower")
-        log_level = "INFO"
+
+    log_level = "INFO" if settings.env == "prod" else "DEBUG"
 
     cfg = {
         "version": 1,
