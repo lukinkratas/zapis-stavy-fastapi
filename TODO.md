@@ -116,13 +116,16 @@ move invalid and expired token into unit tests?
         raise ValueError(f"Invalid fields: {invalid}")
   ```
 
+- [ ] Path, Query endpoint params (+descriptions), deprecated?
+- [ ] GET endpoints - pagination / query params for locations - limit, offset/skip for GET endpoints
 - [ ] bug: test GH action did not fail on failed coverage !
 
 - [ ] upload reading pic
 - [ ] LLM advisory + langfuse observability - cache for current loation table
-- [ ] prod: tf server infra
-- [ ] prod: pagination / query params for locations - limit, offset for GET endpoints
+- [ ] prod: tf infra - api server compute, postgres db
 - [ ] prod: reset_password, forgot password, logout
 - [ ] prod: add prometheus ?
 - [ ] prod: CICD - dev/test/prod branches + make test-cov in test branch
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
+- [ ] ? prod: uvicorn main:app --reload -> gunicorn main:app .. --worker-class uvicorn.workers.UvicornWorker
+  - [ ] + ? uvloop - faster async loops -> test
