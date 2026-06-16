@@ -32,14 +32,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         app.state.pool = pool
         yield
 
-    # pool = create_connection_pool()
+    # pool = await create_connection_pool()
     # app.state.pool = pool
     # await pool.open()
 
     # yield
 
     # await pool.close()
-    # logger.info("API teardown")
+    logger.info("API teardown")
 
 
 settings = get_settings()
