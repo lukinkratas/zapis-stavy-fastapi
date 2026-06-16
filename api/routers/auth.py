@@ -78,7 +78,7 @@ async def register(
     request: Request,
     creds: RegisterCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
-    background_tasks: BackgroundTasks,
+    bg_tasks: BackgroundTasks,
 ) -> ResponseWithId:
     """Register new user.
 
@@ -86,7 +86,7 @@ async def register(
         request: FastAPI request object (used for accessing headers, client info, etc.).
         creds: register credentials payload from client
         db_conn: database connection
-        background_tasks: FastAPI's background que for tasks
+        bg_tasks: FastAPI's background que for tasks
 
     Returns: response with detail and user_id
 
@@ -101,7 +101,7 @@ async def register(
 
     confirmation_token = create_confirmation_token(user.id)
     logger.debug(f"{confirmation_token=}")
-    background_tasks.add_task(
+    bg_tasks.add_task(
         _send_confirmation_email,
         user.email,
         confirmation_url=str(request.url_for("confirm", token=confirmation_token)),
