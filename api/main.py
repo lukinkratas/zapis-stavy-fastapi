@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
+from .config import get_settings
 from .db import get_conn_info
 from .logging_config import configure_logging
 from .routers.auth import router as auth_router
@@ -41,10 +42,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # logger.info("API teardown")
 
 
+settings = get_settings()
+
 app = FastAPI(
     title="Zapis Stavy FastAPI",
     description="API for Zapis Stavy",
     lifespan=lifespan,
+    docs_url=None if settings.env == "prod" else "/docs",
+    redoc_url=None if settings.env == "prod" else "/redoc",
+    openapi_url=None if settings.env == "prod" else "/openapi.json",
 )
 app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["1/second"])
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
