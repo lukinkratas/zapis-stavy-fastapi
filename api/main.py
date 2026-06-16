@@ -1,6 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -44,13 +44,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 settings = get_settings()
 
+doc_kwargs: dict[str, Any] = (
+    dict(docs_url=None, redoc_url=None, openapi_url=None)
+    if settings.env == "prod"
+    else {}
+)
 app = FastAPI(
     title="Zapis Stavy FastAPI",
     description="API for Zapis Stavy",
     lifespan=lifespan,
-    docs_url=None if settings.env == "prod" else "/docs",
-    redoc_url=None if settings.env == "prod" else "/redoc",
-    openapi_url=None if settings.env == "prod" else "/openapi.json",
+    **doc_kwargs,
 )
 app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["1/second"])
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
