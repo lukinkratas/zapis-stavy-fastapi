@@ -12,14 +12,18 @@ token_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
-user_exists_exception = HTTPException(status_code=409, detail="User already exists")
+user_exists_exception = HTTPException(
+    status_code=status.HTTP_409_CONFLICT, detail="User already exists"
+)
 
-user_not_found_exception = HTTPException(status_code=404, detail="User not found")
+user_not_found_exception = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+)
 
 location_exists_exception = HTTPException(
-    status_code=409, detail="Location already exists"
+    status_code=status.HTTP_409_CONFLICT, detail="Location already exists"
 )
 
 location_not_found_exception = HTTPException(
-    status_code=404, detail="Location not found"
+    status_code=status.HTTP_404_NOT_FOUND, detail="Location not found"
 )

@@ -7,7 +7,7 @@ Database connection is passed to downstream user service.
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from psycopg import AsyncConnection
 from psycopg.errors import UniqueViolation
 
@@ -47,7 +47,9 @@ async def update(
             raise user_not_found_exception
 
     except UniqueViolation:
-        raise HTTPException(status_code=409, detail="User email already in use")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="User email already in use"
+        )
 
     return BaseResponse(detail="User updated")
 
