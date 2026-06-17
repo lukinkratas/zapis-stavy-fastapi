@@ -27,9 +27,9 @@ async def test_client() -> AsyncGenerator[AsyncClient, None]:
     # Override the dependency in your app
     app.dependency_overrides[connect_to_db] = override_connect_to_db
 
-    app.state.limiter.enabled = False
-
     async with app.router.lifespan_context(app):
+        app.state.limiter.enabled = False
+
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as client:

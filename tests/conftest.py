@@ -52,9 +52,9 @@ def mock_db_settings(test_db: PostgresContainer) -> Generator[MagicMock, None, N
 
 @pytest_asyncio.fixture(scope="session")
 async def test_client(mock_db_settings: MagicMock) -> AsyncGenerator[AsyncClient, None]:
-    app.state.limiter.enabled = False
-
     async with app.router.lifespan_context(app):
+        app.state.limiter.enabled = False
+
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as client:

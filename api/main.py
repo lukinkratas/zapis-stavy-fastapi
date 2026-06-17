@@ -19,6 +19,7 @@ from .routers.users import router as users_router
 from .schemas import BaseResponse
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 @asynccontextmanager
@@ -27,14 +28,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     configure_logging()
     logger.info("API setup")
 
+    app.state.limiter = Limiter(
+        key_func=get_remote_address, default_limits=["1/second"]
+    )
+
     async with create_connection_pool() as pool:
         app.state.pool = pool
         yield
 
     logger.info("API teardown")
 
-
-settings = get_settings()
 
 doc_kwargs: dict[str, Any] = (
     dict(docs_url=None, redoc_url=None, openapi_url=None)
@@ -47,7 +50,6 @@ app = FastAPI(
     lifespan=lifespan,
     **doc_kwargs,
 )
-app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["1/second"])
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
