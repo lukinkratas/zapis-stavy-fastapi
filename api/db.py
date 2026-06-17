@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import Request
@@ -23,9 +24,13 @@ def get_conn_info() -> str:
     )
 
 
-def create_connection_pool() -> AsyncConnectionPool:
+@asynccontextmanager
+async def create_connection_pool() -> AsyncGenerator[AsyncConnectionPool, None]:
     """Create connection pool."""
-    return AsyncConnectionPool(conninfo=get_conn_info())
+    async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
+        logger.info("New connection pool created.")
+        yield pool
+        logger.info("Connection pool closed.")
 
 
 async def connect_to_db(request: Request) -> AsyncGenerator[AsyncConnection, None]:
