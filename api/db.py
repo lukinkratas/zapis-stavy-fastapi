@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 from fastapi import Request
 from psycopg import AsyncConnection
 from psycopg.conninfo import make_conninfo
+from psycopg_pool import AsyncConnectionPool
 
 from .config import get_db_settings
 
@@ -22,9 +23,9 @@ def get_conn_info() -> str:
     )
 
 
-# def create_connection_pool() -> AsyncConnectionPool:
-#     """Create connection pool."""
-#     return AsyncConnectionPool(conninfo=get_conn_info())
+def create_connection_pool() -> AsyncConnectionPool:
+    """Create connection pool."""
+    return AsyncConnectionPool(conninfo=get_conn_info())
 
 
 async def connect_to_db(request: Request) -> AsyncGenerator[AsyncConnection, None]:

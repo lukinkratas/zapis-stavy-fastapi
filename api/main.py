@@ -5,14 +5,13 @@ from typing import Any, AsyncGenerator
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
-from psycopg_pool import AsyncConnectionPool
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
 from .config import get_settings
-from .db import get_conn_info
+from .db import create_connection_pool
 from .logging_config import configure_logging
 from .routers.auth import router as auth_router
 from .routers.locations import router as locations_router
@@ -28,17 +27,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     configure_logging()
     logger.info("API setup")
 
-    async with AsyncConnectionPool(conninfo=get_conn_info()) as pool:
+    async with create_connection_pool() as pool:
         app.state.pool = pool
         yield
 
-    # pool = await create_connection_pool()
-    # app.state.pool = pool
-    # await pool.open()
-
-    # yield
-
-    # await pool.close()
     logger.info("API teardown")
 
 

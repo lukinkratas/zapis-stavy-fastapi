@@ -6,11 +6,11 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from psycopg import AsyncConnection
-from psycopg.conninfo import make_conninfo
 from testcontainers.postgres import PostgresContainer
 
 from api.auth import create_access_token, create_confirmation_token
 from api.config import DbSettings
+from api.db import get_conn_info
 from api.main import app
 from api.repositories.users import UserRow
 
@@ -62,16 +62,9 @@ async def test_client(mock_db_settings: MagicMock) -> AsyncGenerator[AsyncClient
 
 
 @pytest_asyncio.fixture
-async def db_conn(test_db: PostgresContainer) -> AsyncGenerator[AsyncConnection, None]:
+async def db_conn(mock_db_settings: MagicMock) -> AsyncGenerator[AsyncConnection, None]:
     """Create connection."""
-    conninfo = make_conninfo(
-        dbname=test_db.dbname,
-        user=test_db.username,
-        password=test_db.password,
-        host=test_db.get_container_host_ip(),
-        port=test_db.get_exposed_port(5432),
-    )
-    async with await AsyncConnection.connect(conninfo) as conn:
+    async with await AsyncConnection.connect(conninfo=get_conn_info()) as conn:
         yield conn
 
 
