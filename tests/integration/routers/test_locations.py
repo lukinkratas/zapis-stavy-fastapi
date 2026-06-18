@@ -7,11 +7,7 @@ from psycopg import AsyncConnection
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
 from api.schemas import BaseResponse, CreateProps, ResponseWithId
-from api.services.locations import (
-    create_location,
-    delete_location,
-    select_location_by_id,
-)
+from api.services import locations as location_service
 
 
 class TestCreate:
@@ -37,11 +33,11 @@ class TestCreate:
         assert ResponseWithId.model_validate(response.json())
 
         location_id = response.json()["id"]
-        location_from_db = await select_location_by_id(db_conn, location_id)
+        location_from_db = await location_service.select_by_id(db_conn, location_id)
         assert location_from_db is not None, "Location does not exist in db."
 
         # clean-up
-        await delete_location(db_conn, location_id, confirmed_user.id)
+        await location_service.delete(db_conn, location_id, confirmed_user.id)
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -167,7 +163,9 @@ class TestDelete:
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
 
-        location_from_db = await select_location_by_id(db_conn, created_location.id)
+        location_from_db = await location_service.select_by_id(
+            db_conn, created_location.id
+        )
         assert location_from_db is None, "Location still exists in db."
 
     @pytest.mark.integration
@@ -264,7 +262,7 @@ class TestUpdate:
         db_conn: AsyncConnection,
     ) -> None:
         """Testing expected case."""
-        location_pre = await select_location_by_id(db_conn, created_location.id)
+        location_pre = await location_service.select_by_id(db_conn, created_location.id)
         response = await test_client.put(
             f"/api/v1/locations/{created_location.id}",
             json=update_props,
@@ -273,7 +271,9 @@ class TestUpdate:
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
 
-        location_post = await select_location_by_id(db_conn, created_location.id)
+        location_post = await location_service.select_by_id(
+            db_conn, created_location.id
+        )
         assert location_pre != location_post, "Location was not updated."
 
     @pytest.mark.integration
@@ -286,7 +286,7 @@ class TestUpdate:
         access_token: str,
         db_conn: AsyncConnection,
     ) -> None:
-        location = await create_location(
+        location = await location_service.create(
             db_conn, confirmed_user.id, props=CreateProps(location_name="new")
         )
         response = await test_client.put(

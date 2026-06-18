@@ -17,7 +17,7 @@ from ..db import connect_to_db
 from ..exceptions import location_exists_exception, location_not_found_exception
 from ..repositories.users import UserRow
 from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
-from ..services.locations import create_location, delete_location, update_location
+from ..services import locations as location_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/locations", tags=["locations"])
@@ -42,7 +42,9 @@ async def create(
         HTTPException: if location already exists
     """
     try:
-        location = await create_location(db_conn, current_confirmed_user.id, props)
+        location = await location_service.create(
+            db_conn, current_confirmed_user.id, props
+        )
 
     except UniqueViolation:
         raise location_exists_exception
@@ -71,7 +73,9 @@ async def update(
         HTTPException: if location was not found or name already exists.
     """
     try:
-        location = await update_location(db_conn, id, current_confirmed_user.id, props)
+        location = await location_service.update(
+            db_conn, id, current_confirmed_user.id, props
+        )
 
         if not location:
             raise location_not_found_exception
@@ -102,7 +106,7 @@ async def delete(
     Raises:
         HTTPException: if location was not found
     """
-    location = await delete_location(db_conn, id, current_confirmed_user.id)
+    location = await location_service.delete(db_conn, id, current_confirmed_user.id)
 
     if not location:
         raise location_not_found_exception

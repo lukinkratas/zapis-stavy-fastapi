@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @log_async_func(logger.debug)
-async def select_user_by_id(
-    db_conn: AsyncConnection, user_id: uuid.UUID
-) -> UserRow | None:
+async def select_by_id(db_conn: AsyncConnection, user_id: uuid.UUID) -> UserRow | None:
     """Select user from the database by id.
 
     Args:
@@ -32,7 +30,7 @@ async def select_user_by_id(
 
 
 @log_async_func(logger.debug)
-async def select_user_by_email(db_conn: AsyncConnection, email: str) -> UserRow | None:
+async def select_by_email(db_conn: AsyncConnection, email: str) -> UserRow | None:
     """Select user from the database by email.
 
     Args:
@@ -45,7 +43,7 @@ async def select_user_by_email(db_conn: AsyncConnection, email: str) -> UserRow 
 
 
 @log_async_func(logger.debug)
-async def update_user(
+async def update(
     db_conn: AsyncConnection, user_id: uuid.UUID, creds: UpdateCreds
 ) -> UserRow | None:
     """Update a user in the database.
@@ -68,7 +66,7 @@ async def update_user(
 
 
 @log_async_func(logger.debug)
-async def delete_user(db_conn: AsyncConnection, user_id: uuid.UUID) -> UserRow | None:
+async def delete(db_conn: AsyncConnection, user_id: uuid.UUID) -> UserRow | None:
     """Delete a user from the database.
 
     Args:

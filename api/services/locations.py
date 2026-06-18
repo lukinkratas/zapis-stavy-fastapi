@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @log_async_func(logger.debug)
-async def select_location_by_id(
+async def select_by_id(
     db_conn: AsyncConnection, location_id: uuid.UUID
 ) -> LocationRow | None:
     """Select location from the database by id.
@@ -31,7 +31,7 @@ async def select_location_by_id(
 
 
 @log_async_func(logger.debug)
-async def create_location(
+async def create(
     db_conn: AsyncConnection, user_id: uuid.UUID, props: CreateProps
 ) -> LocationRow | None:
     """Add new location into the database.
@@ -50,7 +50,7 @@ async def create_location(
 
 
 @log_async_func(logger.debug)
-async def update_location(
+async def update(
     db_conn: AsyncConnection,
     location_id: uuid.UUID,
     user_id: uuid.UUID,
@@ -73,7 +73,7 @@ async def update_location(
 
 
 @log_async_func(logger.debug)
-async def delete_location(
+async def delete(
     db_conn: AsyncConnection, location_id: uuid.UUID, user_id: uuid.UUID
 ) -> LocationRow | None:
     """Delete a location from the database.

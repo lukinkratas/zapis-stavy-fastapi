@@ -14,7 +14,7 @@ from .db import connect_to_db
 from .exceptions import credentials_exception, token_exception
 from .repositories.users import UserRow
 from .security import verify_password
-from .services.users import select_user_by_email, select_user_by_id
+from .services import users as user_service
 from .utils import log_async_func, log_func
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ async def authenticate_user(
     Raises:
         HTTPException: if user is not found in the database or password mismatch.
     """
-    user = await select_user_by_email(db_conn, email)
+    user = await user_service.select_by_email(db_conn, email)
 
     if user is None or not verify_password(password, user.password_hash):
         raise credentials_exception
@@ -138,7 +138,7 @@ async def get_current_user(
         HTTPException: if user is not found in the database.
     """
     user_id = get_sub(token, typ="access")
-    user = await select_user_by_id(db_conn, user_id)
+    user = await user_service.select_by_id(db_conn, user_id)
 
     if user is None:
         raise HTTPException(

@@ -18,7 +18,7 @@ from ..aws import ses_send_email
 from ..db import connect_to_db
 from ..exceptions import token_exception, user_exists_exception
 from ..schemas import BaseResponse, RegisterCreds, ResponseWithId, TokenResponse
-from ..services.auth import confirm_user, register_user
+from ..services import auth as auth_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -74,7 +74,7 @@ async def login(
 
 
 @router.post("/register", status_code=201)
-async def register(
+async def register_user(
     request: Request,
     creds: RegisterCreds,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
@@ -94,7 +94,7 @@ async def register(
         HTTPException: if user already exists
     """
     try:
-        user = await register_user(db_conn, creds)
+        user = await auth_service.register_user(db_conn, creds)
 
     except UniqueViolation:
         raise user_exists_exception
@@ -104,7 +104,7 @@ async def register(
     bg_tasks.add_task(
         _send_confirmation_email,
         user.email,
-        confirmation_url=str(request.url_for("confirm", token=confirmation_token)),
+        confirmation_url=str(request.url_for("confirm_user", token=confirmation_token)),
     )
 
     return ResponseWithId(
@@ -113,7 +113,7 @@ async def register(
 
 
 @router.get("/confirm/{token}")
-async def confirm(
+async def confirm_user(
     token: str,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
 ) -> BaseResponse:
@@ -126,7 +126,7 @@ async def confirm(
     Returns: dict with detail message
     """
     user_id = get_sub(token, typ="confirmation")
-    user = await confirm_user(db_conn, user_id)
+    user = await auth_service.confirm_user(db_conn, user_id)
 
     if user is None:
         raise token_exception

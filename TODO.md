@@ -102,10 +102,11 @@ move invalid and expired token into unit tests?
 - [x] move register user endpoint to auth.py router
 - [x] ~~/user~~ or /users/me endpoint?
 - [x] CORS middleware?
+- [x] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
+
+- [ ] Props -> LocationProps, Creds -> UserCreds ?
 
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
-
-- [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 
 - [ ] services and models create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
   - [ ] if dynamic fields: allowed fields in models

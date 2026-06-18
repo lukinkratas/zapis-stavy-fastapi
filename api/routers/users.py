@@ -16,7 +16,7 @@ from ..db import connect_to_db
 from ..exceptions import user_not_found_exception
 from ..repositories.users import UserRow
 from ..schemas import BaseResponse, UpdateCreds
-from ..services.users import delete_user, update_user
+from ..services import users as user_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/users", tags=["users"])
@@ -41,7 +41,7 @@ async def update(
         HTTPException: if user was not found or email already exists.
     """
     try:
-        user = await update_user(db_conn, current_user.id, creds)
+        user = await user_service.update(db_conn, current_user.id, creds)
 
         if not user:
             raise user_not_found_exception
@@ -70,7 +70,7 @@ async def delete(
     Raises:
         HTTPException: if user was not found
     """
-    user = await delete_user(db_conn, current_user.id)
+    user = await user_service.delete(db_conn, current_user.id)
 
     if not user:
         raise user_not_found_exception

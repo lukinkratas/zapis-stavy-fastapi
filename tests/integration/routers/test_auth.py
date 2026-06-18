@@ -6,7 +6,7 @@ from psycopg import AsyncConnection
 
 from api.repositories.users import UserRow, users_table
 from api.schemas import BaseResponse, ResponseWithId, TokenResponse
-from api.services.users import delete_user, select_user_by_id
+from api.services import users as user_service
 
 
 class TestLogin:
@@ -110,11 +110,11 @@ class TestRegister:
         assert ResponseWithId.model_validate(response.json())
 
         user_id = response.json()["id"]
-        user = await select_user_by_id(db_conn, user_id)
+        user = await user_service.select_by_id(db_conn, user_id)
         assert user is not None, "User does not exist in db."
 
         # clean-up
-        await delete_user(db_conn, user.id)
+        await user_service.delete(db_conn, user.id)
 
     @pytest.mark.integration
     @pytest.mark.asyncio

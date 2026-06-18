@@ -11,23 +11,23 @@ from api.auth import create_access_token, create_confirmation_token
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
 from api.schemas import CreateProps, RegisterCreds
-from api.services.auth import confirm_user, register_user
-from api.services.locations import create_location, delete_location
-from api.services.users import delete_user
+from api.services import auth as auth_service
+from api.services import locations as location_service
+from api.services import users as user_service
 
 
 @pytest_asyncio.fixture
 async def registered_user(
     db_conn: AsyncConnection, creds: dict[str, str], mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
-    user = await register_user(db_conn, RegisterCreds(**creds))
+    user = await auth_service.register_user(db_conn, RegisterCreds(**creds))
     yield user
-    await delete_user(db_conn, user.id)
+    await user_service.delete(db_conn, user.id)
 
 
 @pytest_asyncio.fixture
 async def confirmed_user(db_conn: AsyncConnection, registered_user: UserRow) -> UserRow:
-    return await confirm_user(db_conn, registered_user.id)
+    return await auth_service.confirm_user(db_conn, registered_user.id)
 
 
 @pytest_asyncio.fixture
@@ -35,10 +35,10 @@ async def other_user(
     db_conn: AsyncConnection, mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
     other_creds = {"email": "other@test.net", "password": "password"}
-    user = await register_user(db_conn, RegisterCreds(**other_creds))
-    user = await confirm_user(db_conn, user.id)
+    user = await auth_service.register_user(db_conn, RegisterCreds(**other_creds))
+    user = await auth_service.confirm_user(db_conn, user.id)
     yield user
-    await delete_user(db_conn, user.id)
+    await user_service.delete(db_conn, user.id)
 
 
 @pytest_asyncio.fixture
@@ -47,9 +47,11 @@ async def created_location(
     confirmed_user: UserRow,
     props: dict[str, str],
 ) -> AsyncGenerator[LocationRow, None]:
-    location = await create_location(db_conn, confirmed_user.id, CreateProps(**props))
+    location = await location_service.create(
+        db_conn, confirmed_user.id, CreateProps(**props)
+    )
     yield location
-    await delete_location(db_conn, location.id, confirmed_user.id)
+    await location_service.delete(db_conn, location.id, confirmed_user.id)
 
 
 @pytest.fixture
