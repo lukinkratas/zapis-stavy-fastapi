@@ -5,6 +5,7 @@ from typing import Any, AsyncGenerator
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
+from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -48,11 +49,22 @@ app = FastAPI(
     title="Zapis Stavy FastAPI",
     description="API for Zapis Stavy",
     lifespan=lifespan,
+    version="v1",
     **doc_kwargs,
 )
+
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://zapis-stavy.cz"]
+    if settings.env == "prod"
+    else ["http://localhost:3000", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(locations_router)
 app.include_router(users_router)
