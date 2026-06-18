@@ -16,7 +16,12 @@ from ..auth import get_current_confirmed_user
 from ..db import connect_to_db
 from ..exceptions import location_exists_exception, location_not_found_exception
 from ..repositories.users import UserRow
-from ..schemas import BaseResponse, CreateProps, ResponseWithId, UpdateProps
+from ..schemas import (
+    BaseResponse,
+    CreateLocationProperties,
+    ResponseWithId,
+    UpdateLocationProperties,
+)
 from ..services import locations as location_service
 
 logger = logging.getLogger(__name__)
@@ -25,7 +30,7 @@ router = APIRouter(prefix="/api/v1/locations", tags=["locations"])
 
 @router.post("", status_code=201)
 async def create(
-    props: CreateProps,
+    props: CreateLocationProperties,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
 ) -> ResponseWithId:
@@ -55,7 +60,7 @@ async def create(
 @router.put("/{id}")
 async def update(
     id: uuid.UUID,
-    props: UpdateProps,
+    props: UpdateLocationProperties,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
 ) -> BaseResponse:

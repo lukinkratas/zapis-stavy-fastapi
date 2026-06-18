@@ -9,7 +9,7 @@ import uuid
 from psycopg import AsyncConnection
 
 from ..repositories.locations import LocationRow, locations_table
-from ..schemas import CreateProps, UpdateProps
+from ..schemas import CreateLocationProperties, UpdateLocationProperties
 from ..utils import log_async_func
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ async def select_by_id(
 
 @log_async_func(logger.debug)
 async def create(
-    db_conn: AsyncConnection, user_id: uuid.UUID, props: CreateProps
+    db_conn: AsyncConnection, user_id: uuid.UUID, props: CreateLocationProperties
 ) -> LocationRow | None:
     """Add new location into the database.
 
@@ -54,7 +54,7 @@ async def update(
     db_conn: AsyncConnection,
     location_id: uuid.UUID,
     user_id: uuid.UUID,
-    props: UpdateProps,
+    props: UpdateLocationProperties,
 ) -> LocationRow | None:
     """Update a location in the database.
 

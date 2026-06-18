@@ -9,7 +9,7 @@ import uuid
 from psycopg import AsyncConnection
 
 from ..repositories.users import UserRow, users_table
-from ..schemas import UpdateCreds
+from ..schemas import UpdateUserCredentials
 from ..security import get_password_hash
 from ..utils import log_async_func
 
@@ -44,7 +44,7 @@ async def select_by_email(db_conn: AsyncConnection, email: str) -> UserRow | Non
 
 @log_async_func(logger.debug)
 async def update(
-    db_conn: AsyncConnection, user_id: uuid.UUID, creds: UpdateCreds
+    db_conn: AsyncConnection, user_id: uuid.UUID, creds: UpdateUserCredentials
 ) -> UserRow | None:
     """Update a user in the database.
 

@@ -17,7 +17,12 @@ from ..auth import (
 from ..aws import ses_send_email
 from ..db import connect_to_db
 from ..exceptions import token_exception, user_exists_exception
-from ..schemas import BaseResponse, RegisterCreds, ResponseWithId, TokenResponse
+from ..schemas import (
+    BaseResponse,
+    RegisterUserCredentials,
+    ResponseWithId,
+    TokenResponse,
+)
 from ..services import auth as auth_service
 
 logger = logging.getLogger(__name__)
@@ -76,7 +81,7 @@ async def login(
 @router.post("/register", status_code=201)
 async def register_user(
     request: Request,
-    creds: RegisterCreds,
+    creds: RegisterUserCredentials,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     bg_tasks: BackgroundTasks,
 ) -> ResponseWithId:

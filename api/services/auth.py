@@ -9,7 +9,7 @@ import uuid
 from psycopg import AsyncConnection
 
 from ..repositories.users import UserRow, users_table
-from ..schemas import RegisterCreds
+from ..schemas import RegisterUserCredentials
 from ..security import get_password_hash
 from ..utils import log_async_func
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 @log_async_func(logger.debug)
 async def register_user(
-    db_conn: AsyncConnection, creds: RegisterCreds
+    db_conn: AsyncConnection, creds: RegisterUserCredentials
 ) -> UserRow | None:
     """Add new user into the database.
 

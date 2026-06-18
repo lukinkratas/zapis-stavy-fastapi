@@ -22,7 +22,7 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
-class RegisterCreds(BaseModel):
+class RegisterUserCredentials(BaseModel):
     """Register user credentials request model for validation."""
 
     model_config = ConfigDict(extra="forbid")
@@ -30,7 +30,7 @@ class RegisterCreds(BaseModel):
     password: str
 
 
-class UpdateCreds(BaseModel):
+class UpdateUserCredentials(BaseModel):
     """Update user credentials request model for validation."""
 
     model_config = ConfigDict(extra="forbid")
@@ -38,14 +38,14 @@ class UpdateCreds(BaseModel):
     password: str | None = None
 
 
-class CreateProps(BaseModel):
+class CreateLocationProperties(BaseModel):
     """Create location properties request model for validation."""
 
     model_config = ConfigDict(extra="forbid")
     location_name: str
 
 
-class UpdateProps(BaseModel):
+class UpdateLocationProperties(BaseModel):
     """Update location properties request model for validation."""
 
     model_config = ConfigDict(extra="forbid")

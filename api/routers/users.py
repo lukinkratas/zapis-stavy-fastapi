@@ -15,7 +15,7 @@ from ..auth import get_current_user
 from ..db import connect_to_db
 from ..exceptions import user_not_found_exception
 from ..repositories.users import UserRow
-from ..schemas import BaseResponse, UpdateCreds
+from ..schemas import BaseResponse, UpdateUserCredentials
 from ..services import users as user_service
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 @router.put("/me")
 async def update(
-    creds: UpdateCreds,
+    creds: UpdateUserCredentials,
     db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
     current_user: Annotated[UserRow, Depends(get_current_user)],
 ) -> BaseResponse:

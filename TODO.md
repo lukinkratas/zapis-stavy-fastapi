@@ -103,8 +103,7 @@ move invalid and expired token into unit tests?
 - [x] ~~/user~~ or /users/me endpoint?
 - [x] CORS middleware?
 - [x] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
-
-- [ ] Props -> LocationProps, Creds -> UserCreds ?
+- [x] Props -> LocationProps, Creds -> UserCreds ?
 
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 

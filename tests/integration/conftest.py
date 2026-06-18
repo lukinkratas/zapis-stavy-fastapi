@@ -10,7 +10,7 @@ from psycopg import AsyncConnection
 from api.auth import create_access_token, create_confirmation_token
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
-from api.schemas import CreateProps, RegisterCreds
+from api.schemas import CreateLocationProperties, RegisterUserCredentials
 from api.services import auth as auth_service
 from api.services import locations as location_service
 from api.services import users as user_service
@@ -20,7 +20,7 @@ from api.services import users as user_service
 async def registered_user(
     db_conn: AsyncConnection, creds: dict[str, str], mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
-    user = await auth_service.register_user(db_conn, RegisterCreds(**creds))
+    user = await auth_service.register_user(db_conn, RegisterUserCredentials(**creds))
     yield user
     await user_service.delete(db_conn, user.id)
 
@@ -35,7 +35,9 @@ async def other_user(
     db_conn: AsyncConnection, mock_send_email: MagicMock
 ) -> AsyncGenerator[UserRow, None]:
     other_creds = {"email": "other@test.net", "password": "password"}
-    user = await auth_service.register_user(db_conn, RegisterCreds(**other_creds))
+    user = await auth_service.register_user(
+        db_conn, RegisterUserCredentials(**other_creds)
+    )
     user = await auth_service.confirm_user(db_conn, user.id)
     yield user
     await user_service.delete(db_conn, user.id)
@@ -48,7 +50,7 @@ async def created_location(
     props: dict[str, str],
 ) -> AsyncGenerator[LocationRow, None]:
     location = await location_service.create(
-        db_conn, confirmed_user.id, CreateProps(**props)
+        db_conn, confirmed_user.id, CreateLocationProperties(**props)
     )
     yield location
     await location_service.delete(db_conn, location.id, confirmed_user.id)

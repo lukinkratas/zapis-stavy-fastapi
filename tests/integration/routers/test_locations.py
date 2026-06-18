@@ -6,7 +6,7 @@ from psycopg import AsyncConnection
 
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
-from api.schemas import BaseResponse, CreateProps, ResponseWithId
+from api.schemas import BaseResponse, CreateLocationProperties, ResponseWithId
 from api.services import locations as location_service
 
 
@@ -287,7 +287,9 @@ class TestUpdate:
         db_conn: AsyncConnection,
     ) -> None:
         location = await location_service.create(
-            db_conn, confirmed_user.id, props=CreateProps(location_name="new")
+            db_conn,
+            confirmed_user.id,
+            props=CreateLocationProperties(location_name="new"),
         )
         response = await test_client.put(
             f"/api/v1/locations/{location.id}",
