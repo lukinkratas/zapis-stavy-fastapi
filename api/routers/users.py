@@ -19,7 +19,7 @@ from ..schemas import BaseResponse, UpdateCreds
 from ..services.users import delete_user, update_user
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/api/v1/users")
+router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 @router.put("/me")

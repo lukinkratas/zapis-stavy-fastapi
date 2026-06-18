@@ -102,6 +102,7 @@ move invalid and expired token into unit tests?
 - [x] move register user endpoint to auth.py router
 - [x] ~~/user~~ or /users/me endpoint?
 - [x] CORS middleware?
+
 - [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
 
 - [ ] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
