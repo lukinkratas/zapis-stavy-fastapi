@@ -1,7 +1,7 @@
 [project]
-name = "zapis-stavy-backend"
+name = "zapis-stavy-fastapi"
 version = "0.1.0"
-description = "Add your description here"
+description = "API for Zapis Stavy"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

@@ -46,10 +46,10 @@ doc_kwargs: dict[str, Any] = (
     else {}
 )
 app = FastAPI(
-    title="Zapis Stavy FastAPI",
+    title="Zapis Stavy",
     description="API for Zapis Stavy",
+    version="0.1.0",
     lifespan=lifespan,
-    version="v1",
     **doc_kwargs,
 )
 

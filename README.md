@@ -155,6 +155,22 @@ docker compose up -d
 
   Cannot be used -> requires SQLAlchemy.
 
+### api.repositories.* insert() and update() methods with dynamic/dict or static args:
+
+  UsersTable.update(..., data: dict), (data dict contains email, password_hash)
+  LocationsTable.update(..., data: dict), (data dict contains location_name)
+  (example of dynamic/dict)
+
+  - choice: dynamic, bcs with static args what location_name/email/password_hash = None actually means? To update to None or do not update? For now updating to None is not needed, bcs location/email/password_hash cannot be empty, but the dynamic approach is future proof and more intentional and that is - update only, what is inside data dict.
+
+  UsersTable.insert(..., email: str, password_hash: str)
+  LocationsTable.insert(..., location_name: str)
+  (example of static)
+
+  - static pros: more explicit
+  - dynamic pros: fields are centralized in pydantic schemas on router lvl, plus match the style of update methods
+  - choice:
+
 ## Resources
 
 better stack / logtail cloud logging: https://betterstack.com/community/guides/logging/logging-with-fastapi/
@@ -186,7 +202,7 @@ SQLAlchemy sync: https://medium.com/@suganthi2496/fastapi-with-sqlalchemy-buildi
 SQLAlchemy sync: https://youtu.be/XlnmN4BfCxw?si=tuJ2S9PpxMOhF-pM
 
 SQLAlchemy sync: https://github.com/ArjanCodes/examples/tree/main/2023/fastapi-router
-
+ss
 SQLAlchemy async (+FastAPI.users): https://youtu.be/SR5NYCdzKkc?si=rvkNPMpGO_KLbDn9
 
 SQLAlchemy async: https://github.com/techwithtim/FastAPIPhotoVideoSharing

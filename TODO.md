@@ -104,20 +104,12 @@ move invalid and expired token into unit tests?
 - [x] CORS middleware?
 - [x] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
 - [x] Props -> LocationProps, Creds -> UserCreds ?
+- [ ] AI review
+- [ ] location.location_name -> location.name ?
+- [ ] GET /locations
+- [ ] load version, name and desc from pyproject.toml into main app
+- [ ] align naming - pyproject.toml, github repo name, app name etc.
 
-- [ ] hardcode email and password in UsersTable model? -> Update still dynamic or also hardcoded?
-
-- [ ] services and models create/register(email, password) x update(data) + same for location - unify - either use dynamic or hardcoded fields in both.
-  - [ ] if dynamic fields: allowed fields in models
-  ```
-    ALLOWED_UPDATE_FIELDS = {"email", "password"}
-
-    invalid = set(data) - ALLOWED_UPDATE_FIELDS
-    if invalid:
-        raise ValueError(f"Invalid fields: {invalid}")
-  ```
-
-- [ ] Path, Query endpoint params (+descriptions), deprecated?
 - [ ] GET endpoints - pagination / query params for locations - limit, offset/skip for GET endpoints
 - [ ] bug: test GH action did not fail on failed coverage !
 
