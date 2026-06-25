@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
@@ -27,8 +26,6 @@ class Location(BaseModel):
     """Location row database model."""
 
     id: uuid.UUID
-    created_at: datetime
-    user_id: uuid.UUID
     location_name: str
 
 
