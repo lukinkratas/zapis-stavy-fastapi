@@ -118,7 +118,7 @@ class TestRegister:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_register_user_conmflict(
+    async def test_register_user_conflict(
         self,
         test_client: AsyncClient,
         creds: dict[str, str],

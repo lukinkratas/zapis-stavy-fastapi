@@ -6,7 +6,13 @@ from psycopg import AsyncConnection
 
 from api.repositories.locations import LocationRow
 from api.repositories.users import UserRow
-from api.schemas import BaseResponse, CreateLocationProperties, ResponseWithId
+from api.schemas import (
+    BaseResponse,
+    CreateLocationProperties,
+    Location,
+    LocationsResponse,
+    ResponseWithId,
+)
 from api.services import locations as location_service
 
 
@@ -73,7 +79,7 @@ class TestCreate:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_create_location_by_registered_user(
+    async def test_create_location_by_only_registered_user(
         self,
         test_client: AsyncClient,
         props: dict[str, str],
@@ -333,8 +339,9 @@ class TestUpdate:
         )
         assert response.status_code == 404
 
-    # async def test_update_location_by_registered_user() makes no sense
-    # (In order to update a location, one has to be created first [by confirmed user])
+    # async def test_update_location_by_only_registered_user() makes no sense
+    # (In order to update a location, one has to be created first)
+    # (can be done only by confirmed user)
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -404,6 +411,114 @@ class TestUpdate:
         response = await test_client.put(
             f"/api/v1/locations/{created_location.id}",
             json=update_props,
+            headers={"Authorization": f"Bearer {confirmation_token}"},
+        )
+        assert response.status_code == 401
+
+
+class TestList:
+    """Integration tests for list locations endpoint."""
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        access_token: str,
+    ) -> None:
+        """Testing expected case."""
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert LocationsResponse.model_validate(data)
+        assert data["locations"] == [
+            # serialize location into JSON (uuid and datetime becomes str)
+            Location(**created_location._asdict()).model_dump(mode="json")
+        ]
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations_by_only_registered_user(
+        self,
+        test_client: AsyncClient,
+        registered_user: UserRow,
+        access_token: str,
+    ) -> None:
+        """Testing expected case."""
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations_with_expired_access_token(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        expired_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded exp."""
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {expired_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations_with_other_user_access_token(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        other_user_access_token: str,
+    ) -> None:
+        """Testing access token with different encoded sub."""
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {other_user_access_token}"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert LocationsResponse.model_validate(data)
+        assert data["locations"] == []
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations_with_random_user_access_token(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        random_user_access_token: str,
+    ) -> None:
+        """Testing access token with random access token."""
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {random_user_access_token}"},
+        )
+        assert response.status_code == 401
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_select_locations_with_confirmation_token(
+        self,
+        test_client: AsyncClient,
+        created_location: LocationRow,
+        confirmed_user: UserRow,
+        confirmation_token: str,
+    ) -> None:
+        """Testing access token with different encoded typ."""
+        response = await test_client.get(
+            "/api/v1/locations",
             headers={"Authorization": f"Bearer {confirmation_token}"},
         )
         assert response.status_code == 401

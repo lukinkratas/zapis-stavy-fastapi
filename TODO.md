@@ -103,12 +103,13 @@ move invalid and expired token into unit tests?
 - [x] ~~/user~~ or /users/me endpoint?
 - [x] CORS middleware?
 - [x] services.users.register_user -> services.users.register + from api.services import users as users_service + users_service.register
-- [x] Props -> LocationProps, Creds -> UserCreds ?
-- [ ] AI review
-- [ ] location.location_name -> location.name ?
-- [ ] GET /locations
+- [x] Props -> LocationProps, Creds -> UserCreds
+- [x] location.location_name -> location.name ? Not possible, name is sql reserved
+- [x] db_conn.transaction() needed for select -> Nope
+- [x] GET /locations
 - [ ] load version, name and desc from pyproject.toml into main app
 - [ ] align naming - pyproject.toml, github repo name, app name etc.
+- [ ] AI review
 
 - [ ] GET endpoints - pagination / query params for locations - limit, offset/skip for GET endpoints
 - [ ] bug: test GH action did not fail on failed coverage !

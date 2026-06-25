@@ -1,17 +1,14 @@
 info:
-  name: create location
+  name: select locations
   type: http
-  seq: 6
+  seq: 7
 
 http:
-  method: POST
+  method: GET
   url: http://localhost:8080/api/v1/locations
   body:
     type: json
-    data: |-
-      {
-        "location_name": "test"
-      }
+    data: ""
   auth:
     type: bearer
     token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiNTE4NjE2NDEtYTc1ZC00MzRiLWFjNzUtMjU0M2Q2Nzk1MTFjIiwiZXhwIjoxNzc4MzIxMjk4fQ.qr2nZm7aBfqH8hOhvXPmyTQa_05eKarDiG4qbswoyBI
@@ -26,10 +23,6 @@ runtime:
         } else {
           console.warn("No access token found. Login first.");
         }
-    - type: after-response
-      code: |-
-        bru.setEnvVar("location_id", res.body.id);
-        console.log("env var location_id set: " + res.body.id);
 
 settings:
   encodeUrl: true

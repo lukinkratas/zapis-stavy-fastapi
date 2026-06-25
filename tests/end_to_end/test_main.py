@@ -63,6 +63,13 @@ class TestEndToEnd:
         new_location = response.json()
         location_id = new_location["id"]
 
+        # select locations
+        response = await test_client.get(
+            "/api/v1/locations",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert response.status_code == 200
+
         # update location
         response = await test_client.put(
             f"/api/v1/locations/{location_id}",

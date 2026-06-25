@@ -108,7 +108,7 @@ class LocationsTable:
         logger.debug(f"SQL query: {format_sql_query(query)}")
 
         async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
-            await cur.execute(query, {"location_id": location_id, "user_id": user_id})
+            await cur.execute(query, dict(location_id=location_id, user_id=user_id))
             return await cur.fetchone()
 
     @log_async_func(logger.debug)
@@ -132,8 +132,32 @@ class LocationsTable:
         logger.debug(f"SQL query: {format_sql_query(query)}")
 
         async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
-            await cur.execute(query, {"location_id": location_id})
+            await cur.execute(query, dict(location_id=location_id))
             return await cur.fetchone()
+
+    @log_async_func(logger.debug)
+    async def select(
+        self,
+        db_conn: AsyncConnection,
+        user_id: uuid.UUID,
+    ) -> list[LocationRow] | None:
+        """Select location records from db.
+
+        Args:
+            db_conn: database connection
+            user_id: user id to be updated
+
+        Returns: location row
+        """
+        query = sql.SQL("""
+            SELECT * FROM {table}
+            WHERE user_id = %(user_id)s
+        """).format(table=sql.Identifier(self.table_name))
+        logger.debug(f"SQL query: {format_sql_query(query)}")
+
+        async with db_conn.cursor(row_factory=class_row(LocationRow)) as cur:
+            await cur.execute(query, dict(user_id=user_id))
+            return await cur.fetchall()
 
 
 locations_table = LocationsTable()

@@ -5,7 +5,7 @@ from httpx import AsyncClient
 
 from api.repositories.locations import LocationRow, LocationsTable
 from api.repositories.users import UserRow
-from api.schemas import BaseResponse, ResponseWithId
+from api.schemas import BaseResponse, Location, LocationsResponse, ResponseWithId
 
 
 class TestUnitLocation:
@@ -75,3 +75,27 @@ class TestUnitLocation:
 
         assert response.status_code == 200
         assert BaseResponse.model_validate(response.json())
+
+    @pytest.mark.asyncio
+    async def test_select_locations(
+        self,
+        test_client: AsyncClient,
+        location_row: LocationRow,
+        confirmed_user: UserRow,
+        access_token: str,
+    ) -> None:
+        # mock
+        with patch.object(LocationsTable, "select", return_value=[location_row]):
+            # select locations
+            response = await test_client.get(
+                "/api/v1/locations",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert LocationsResponse.model_validate(data)
+        assert data["locations"] == [
+            # serialize location into JSON (uuid and datetime becomes str)
+            Location(**location_row._asdict()).model_dump(mode="json")
+        ]

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
@@ -20,6 +21,21 @@ class TokenResponse(BaseModel):
 
     access_token: str
     token_type: str
+
+
+class Location(BaseModel):
+    """Location row database model."""
+
+    id: uuid.UUID
+    created_at: datetime
+    user_id: uuid.UUID
+    location_name: str
+
+
+class LocationsResponse(BaseModel):
+    """Response token model for validation."""
+
+    locations: list[Location]
 
 
 class RegisterUserCredentials(BaseModel):

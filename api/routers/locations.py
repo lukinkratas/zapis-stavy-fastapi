@@ -19,6 +19,7 @@ from ..repositories.users import UserRow
 from ..schemas import (
     BaseResponse,
     CreateLocationProperties,
+    LocationsResponse,
     ResponseWithId,
     UpdateLocationProperties,
 )
@@ -117,3 +118,20 @@ async def delete(
         raise location_not_found_exception
 
     return BaseResponse(detail="Location deleted")
+
+
+@router.get("")
+async def select(
+    db_conn: Annotated[AsyncConnection, Depends(connect_to_db)],
+    current_confirmed_user: Annotated[UserRow, Depends(get_current_confirmed_user)],
+) -> LocationsResponse:
+    """Select locations.
+
+    Args:
+        db_conn: database connection
+        current_confirmed_user: current authorized and confirmed user
+
+    Returns: response with locations
+    """
+    locations = await location_service.select(db_conn, current_confirmed_user.id)
+    return LocationsResponse(locations=[loc._asdict() for loc in locations])

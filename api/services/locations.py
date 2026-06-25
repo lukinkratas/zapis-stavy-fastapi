@@ -16,21 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 @log_async_func(logger.debug)
-async def select_by_id(
-    db_conn: AsyncConnection, location_id: uuid.UUID
-) -> LocationRow | None:
-    """Select location from the database by id.
-
-    Args:
-        db_conn: database connection
-        location_id: id of the location being selected
-
-    Returns: location row
-    """
-    return await locations_table.select_by_id(db_conn, location_id)
-
-
-@log_async_func(logger.debug)
 async def create(
     db_conn: AsyncConnection, user_id: uuid.UUID, props: CreateLocationProperties
 ) -> LocationRow | None:
@@ -87,3 +72,34 @@ async def delete(
     """
     async with db_conn.transaction():
         return await locations_table.delete(db_conn, location_id, user_id)
+
+
+@log_async_func(logger.debug)
+async def select_by_id(
+    db_conn: AsyncConnection, location_id: uuid.UUID
+) -> LocationRow | None:
+    """Select location from the database by id.
+
+    Args:
+        db_conn: database connection
+        location_id: id of the location being selected
+
+    Returns: location row
+    """
+    return await locations_table.select_by_id(db_conn, location_id)
+
+
+@log_async_func(logger.debug)
+async def select(
+    db_conn: AsyncConnection,
+    user_id: uuid.UUID,
+) -> list[LocationRow] | None:
+    """Select locations from the database.
+
+    Args:
+        db_conn: database connection
+        user_id: location owner's user id
+
+    Returns: list of location rows
+    """
+    return await locations_table.select(db_conn, user_id)
