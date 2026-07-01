@@ -1,4 +1,4 @@
-# Zapis Stavy Backend [WIP]
+# Zapis Stavy Fastapi [WIP]
 
 FastAPI + Postgres via Psycopg app.
 
