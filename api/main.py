@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("API setup")
 
     app.state.limiter = Limiter(
-        key_func=get_remote_address, default_limits=["1/second"]
+        key_func=get_remote_address, default_limits=["5/second"]
     )
 
     async with create_connection_pool() as pool:

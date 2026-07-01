@@ -123,3 +123,4 @@ move invalid and expired token into unit tests?
 - [ ] test latency with sqlaclehmy ORM - prev issue engine, sessionmaker, dbsession model in tests
 - [ ] ? prod: uvicorn main:app --reload -> gunicorn main:app .. --worker-class uvicorn.workers.UvicornWorker
   - [ ] + ? uvloop - faster async loops -> test
+- [ ] performance tests
